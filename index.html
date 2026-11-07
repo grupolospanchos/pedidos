@@ -92,6 +92,15 @@
   .gpsEdo a{color:var(--vino);font-weight:600}
   .gpsEdo.ok{color:var(--verde);font-weight:600}
   .gpsEdo.mal{color:var(--rojo);font-weight:600}
+  .cotiza{border:2px solid var(--oro);background:#fffaf0;border-radius:12px;padding:12px;margin:2px 0 10px}
+  .cotiza .cf{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px;padding:3px 0}
+  .cotiza .cf b{white-space:nowrap}
+  .cotiza .cf.g{font-size:18px;font-family:Archivo,sans-serif;font-weight:800;color:var(--vino)}
+  .cbtns{display:grid;grid-template-columns:1.4fr 1fr;gap:8px;margin-top:10px}
+  .cbtns button{border-radius:10px;padding:12px 8px;font-weight:700;font-size:15px;border:1.5px solid var(--linea);background:#fff;color:var(--tinta)}
+  .cbtns .si.on{background:var(--verde);border-color:var(--verde);color:#fff}
+  .cbtns .no.on{background:#fdecea;border-color:var(--rojo);color:var(--rojo)}
+  .cmsg{font-size:13px;margin-top:8px;line-height:1.4;display:none}
   .tarifa{font-size:13px;color:var(--gris);background:#fbf3e3;border-radius:10px;padding:10px 12px;margin-top:4px;line-height:1.45}
   .tot{display:flex;justify-content:space-between;font-size:15px;padding:4px 0}
   .tot.g{font-size:18px;font-weight:800;font-family:Archivo,sans-serif;border-top:1px solid var(--linea);margin-top:6px;padding-top:10px}
@@ -156,9 +165,15 @@
     <input class="inp" id="refs" placeholder="Ej. portón negro, frente a la tienda">
     <div id="gpsBox" style="display:none">
       <button type="button" class="gps" id="gpsBtn">📍 Mandar mi ubicación exacta</button>
-      <div class="gpsEdo" id="gpsEdo">Toca el botón estando en tu casa y acepta el permiso de ubicación.</div>
+      <div class="gpsEdo" id="gpsEdo">Toca el botón estando en tu casa y acepta el permiso de ubicación. Te decimos el costo de envío al momento.</div>
+      <div class="cotiza" id="cotiza" style="display:none">
+        <div class="cf"><span>Distancia aprox. desde nuestra cocina</span><b id="cDist"></b></div>
+        <div class="cf g"><span>Tu envío</span><b id="cEnvio"></b></div>
+        <div class="cbtns"><button type="button" class="si" id="cSi">✅ Acepto el envío</button><button type="button" class="no" id="cNo">No, gracias</button></div>
+        <div class="cmsg" id="cMsg"></div>
+      </div>
     </div>
-    <div class="tarifa"><b>Envío:</b> hasta 5 km, $30 · cada km adicional, $5.<br>Te confirmamos el costo exacto con tu ubicación 📍.</div>
+    <div class="tarifa"><b>Envío:</b> hasta 5 km, $30 · cada km adicional, $5.<br><span id="tarifaNota">Te confirmamos el costo exacto con tu ubicación 📍.</span></div>
   </div>
 
   <div class="bloque">
@@ -181,7 +196,7 @@
 
   <div class="bloque">
     <div class="tot"><span>Comida</span><span id="sub">$0</span></div>
-    <div class="tot"><span>Envío</span><span>desde $30</span></div>
+    <div class="tot"><span>Envío</span><span id="envioTot">desde $30</span></div>
     <div class="tot g"><span>Total</span><span id="tot">$0 + envío</span></div>
   </div>
 
@@ -209,6 +224,39 @@ const SUCURSAL = 'Corregidora';
 const ABRE = 8, CIERRA = 2; // 8:00 a.m. a 2:00 a.m.
 const USAR_GPS = true;   // true solo en la versión publicada fuera de Claude
 let gps = null;             // {lat, lng, prec}
+/* Cocina Corregidora y tarifa de envío */
+const LOCAL = {lat: 20.6024719, lng: -100.3932257};
+const ENVIO_BASE = 30, KM_INCLUIDOS = 5, POR_KM = 5;
+const FACTOR_CALLE = 1.3;   // la distancia en línea recta se multiplica por esto para aproximar el recorrido por calles
+let envio = null;           // {km, costo, acepto: null|true|false}
+function distanciaKm(a, b){
+  const R = 6371, rad = x => x * Math.PI / 180;
+  const dLat = rad(b.lat - a.lat), dLng = rad(b.lng - a.lng);
+  const h = Math.sin(dLat/2)**2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+function cotizar(){
+  if (!gps || LOCAL.lat === null) return;
+  const km = Math.round(distanciaKm(LOCAL, gps) * FACTOR_CALLE * 10) / 10;
+  const extra = Math.max(0, Math.ceil(km - KM_INCLUIDOS));
+  envio = {km, costo: ENVIO_BASE + extra * POR_KM, acepto: null};
+  $('cDist').textContent = km.toLocaleString('es-MX') + ' km';
+  $('cEnvio').textContent = pesos(envio.costo);
+  $('cSi').classList.remove('on'); $('cNo').classList.remove('on'); $('cMsg').style.display = 'none';
+  $('cotiza').style.display = 'block';
+  $('tarifaNota').textContent = 'Cada km empezado después de los 5 km cuenta como km completo.';
+  actualizar();
+}
+function decidirEnvio(si){
+  if (!envio) return;
+  envio.acepto = si;
+  $('cSi').classList.toggle('on', si); $('cNo').classList.toggle('on', !si);
+  const m = $('cMsg'); m.style.display = 'block';
+  if (si){ m.style.color = 'var(--verde)'; m.textContent = 'Listo. Tu total ya incluye el envío.'; }
+  else { m.style.color = 'var(--rojo)'; m.textContent = 'Sin problema, tu pedido no se manda. Si cambias de opinión, toca "Acepto el envío".'; }
+  if ($('err').style.display === 'block') revisar();
+  actualizar();
+}
 
 const MENU = [
  {c:'Tacos', i:'🌮', p:[['Taco al pastor',16],['Taco de chuleta',16],['Taco de chorizo',16],['Taco campechano',16],['Taco de suadero',16],['Taco de arrachera de cerdo',19],['Taco de bistec de res',22]]},
@@ -287,7 +335,9 @@ function actualizar(){
   const {n, t} = resumen();
   $('barra').style.display = n ? 'block' : 'none';
   $('bn').textContent = n; $('bt').textContent = pesos(t);
-  $('sub').textContent = pesos(t); $('tot').textContent = pesos(t) + ' + envío';
+  $('sub').textContent = pesos(t);
+  if (envio && envio.acepto !== false){ $('envioTot').textContent = pesos(envio.costo); $('tot').textContent = pesos(t + envio.costo); }
+  else { $('envioTot').textContent = 'desde $30'; $('tot').textContent = pesos(t) + ' + envío'; }
   if ($('hoja').classList.contains('on')) pintarLineas();
   armarEnlace();
 }
@@ -314,7 +364,10 @@ function mensaje(){
   if ($('primero').checked) L.push('1 × Agua de Jamaica — *REGALO 1er pedido*');
   L.push('');
   L.push('Comida: ' + pesos(t));
-  L.push('Envío: por confirmar (hasta 5 km $30, +$5 por km)');
+  if (envio && envio.acepto){
+    L.push('Envío: ' + pesos(envio.costo) + ' (' + envio.km.toLocaleString('es-MX') + ' km aprox.) — *aceptado por el cliente*');
+    L.push('*Total a cobrar: ' + pesos(t + envio.costo) + '*');
+  } else L.push('Envío: por confirmar (hasta 5 km $30, +$5 por km)');
   if (val('notas')) { L.push(''); L.push('Indicaciones: ' + val('notas')); }
   L.push('');
   L.push('Nombre: ' + val('nombre'));
@@ -342,6 +395,7 @@ function revisar(){
   if (val('tel').replace(/\D/g,'').length < 10) { faltan.push('tu teléfono a 10 dígitos'); $('tel').classList.add('mal'); }
   if (!val('calle')) { faltan.push('calle y número'); $('calle').classList.add('mal'); }
   if (!val('colonia')) { faltan.push('colonia'); $('colonia').classList.add('mal'); }
+  if (envio && envio.acepto !== true) faltan.push('aceptar el costo de envío');
   if (faltan.length){ $('err').textContent = 'Falta: ' + faltan.join(', ') + '.'; $('err').style.display = 'block'; return false; }
   $('err').style.display = 'none'; return true;
 }
@@ -362,6 +416,7 @@ function pedirGPS(){
     edo.className = 'gpsEdo ok';
     edo.innerHTML = 'Listo, va con tu pedido (precisión de unos ' + gps.prec + ' m). <a href="https://maps.google.com/?q=' + gps.lat + ',' + gps.lng + '" target="_blank" rel="noopener">Revisar en el mapa</a>';
     $('pasosUbic').style.display = 'none';
+    cotizar();
     armarEnlace();
   }, e => {
     btn.disabled = false; edo.className = 'gpsEdo mal';
@@ -370,7 +425,11 @@ function pedirGPS(){
       : 'No pudimos ubicarte. Intenta de nuevo (mejor con el GPS prendido) o mándala por WhatsApp después de enviar.';
   }, {enableHighAccuracy: true, timeout: 20000, maximumAge: 0});
 }
-if (USAR_GPS){ $('gpsBox').style.display = 'block'; $('gpsBtn').addEventListener('click', pedirGPS); }
+if (USAR_GPS){
+  $('gpsBox').style.display = 'block'; $('gpsBtn').addEventListener('click', pedirGPS);
+  $('cSi').addEventListener('click', () => decidirEnvio(true));
+  $('cNo').addEventListener('click', () => decidirEnvio(false));
+}
 
 function aviso(t){ const a = $('aviso'); a.textContent = t; a.classList.add('on'); clearTimeout(aviso.t); aviso.t = setTimeout(()=>a.classList.remove('on'), 2200); }
 
