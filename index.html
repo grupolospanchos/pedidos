@@ -376,6 +376,7 @@ function mensaje(){
   L.push('Colonia: ' + val('colonia'));
   if (val('refs')) L.push('Referencias: ' + val('refs'));
   if (gps) L.push('📍 Ubicación exacta (GPS): https://maps.google.com/?q=' + gps.lat.toFixed(6) + ',' + gps.lng.toFixed(6));
+  if (gps && LOCAL.lat !== null) L.push('🛵 Ruta desde la cocina: https://www.google.com/maps/dir/?api=1&origin=' + LOCAL.lat + ',' + LOCAL.lng + '&destination=' + gps.lat.toFixed(6) + ',' + gps.lng.toFixed(6) + '&travelmode=driving');
   else if (val('calle') && val('colonia')) L.push('Mapa: https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(val('calle') + ', ' + val('colonia') + ', Querétaro, Qro.'));
   let pago = 'Pago: ' + pagoElegido();
   if (pagoElegido() === 'Efectivo' && val('cambio')) pago += ' (paga con $' + val('cambio').replace(/[^0-9.]/g,'') + ')';
