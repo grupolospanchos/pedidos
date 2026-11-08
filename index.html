@@ -160,6 +160,8 @@
   .pagos{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
   .pagos label{border:1px solid var(--linea);border-radius:10px;padding:10px 6px;text-align:center;font-size:13px;font-weight:600;background:#fffdf9}
   .pagos input{display:none}
+  .pagos.modo{grid-template-columns:1fr 1fr}
+  .pagos.modo label{font-size:14.5px;padding:12px 6px}
   .pagos label:has(input:checked){border-color:var(--vino);background:#fbeef0;color:var(--vino)}
   .regalo{display:flex;gap:10px;align-items:flex-start;font-size:14px}
   .regalo input{width:22px;height:22px;accent-color:var(--vino);margin-top:1px;flex:0 0 auto}
@@ -245,11 +247,27 @@
   </div>
 
   <div class="bloque">
-    <h4>¿A dónde te lo llevamos?</h4>
-    <label class="campo" for="nombre">Nombre</label>
+    <h4>¿Cómo lo quieres?</h4>
+    <div class="pagos modo">
+      <label><input type="radio" name="modo" value="domicilio" checked>🛵<br>A domicilio</label>
+      <label><input type="radio" name="modo" value="recoger">🏃<br>Paso a recoger</label>
+    </div>
+    <label class="campo" for="nombre" style="margin-top:12px">Nombre</label>
     <input class="inp" id="nombre" autocomplete="name" placeholder="¿A nombre de quién?">
     <label class="campo" for="tel">Teléfono (10 dígitos)</label>
     <input class="inp" id="tel" type="tel" inputmode="numeric" autocomplete="tel" placeholder="442 123 4567">
+  </div>
+
+  <div class="bloque" id="bloqueRecoger" style="display:none">
+    <h4>Pasa por él a nuestro local</h4>
+    <div class="tarifa" style="margin-top:0"><b>Grupo Los Panchos Corregidora</b><br>Prol. Corregidora Nte. 180, El Cerrito, Querétaro<br><a href="https://www.google.com/maps/dir/?api=1&destination=20.6024719,-100.3932257" target="_blank" rel="noopener" style="color:var(--vino);font-weight:700">📍 Cómo llegar</a></div>
+    <label class="campo" for="hora" style="margin-top:12px">¿A qué hora pasas?</label>
+    <select class="inp" id="hora"></select>
+    <p class="tarifa" style="margin-top:10px">Te avisamos por WhatsApp cuando tu pedido esté listo. Sin costo de envío.</p>
+  </div>
+
+  <div class="bloque" id="bloqueDomicilio">
+    <h4>¿A dónde te lo llevamos?</h4>
     <label class="campo" for="calle">Calle y número</label>
     <input class="inp" id="calle" autocomplete="street-address" placeholder="Ej. Av. Universidad 123, int. 4">
     <label class="campo" for="colonia">Colonia</label>
@@ -337,7 +355,7 @@
     <h3>¡Tu pedido se mandó a WhatsApp!</h3>
     <div class="folio" id="lsFolio"></div>
     <p>Si WhatsApp no te dejó enviarlo, regresa a la conversación y toca <b>enviar</b>.</p>
-    <p>Te confirmamos por WhatsApp el tiempo de entrega y, si no usaste el botón de ubicación, el costo de envío.</p>
+    <p id="lsTxt">Te confirmamos por WhatsApp el tiempo de entrega y, si no usaste el botón de ubicación, el costo de envío.</p>
     <a class="bt wa" id="lsWa" href="#" target="_blank" rel="noopener">Abrir WhatsApp otra vez</a>
     <button class="bt otro" id="lsOtro">Hacer otro pedido</button>
   </div>
@@ -427,6 +445,27 @@ const carrito = {}; // id -> cantidad
 const datos = {};
 MENU.forEach((cat, ci) => cat.p.forEach((it, ii) => { datos[ci+'-'+ii] = {n: it[0], p: it[1], c: cat.c, f: it[2] || null, d: DESC[it[0]] || ''}; }));
 const notas = {};    // id -> indicación del cliente para ese platillo
+function modo(){ const r = document.querySelector('input[name=modo]:checked'); return r ? r.value : 'domicilio'; }
+const recoge = () => modo() === 'recoger';
+function llenarHoras(){
+  const sel = $('hora'); if (!sel) return;
+  const antes = sel.value;
+  let ahora;
+  try { const p = new Intl.DateTimeFormat('en-GB', {hour:'2-digit', minute:'2-digit', hourCycle:'h23', timeZone:'America/Mexico_City'}).format(new Date()).split(':'); ahora = (+p[0]) * 60 + (+p[1]); }
+  catch(e){ const d = new Date(); ahora = d.getHours() * 60 + d.getMinutes(); }
+  let ini = abierto() ? ahora + 30 : ABRE * 60 + 30;
+  ini = Math.ceil(ini / 15) * 15;
+  const fin = (CIERRA + 24) * 60;            // 2:00 a.m. del día siguiente
+  const opciones = [abierto() ? 'Lo antes posible' : 'En cuanto abran (8:00 a.m.)'];
+  for (let m = ini, n = 0; n < 16; m += 15, n++){
+    const real = m % (24 * 60);
+    if (abierto() && m > fin) break;
+    const h = Math.floor(real / 60), mi = real % 60, h12 = ((h + 11) % 12) + 1;
+    opciones.push(h12 + ':' + String(mi).padStart(2, '0') + (h < 12 ? ' a.m.' : ' p.m.'));
+  }
+  sel.innerHTML = opciones.map(o => `<option>${o}</option>`).join('');
+  if (opciones.includes(antes)) sel.value = antes;
+}
 const IMG = h => h.startsWith('u:') ? 'https://images.unsplash.com/' + h.slice(2) + '?w=700&q=72&auto=format&fit=crop' : 'https://tb-static.uber.com/prod/image-proc/processed_images/' + h + '/d03e52b3c8af19d8fa8222e23efd9cfa.jpeg';
 const PORTADAS = {'Gusanos':'Gusano de pastor','Charolas':'Charola de pastor','Chilaquiles':'Chilaquiles de pastor','Tacos':'Taco al pastor','Alambres':'Alambre al pastor','Hamburguesas':'Hamburguesa especial','Gringas':'Gringa de pastor','Quesadillas':'Quesadilla de pastor','Volcanes':'Volcán de pastor','Enchiladas':'Enchiladas sencillas','Tortas':'Torta de pastor','Tortas especiales':'Torta Hawaiana','Chapatas':'Chapata de pollo','Hot dogs':'Hot dog especial','Ensaladas':'Ensalada de pollo','Huevos':'Huevo revuelto a la mexicana','Por kilo':'Kilo de pastor','Bebidas':'Agua de sabor 1 litro'};
 const slug = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
@@ -497,7 +536,8 @@ function actualizar(){
   $('barra').style.display = n ? 'block' : 'none';
   $('bn').textContent = n; $('bt').textContent = pesos(t);
   $('sub').textContent = pesos(t);
-  if (envio && envio.acepto !== false){ $('envioTot').textContent = pesos(envio.costo); $('tot').textContent = pesos(t + envio.costo); }
+  if (recoge()){ $('envioTot').textContent = 'Sin costo (recoges)'; $('tot').textContent = pesos(t); }
+  else if (envio && envio.acepto !== false){ $('envioTot').textContent = pesos(envio.costo); $('tot').textContent = pesos(t + envio.costo); }
   else { $('envioTot').textContent = 'desde $30'; $('tot').textContent = pesos(t) + ' + envío'; }
   if ($('hoja').classList.contains('on')) pintarLineas();
   armarEnlace();
@@ -519,14 +559,16 @@ function pagoElegido(){ return document.querySelector('input[name=pago]:checked'
 function mensaje(){
   const {t} = resumen();
   const L = [];
-  L.push('*PEDIDO NUEVO #' + folio + ' – ' + SUCURSAL + '*');
+  L.push((recoge() ? '*PEDIDO PARA RECOGER #' : '*PEDIDO NUEVO #') + folio + ' – ' + SUCURSAL + '*');
   L.push('Hora: ' + horaTexto());
   L.push('');
   for (const id in carrito){ const d = datos[id]; L.push(carrito[id] + ' × ' + d.n + ' — ' + pesos(carrito[id]*d.p)); if (notas[id]) L.push('   ↳ ' + notas[id]); }
   if ($('primero').checked) L.push('1 × Agua de Jamaica — *REGALO 1er pedido*');
   L.push('');
   L.push('Comida: ' + pesos(t));
-  if (envio && envio.acepto){
+  if (recoge()){
+    L.push('*Total a cobrar: ' + pesos(t) + '* (pasa a recoger, sin envío)');
+  } else if (envio && envio.acepto){
     L.push('Envío: ' + pesos(envio.costo) + ' (' + envio.km.toLocaleString('es-MX') + ' km aprox.) — *aceptado por el cliente*');
     L.push('*Total a cobrar: ' + pesos(t + envio.costo) + '*');
   } else L.push('Envío: por confirmar (hasta 5 km $30, +$5 por km)');
@@ -534,17 +576,21 @@ function mensaje(){
   L.push('');
   L.push('Nombre: ' + val('nombre'));
   L.push('Tel: ' + val('tel'));
+  if (recoge()){
+    L.push('🏃 *Pasa a recoger:* ' + ($('hora').value || 'Lo antes posible'));
+  } else {
   L.push('Dirección: ' + val('calle'));
   L.push('Colonia: ' + val('colonia'));
   if (val('refs')) L.push('Referencias: ' + val('refs'));
   if (gps) L.push('📍 Ubicación exacta (GPS): https://maps.google.com/?q=' + gps.lat.toFixed(6) + ',' + gps.lng.toFixed(6));
   if (gps && LOCAL.lat !== null) L.push('🛵 Ruta desde la cocina: https://www.google.com/maps/dir/?api=1&origin=' + LOCAL.lat + ',' + LOCAL.lng + '&destination=' + gps.lat.toFixed(6) + ',' + gps.lng.toFixed(6) + '&travelmode=driving');
   else if (val('calle') && val('colonia')) L.push('Mapa: https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(val('calle') + ', ' + val('colonia') + ', Querétaro, Qro.'));
+  }
   let pago = 'Pago: ' + pagoElegido();
   if (pagoElegido() === 'Efectivo' && val('cambio')) pago += ' (paga con $' + val('cambio').replace(/[^0-9.]/g,'') + ')';
   L.push(pago);
   L.push('');
-  if (!gps) L.push('📍 Ahorita les mando mi ubicación por aquí.');
+  if (!gps && !recoge()) L.push('📍 Ahorita les mando mi ubicación por aquí.');
   return L.join('\n');
 }
 function horaTexto(){
@@ -560,9 +606,11 @@ function revisar(){
   if (!resumen().n) faltan.push('agrega al menos un platillo');
   if (!val('nombre')) { faltan.push('tu nombre'); $('nombre').classList.add('mal'); }
   if (val('tel').replace(/\D/g,'').length < 10) { faltan.push('tu teléfono a 10 dígitos'); $('tel').classList.add('mal'); }
-  if (!val('calle')) { faltan.push('calle y número'); $('calle').classList.add('mal'); }
-  if (!val('colonia')) { faltan.push('colonia'); $('colonia').classList.add('mal'); }
-  if (envio && envio.acepto !== true) faltan.push('aceptar el costo de envío');
+  if (!recoge()){
+    if (!val('calle')) { faltan.push('calle y número'); $('calle').classList.add('mal'); }
+    if (!val('colonia')) { faltan.push('colonia'); $('colonia').classList.add('mal'); }
+    if (envio && envio.acepto !== true) faltan.push('aceptar el costo de envío');
+  }
   if (faltan.length){ $('err').textContent = 'Falta: ' + faltan.join(', ') + '.'; $('err').style.display = 'block'; return false; }
   $('err').style.display = 'none'; return true;
 }
@@ -656,6 +704,7 @@ function guardarUltimo(){
 }
 function mostrarListo(){
   $('lsFolio').textContent = 'Pedido #' + folio;
+  $('lsTxt').textContent = recoge() ? 'Te avisamos por WhatsApp cuando tu pedido esté listo para recoger.' : 'Te confirmamos por WhatsApp el tiempo de entrega y, si no usaste el botón de ubicación, el costo de envío.';
   $('lsWa').href = $('enviar').href;
   abrirVelo('veloListo');
 }
@@ -701,8 +750,21 @@ $('instalar').onclick = async () => {
   else aviso('En iPhone: toca Compartir ⬆️ y luego "Agregar a inicio"', 5000);
 };
 if (USAR_GPS && 'serviceWorker' in navigator){ try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch(e){} }
-$('verPedido').onclick = () => { pintarLineas(); $('hoja').classList.add('on'); $('hoja').scrollTop = 0; document.body.style.overflow = 'hidden'; };
+$('verPedido').onclick = () => { if (recoge()) llenarHoras(); pintarLineas(); $('hoja').classList.add('on'); $('hoja').scrollTop = 0; document.body.style.overflow = 'hidden'; };
 $('cerrar').onclick = () => { $('hoja').classList.remove('on'); document.body.style.overflow = ''; };
+function aplicarModo(){
+  const r = recoge();
+  $('bloqueRecoger').style.display = r ? 'block' : 'none';
+  $('bloqueDomicilio').style.display = r ? 'none' : 'block';
+  $('pasosUbic').style.display = (r || gps) ? 'none' : 'block';
+  $('cambio').previousElementSibling.textContent = r ? '¿Con cuánto pagas? (para tenerte el cambio)' : '¿Con cuánto pagas? (para llevarte cambio)';
+  if (r) llenarHoras();
+  try { localStorage.setItem('glp_modo', modo()); } catch(e){}
+  if ($('err').style.display === 'block') revisar();
+  actualizar();
+}
+document.querySelectorAll('input[name=modo]').forEach(x => x.addEventListener('change', aplicarModo));
+try { const m = localStorage.getItem('glp_modo'); if (m === 'recoger') document.querySelector('input[name=modo][value=recoger]').checked = true; } catch(e){}
 document.querySelectorAll('input[name=pago]').forEach(r => r.addEventListener('change', () => {
   $('cajaEfectivo').style.display = pagoElegido() === 'Efectivo' ? 'block' : 'none';
   $('txtTarjeta').style.display = pagoElegido().startsWith('Tarjeta') ? 'block' : 'none';
@@ -762,7 +824,7 @@ $('volver').onclick = () => { if (vinoDeInicio) history.back(); else irInicio();
 pintarMenu();
 desdeHash();
 pintarEstado(); setInterval(pintarEstado, 60000);
-cargar(); actualizar(); pintarRepetir();
+cargar(); aplicarModo(); pintarRepetir();
 </script>
 </body>
 </html>
