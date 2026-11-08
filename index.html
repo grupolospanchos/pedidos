@@ -618,7 +618,10 @@ function mensaje(){
   L.push(pago);
   L.push('');
   if (!gps && !recoge()) L.push('📍 Ahorita les mando mi ubicación por aquí.');
-  L.push('🔙 Regresar a mi pedido: ' + PAGINA + '?p=' + folio);
+  L.push('');
+  L.push('━━━━━━━━━━━━━━');
+  L.push('👇 *TOCA AQUÍ PARA VER TU PEDIDO* 👇');
+  L.push(PAGINA + '?p=' + folio);
   return L.join('\n');
 }
 function horaTexto(){
