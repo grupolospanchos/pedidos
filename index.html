@@ -303,6 +303,7 @@
 
   <div class="bloque">
     <label class="regalo"><input type="checkbox" id="primero"><span><b>Es mi primer pedido directo</b><br><span style="color:var(--gris)">Te regalamos un agua de Jamaica 🥤</span></span></label>
+    <label class="regalo" style="margin-top:14px"><input type="checkbox" id="promos"><span><b>Quiero recibir promos por WhatsApp</b><br><span style="color:var(--gris)">Te das de baja cuando quieras respondiendo BAJA.</span></span></label>
   </div>
 
   <div class="bloque">
@@ -586,6 +587,7 @@ function mensaje(){
   if (gps && LOCAL.lat !== null) L.push('🛵 Ruta desde la cocina: https://www.google.com/maps/dir/?api=1&origin=' + LOCAL.lat + ',' + LOCAL.lng + '&destination=' + gps.lat.toFixed(6) + ',' + gps.lng.toFixed(6) + '&travelmode=driving');
   else if (val('calle') && val('colonia')) L.push('Mapa: https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(val('calle') + ', ' + val('colonia') + ', Querétaro, Qro.'));
   }
+  L.push('Promos por WhatsApp: ' + ($('promos').checked ? 'Sí ✅' : 'No'));
   let pago = 'Pago: ' + pagoElegido();
   if (pagoElegido() === 'Efectivo' && val('cambio')) pago += ' (paga con $' + val('cambio').replace(/[^0-9.]/g,'') + ')';
   L.push(pago);
@@ -617,8 +619,8 @@ function revisar(){
 
 /* ---------- Recordar datos del cliente en su celular ---------- */
 const CAMPOS = ['nombre','tel','calle','colonia','refs'];
-function guardar(){ try{ const o = {}; CAMPOS.forEach(k => o[k] = $(k).value); localStorage.setItem('glp_cliente', JSON.stringify(o)); }catch(e){} }
-function cargar(){ try{ const o = JSON.parse(localStorage.getItem('glp_cliente')||'{}'); CAMPOS.forEach(k => { if (o[k]) $(k).value = o[k]; }); }catch(e){} }
+function guardar(){ try{ const o = {}; CAMPOS.forEach(k => o[k] = $(k).value); o.promos = $('promos').checked; localStorage.setItem('glp_cliente', JSON.stringify(o)); }catch(e){} }
+function cargar(){ try{ const o = JSON.parse(localStorage.getItem('glp_cliente')||'{}'); CAMPOS.forEach(k => { if (o[k]) $(k).value = o[k]; }); if (o.promos) $('promos').checked = true; }catch(e){} }
 
 /* ---------- Ubicación exacta con un botón ---------- */
 function pedirGPS(){
