@@ -113,6 +113,10 @@
   .legal h3{font-family:Archivo,sans-serif;margin:0 40px 10px 0;color:var(--vino)}
   .lnk{background:none;border:none;color:var(--vino);text-decoration:underline;font-size:inherit;padding:0}
   .linea .txt .nota-it{display:block;color:var(--vino);font-size:12.5px}
+  @media (min-width:640px){
+    body{max-width:600px;margin:0 auto;box-shadow:0 0 0 1px var(--linea),0 10px 40px rgba(0,0,0,.08);min-height:100vh}
+    .barra,.hoja{left:50%;right:auto;width:600px;transform:translateX(-50%)}
+  }
 
   /* Barra inferior */
   .barra{position:fixed;left:0;right:0;bottom:0;padding:12px 14px 16px;background:linear-gradient(to top,var(--crema) 70%,rgba(251,246,238,0));z-index:10;display:none}
