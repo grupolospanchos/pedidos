@@ -123,6 +123,15 @@
   .listo .bt{display:block;width:100%;margin-top:10px;border-radius:12px;padding:14px;font-weight:800;font-size:15px;text-decoration:none;border:none}
   .listo .bt.wa{background:#25d366;color:#fff}
   .listo .bt.otro{background:#f3ece1;color:var(--tinta)}
+  .pasos-ped{display:flex;margin:12px 0 4px;position:relative}
+  .pasos-ped::before{content:'';position:absolute;top:14px;left:17%;right:17%;height:3px;background:#eadfcd}
+  .pasos-ped div{flex:1;position:relative;font-size:12px;color:#8a7f76;font-weight:700;line-height:1.25}
+  .pasos-ped i{display:block;position:relative;width:30px;height:30px;border-radius:50%;background:#eadfcd;color:#fff;font-style:normal;font-size:14px;line-height:30px;margin:0 auto 5px}
+  .pasos-ped .hecho{color:var(--verde)}
+  .pasos-ped .hecho i{background:var(--verde)}
+  .pasos-ped .ahora i{box-shadow:0 0 0 5px #cfeedb}
+  .listo .resumen-ped{text-align:left;background:#faf6ef;border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.5;margin:10px 0 2px}
+  .listo p a{color:var(--vino);font-weight:700}
   .legal{padding:22px 20px 26px;font-size:14px;line-height:1.55;color:#3d3632}
   .legal h3{font-family:Archivo,sans-serif;margin:0 40px 10px 0;color:var(--vino)}
   .lnk{background:none;border:none;color:var(--vino);text-decoration:underline;font-size:inherit;padding:0}
@@ -362,6 +371,21 @@
   </div>
 </div>
 
+<!-- Estado del pedido (se abre con el enlace que llega por WhatsApp) -->
+<div class="velo" id="veloEstado">
+  <div class="ventana listo" role="dialog" aria-modal="true">
+    <button class="x" data-cerrar aria-label="Cerrar">✕</button>
+    <div class="pal" id="esIco">✓</div>
+    <h3 id="esTit"></h3>
+    <div class="folio" id="esFolio"></div>
+    <div class="pasos-ped" id="esPasos"></div>
+    <p id="esTxt"></p>
+    <div class="resumen-ped" id="esRes"></div>
+    <a class="bt wa" id="esWa" href="#" target="_blank" rel="noopener">Escribirnos por WhatsApp</a>
+    <button class="bt otro" id="esMenu">Ver el menú</button>
+  </div>
+</div>
+
 <!-- Aviso de privacidad -->
 <div class="velo" id="veloPriv">
   <div class="ventana legal" role="dialog" aria-modal="true">
@@ -378,6 +402,7 @@
 
 <script>
 const WHATSAPP = '527448176464';
+const PAGINA = 'https://grupolospanchos.github.io/pedidos/';
 const SUCURSAL = 'Corregidora';
 const ABRE = 8, CIERRA = 2; // 8:00 a.m. a 2:00 a.m.
 const USAR_GPS = true;   // true solo en la versión publicada fuera de Claude
@@ -593,6 +618,7 @@ function mensaje(){
   L.push(pago);
   L.push('');
   if (!gps && !recoge()) L.push('📍 Ahorita les mando mi ubicación por aquí.');
+  L.push('🔙 Regresar a mi pedido: ' + PAGINA + '?p=' + folio);
   return L.join('\n');
 }
 function horaTexto(){
@@ -701,7 +727,7 @@ $('detOk').onclick = () => {
 function guardarUltimo(){
   try {
     const items = Object.keys(carrito).map(id => ({n: datos[id].n, q: carrito[id], nota: notas[id] || ''}));
-    localStorage.setItem('glp_ultimo', JSON.stringify({items, t: resumen().t}));
+    localStorage.setItem('glp_ultimo', JSON.stringify({items, t: resumen().t, folio, r: recoge(), env: (!recoge() && envio && envio.acepto) ? envio.costo : null, ts: Date.now()}));
   } catch(e){}
 }
 function mostrarListo(){
@@ -823,10 +849,52 @@ function irInicio(){ history.replaceState(null, '', location.pathname + location
 window.addEventListener('hashchange', desdeHash);
 $('volver').onclick = () => { if (vinoDeInicio) history.back(); else irInicio(); };
 
+/* ---------- Estado del pedido (enlace desde WhatsApp) ----------
+   ?p=FOLIO  → lo manda el cliente en su mensaje (pedido enviado)
+   ?ok       → respuesta rápida de la cocina: confirmado / preparando
+   ?camino   → ya salió el repartidor      ?listo → listo para recoger */
+function verEstado(){
+  const q = new URLSearchParams(location.search);
+  const clave = ['camino','listo','ok','p'].find(k => q.has(k));
+  if (!clave) return;
+  const nivel = {p:1, ok:2, camino:3, listo:3}[clave];
+  let f = (q.get(clave) || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+  let u = null;
+  try { u = JSON.parse(localStorage.getItem('glp_ultimo') || 'null'); } catch(e){}
+  if (u && (!u.folio || (f ? u.folio !== f : !(u.ts && Date.now() - u.ts < 6*3600e3)))) u = null;
+  if (!f && u) f = u.folio;
+  const rec = clave === 'listo' ? true : clave === 'camino' ? false : (u ? !!u.r : null);
+  const tercero = rec === true ? 'Listo para recoger' : rec === false ? 'En camino' : 'En camino o listo';
+  const tit = {1:'Pedido enviado', 2:'¡Pedido confirmado!', 3: rec ? '¡Listo para recoger!' : '¡Tu pedido va en camino!'}[nivel];
+  const ico = {1:'✓', 2:'🔥', 3: rec ? '🏃' : '🛵'}[nivel];
+  const txt = {
+    1: 'Tu pedido se envió por WhatsApp. En unos minutos te confirmamos por ahí' + (rec ? ' a qué hora pasar.' : ' el tiempo de entrega.'),
+    2: 'Ya lo estamos preparando. Te avisamos por WhatsApp cuando ' + (rec === true ? 'esté listo para recoger.' : rec === false ? 'salga a tu domicilio.' : 'esté listo.'),
+    3: rec ? 'Pasa por él a Prol. Corregidora Nte. 180, El Cerrito. <a href="https://www.google.com/maps/dir/?api=1&destination=20.6024719,-100.3932257" target="_blank" rel="noopener">📍 Cómo llegar</a>' : 'El repartidor ya salió hacia tu domicilio.'
+  }[nivel];
+  $('esIco').textContent = ico;
+  $('esTit').textContent = tit;
+  $('esFolio').textContent = f ? 'Pedido #' + f : '';
+  $('esFolio').style.display = f ? '' : 'none';
+  $('esPasos').innerHTML = ['Enviado', 'Preparando', tercero].map((n, i) =>
+    '<div class="' + (i + 1 < nivel ? 'hecho' : i + 1 === nivel ? 'hecho ahora' : '') + '"><i>' + (i + 1 <= nivel ? '✓' : i + 1) + '</i>' + n + '</div>').join('');
+  $('esTxt').innerHTML = txt;
+  if (u && u.items && u.items.length){
+    const tot = u.r ? 'Total: ' + pesos(u.t) : (u.env != null ? 'Total: ' + pesos(u.t + u.env) + ' con envío' : 'Comida: ' + pesos(u.t) + ' + envío');
+    $('esRes').innerHTML = u.items.map(x => esc(x.q + ' × ' + x.n)).join('<br>') + '<br><b>' + tot + '</b>';
+    $('esRes').style.display = '';
+  } else $('esRes').style.display = 'none';
+  $('esWa').href = 'https://wa.me/' + WHATSAPP + (f ? '?text=' + encodeURIComponent('Hola, sobre mi pedido #' + f + ': ') : '');
+  history.replaceState(null, '', location.pathname + location.hash);
+  abrirVelo('veloEstado');
+}
+$('esMenu').onclick = () => cerrarVelo('veloEstado');
+
 pintarMenu();
 desdeHash();
 pintarEstado(); setInterval(pintarEstado, 60000);
 cargar(); aplicarModo(); pintarRepetir();
+verEstado();
 </script>
 </body>
 </html>
