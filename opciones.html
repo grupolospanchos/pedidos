@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grupo Los Panchos – Pide directo</title>
+<meta name="description" content="Tacos, gusanos, chilaquiles, charolas, tortas y más en Querétaro. Pide directo por WhatsApp y paga precio de mostrador.">
+<meta name="theme-color" content="#6e1421">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Grupo Los Panchos – Pide directo">
+<meta property="og:description" content="Tacos, gusanos, chilaquiles, charolas y más. Pide directo por WhatsApp y paga precio de mostrador.">
+<meta property="og:image" content="https://grupolospanchos.github.io/pedidos/og.jpg">
+<meta property="og:url" content="https://grupolospanchos.github.io/pedidos/">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --vino:#6e1421; --vino2:#8c1d2c; --oro:#c9a24a; --oro2:#e8cc84;
+    --crema:#fbf6ee; --tinta:#1f1a17; --gris:#6f6760; --linea:#eadfce;
+    --verde:#1f9d55; --rojo:#c0392b;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:Inter,system-ui,sans-serif;background:var(--crema);color:var(--tinta);-webkit-tap-highlight-color:transparent;padding-bottom:96px}
+  button{font:inherit;cursor:pointer}
+  input,textarea,select{font:inherit;font-size:16px}
+
+  /* Encabezado */
+  .top{background:linear-gradient(160deg,var(--vino) 0%,#4a0d16 100%);color:#fff;padding:18px 16px 20px;text-align:center}
+  .top img{width:84px;height:84px;border-radius:50%;box-shadow:0 4px 18px rgba(0,0,0,.35)}
+  .top h1{font-family:Archivo,sans-serif;font-weight:800;font-size:22px;margin:10px 0 2px;letter-spacing:.2px}
+  .top .suc{font-size:14px;color:var(--oro2);margin:0}
+  .estado{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:13px;font-weight:600;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.12)}
+  .estado i{width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block}
+  .estado.cerrado i{background:#f87171}
+
+  .promo{margin:14px 14px 0;background:#fff;border:1.5px dashed var(--oro);border-radius:14px;padding:12px 14px;display:flex;gap:12px;align-items:center}
+  .promo .ico{font-size:28px}
+  .promo b{display:block;font-family:Archivo,sans-serif;font-size:15px;color:var(--vino)}
+  .promo span{font-size:13px;color:var(--gris)}
+
+  .buscar{margin:14px 14px 0;position:relative}
+  .buscar input{width:100%;padding:12px 14px 12px 40px;border-radius:12px;border:1px solid var(--linea);background:#fff;outline:none}
+  .buscar input:focus{border-color:var(--oro)}
+  .buscar svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);opacity:.5}
+
+  .cats{display:flex;gap:8px;overflow-x:auto;padding:10px 14px 12px;scrollbar-width:none}
+  .cats::-webkit-scrollbar{display:none}
+  .cats button{flex:0 0 auto;border:1px solid var(--linea);background:#fff;border-radius:999px;padding:11px 16px;font-size:15.5px;font-weight:600;color:var(--tinta);white-space:nowrap}
+  .cats button.on{background:var(--vino);color:#fff;border-color:var(--vino)}
+
+  section{padding:6px 14px 4px;scroll-margin-top:120px}
+  .catbar{position:sticky;top:0;z-index:5;background:var(--crema);border-bottom:1px solid var(--linea);box-shadow:0 4px 12px rgba(0,0,0,.05)}
+  .volver{display:block;width:100%;text-align:left;border:none;background:var(--vino);color:#fff;font-weight:800;font-size:16px;padding:14px 16px}
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px 6px}
+  .tile{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:4/3;cursor:pointer;background:linear-gradient(150deg,var(--vino2),#3e0b13);box-shadow:0 3px 10px rgba(0,0,0,.08)}
+  .tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .tile .tn{position:absolute;left:0;right:0;bottom:0;padding:22px 10px 9px;background:linear-gradient(to top,rgba(0,0,0,.78),rgba(0,0,0,0));color:#fff}
+  .tile .tn b{display:block;font-family:Archivo,sans-serif;font-size:17px;line-height:1.15}
+  .tile .tn span{font-size:12.5px;opacity:.9}
+  .tile .emo{position:absolute;top:50%;left:50%;transform:translate(-50%,-62%);font-size:46px}
+  body.v-inicio #catbar, body.v-inicio #menu{display:none}
+  body.v-cat .top, body.v-cat .promo, body.v-cat #repetir, body.v-cat .favs-wrap, body.v-cat .buscar, body.v-cat .tiles-wrap{display:none!important}
+  body.v-buscar .tiles-wrap, body.v-buscar #catbar{display:none}
+  body.v-cat main section{display:none}
+  body.v-cat main section.actual{display:block}
+  section h2{font-family:Archivo,sans-serif;font-size:19px;margin:16px 2px 8px;color:var(--vino)}
+  .item{background:#fff;border:1px solid var(--linea);border-radius:14px;padding:12px 12px 12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .item .txt{flex:1;min-width:0}
+  .item .nom{font-weight:600;font-size:15px;line-height:1.25}
+  .item .pre{font-size:14px;color:var(--gris);margin-top:2px}
+  .add{border:none;background:var(--oro);color:#3b2a06;font-weight:700;border-radius:10px;padding:9px 14px;font-size:14px}
+  .step{display:flex;align-items:center;gap:2px;background:var(--vino);border-radius:10px;color:#fff}
+  .step button{border:none;background:transparent;color:#fff;width:36px;height:36px;font-size:20px;font-weight:700;line-height:1}
+  .step b{min-width:22px;text-align:center;font-size:15px}
+  .vacio{text-align:center;color:var(--gris);padding:30px 10px;display:none}
+  .item{cursor:pointer}
+  .item .foto{width:72px;height:72px;border-radius:12px;object-fit:cover;flex:0 0 auto;background:#f1e8da}
+  .item .des{font-size:12.5px;color:var(--gris);margin-top:3px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .item .ctl{flex:0 0 auto}
+
+  /* Favoritos */
+  h2.sub{font-family:Archivo,sans-serif;font-size:19px;margin:18px 16px 8px;color:var(--vino)}
+  .favs{display:flex;gap:10px;overflow-x:auto;padding:2px 14px 6px;scrollbar-width:none}
+  .favs::-webkit-scrollbar{display:none}
+  .fav{flex:0 0 156px;background:#fff;border:1px solid var(--linea);border-radius:14px;overflow:hidden;cursor:pointer}
+  .fav img{width:100%;height:112px;object-fit:cover;display:block;background:#f1e8da}
+  .fav .fi{padding:8px 10px 10px}
+  .fav .nom{font-weight:700;font-size:14px;line-height:1.2;height:34px;overflow:hidden}
+  .fav .pre{font-size:13px;color:var(--gris);margin-top:3px}
+
+  /* Repetir */
+  .repetir{margin:12px 14px 0;display:none;width:calc(100% - 28px);text-align:left;border:1.5px solid var(--vino);background:#fbeef0;color:var(--vino);border-radius:14px;padding:12px 14px;font-weight:700;font-size:15px}
+  .repetir small{display:block;font-weight:500;color:var(--gris);font-size:13px;margin-top:2px}
+
+  /* Botón instalar */
+  .instalar{display:none;margin-top:10px;border:1px solid rgba(255,255,255,.45);background:transparent;color:#fff;border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600}
+
+  /* Ventanas (detalle, pedido enviado, aviso) */
+  .velo{position:fixed;inset:0;background:rgba(20,10,8,.55);z-index:40;display:none;align-items:flex-end;justify-content:center}
+  .velo.on{display:flex}
+  .ventana{background:#fff;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;border-radius:20px 20px 0 0;position:relative;animation:sube .22s ease-out}
+  @keyframes sube{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+  .ventana .x{position:absolute;top:10px;right:10px;width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,.92);font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:2}
+  .det-foto{width:100%;aspect-ratio:16/11;max-height:40vh;object-fit:cover;display:block;background:#f1e8da}
+  .det-cuerpo{padding:16px 18px 18px}
+  .det-cuerpo h3{font-family:Archivo,sans-serif;font-size:22px;margin:0 40px 4px 0;line-height:1.2}
+  .det-pre{font-size:17px;font-weight:700;color:var(--vino)}
+  .det-des{font-size:15px;line-height:1.5;color:#3d3632;margin:10px 0 4px}
+  .det-pie{display:flex;gap:10px;align-items:center;padding:12px 18px calc(16px + env(safe-area-inset-bottom));border-top:1px solid var(--linea);position:sticky;bottom:0;background:#fff}
+  .det-pie .step{background:#f3ece1;color:var(--tinta)}
+  .det-pie .step button{color:var(--tinta)}
+  .det-pie .ok{flex:1;border:none;background:var(--vino);color:#fff;border-radius:12px;padding:14px;font-weight:800;font-size:16px}
+  .listo{padding:26px 22px 22px;text-align:center}
+  .listo .pal{width:66px;height:66px;border-radius:50%;background:#e7f6ec;color:var(--verde);font-size:36px;line-height:66px;margin:0 auto 10px}
+  .listo h3{font-family:Archivo,sans-serif;font-size:22px;margin:0 0 4px}
+  .listo .folio{display:inline-block;background:#fbf3e3;border:1.5px dashed var(--oro);border-radius:10px;padding:6px 14px;font-weight:800;font-size:18px;margin:8px 0 12px;letter-spacing:.5px}
+  .listo p{font-size:14.5px;color:#3d3632;line-height:1.5;margin:6px 0}
+  .listo .bt{display:block;width:100%;margin-top:10px;border-radius:12px;padding:14px;font-weight:800;font-size:15px;text-decoration:none;border:none}
+  .listo .bt.wa{background:#25d366;color:#fff}
+  .listo .bt.otro{background:#f3ece1;color:var(--tinta)}
+  .pasos-ped{display:flex;margin:12px 0 4px;position:relative}
+  .pasos-ped::before{content:'';position:absolute;top:14px;left:17%;right:17%;height:3px;background:#eadfcd}
+  .pasos-ped div{flex:1;position:relative;font-size:12px;color:#8a7f76;font-weight:700;line-height:1.25}
+  .pasos-ped i{display:block;position:relative;width:30px;height:30px;border-radius:50%;background:#eadfcd;color:#fff;font-style:normal;font-size:14px;line-height:30px;margin:0 auto 5px}
+  .pasos-ped .hecho{color:var(--verde)}
+  .pasos-ped .hecho i{background:var(--verde)}
+  .pasos-ped .ahora i{box-shadow:0 0 0 5px #cfeedb}
+  .listo .resumen-ped{text-align:left;background:#faf6ef;border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.5;margin:10px 0 2px}
+  .listo p a{color:var(--vino);font-weight:700}
+  .legal{padding:22px 20px 26px;font-size:14px;line-height:1.55;color:#3d3632}
+  .legal h3{font-family:Archivo,sans-serif;margin:0 40px 10px 0;color:var(--vino)}
+  .lnk{background:none;border:none;color:var(--vino);text-decoration:underline;font-size:inherit;padding:0}
+  .linea .txt .nota-it{display:block;color:var(--vino);font-size:12.5px}
+  @media (min-width:640px){
+    body{max-width:600px;margin:0 auto;box-shadow:0 0 0 1px var(--linea),0 10px 40px rgba(0,0,0,.08);min-height:100vh}
+    .barra,.hoja{left:50%;right:auto;width:600px;transform:translateX(-50%)}
+  }
+
+  /* Barra inferior */
+  .barra{position:fixed;left:0;right:0;bottom:0;padding:12px 14px 16px;background:linear-gradient(to top,var(--crema) 70%,rgba(251,246,238,0));z-index:10;display:none}
+  .barra button{width:100%;border:none;background:var(--vino);color:#fff;border-radius:14px;padding:15px 18px;font-size:16px;font-weight:700;display:flex;justify-content:space-between;align-items:center;box-shadow:0 6px 20px rgba(110,20,33,.35)}
+  .barra .n{background:var(--oro);color:#3b2a06;border-radius:8px;padding:2px 9px;font-size:14px;margin-right:8px}
+
+  /* Hoja del pedido */
+  .hoja{position:fixed;inset:0;background:var(--crema);z-index:20;overflow-y:auto;display:none;padding-bottom:40px}
+  .hoja.on{display:block}
+  .hoja .cab{position:sticky;top:0;background:var(--vino);color:#fff;display:flex;align-items:center;gap:10px;padding:14px 12px;z-index:2}
+  .hoja .cab button{border:none;background:rgba(255,255,255,.15);color:#fff;border-radius:10px;width:38px;height:38px;font-size:20px}
+  .hoja .cab h3{margin:0;font-family:Archivo,sans-serif;font-size:18px}
+  .bloque{background:#fff;border:1px solid var(--linea);border-radius:14px;margin:14px 14px 0;padding:14px}
+  .bloque h4{margin:0 0 10px;font-family:Archivo,sans-serif;font-size:16px;color:var(--vino)}
+  .linea{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f3ece1}
+  .linea:last-child{border-bottom:none}
+  .linea .txt{flex:1;min-width:0;font-size:14px}
+  .linea .txt small{display:block;color:var(--gris)}
+  .linea .imp{font-weight:700;font-size:14px;min-width:60px;text-align:right}
+  .step.chico button{width:32px;height:32px;font-size:18px}
+  label.campo{display:block;font-size:13px;font-weight:600;color:var(--gris);margin:10px 0 4px}
+  label.campo:first-of-type{margin-top:0}
+  .inp{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--linea);background:#fffdf9;outline:none}
+  .inp:focus{border-color:var(--oro)}
+  .inp.mal{border-color:var(--rojo);background:#fff5f4}
+  textarea.inp{resize:vertical;min-height:64px}
+  .pagos{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .pagos label{border:1px solid var(--linea);border-radius:10px;padding:10px 6px;text-align:center;font-size:13px;font-weight:600;background:#fffdf9}
+  .pagos input{display:none}
+  .pagos.modo{grid-template-columns:1fr 1fr}
+  .pagos.modo label{font-size:14.5px;padding:12px 6px}
+  .pagos label:has(input:checked){border-color:var(--vino);background:#fbeef0;color:var(--vino)}
+  .regalo{display:flex;gap:10px;align-items:flex-start;font-size:14px}
+  .regalo input{width:22px;height:22px;accent-color:var(--vino);margin-top:1px;flex:0 0 auto}
+  .gps{width:100%;margin-top:14px;border:2px solid var(--vino);background:#fbeef0;color:var(--vino);font-weight:800;font-size:16px;border-radius:12px;padding:14px}
+  .gps.listo{border-color:var(--verde);background:#eaf7ef;color:var(--verde)}
+  .gpsEdo{font-size:13px;color:var(--gris);margin:8px 2px 10px;line-height:1.45}
+  .gpsEdo a{color:var(--vino);font-weight:600}
+  .gpsEdo.ok{color:var(--verde);font-weight:600}
+  .gpsEdo.mal{color:var(--rojo);font-weight:600}
+  .cotiza{border:2px solid var(--oro);background:#fffaf0;border-radius:12px;padding:12px;margin:2px 0 10px}
+  .cotiza .cf{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px;padding:3px 0}
+  .cotiza .cf b{white-space:nowrap}
+  .cotiza .cf.g{font-size:18px;font-family:Archivo,sans-serif;font-weight:800;color:var(--vino)}
+  .cbtns{display:grid;grid-template-columns:1.4fr 1fr;gap:8px;margin-top:10px}
+  .cbtns button{border-radius:10px;padding:12px 8px;font-weight:700;font-size:15px;border:1.5px solid var(--linea);background:#fff;color:var(--tinta)}
+  .cbtns .si.on{background:var(--verde);border-color:var(--verde);color:#fff}
+  .cbtns .no.on{background:#fdecea;border-color:var(--rojo);color:var(--rojo)}
+  .cmsg{font-size:13px;margin-top:8px;line-height:1.4;display:none}
+  .tarifa{font-size:13px;color:var(--gris);background:#fbf3e3;border-radius:10px;padding:10px 12px;margin-top:4px;line-height:1.45}
+  .tot{display:flex;justify-content:space-between;font-size:15px;padding:4px 0}
+  .tot.g{font-size:18px;font-weight:800;font-family:Archivo,sans-serif;border-top:1px solid var(--linea);margin-top:6px;padding-top:10px}
+  .err{color:var(--rojo);font-size:13px;font-weight:600;margin:12px 16px 0;display:none}
+  .enviar{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px 14px 0;background:#25d366;color:#fff;text-decoration:none;font-weight:800;font-size:17px;border-radius:14px;padding:16px;box-shadow:0 6px 18px rgba(37,211,102,.35)}
+  .copiar{display:block;margin:10px auto 0;border:none;background:transparent;color:var(--vino);font-weight:600;text-decoration:underline;font-size:14px}
+  .nota{text-align:center;font-size:12.5px;color:var(--gris);margin:10px 22px 0;line-height:1.45}
+  .pie{text-align:center;font-size:12px;color:var(--gris);padding:24px 16px 8px}
+  .aviso{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--tinta);color:#fff;font-size:14px;padding:10px 16px;border-radius:10px;z-index:60;max-width:88vw;text-align:center;opacity:0;transition:opacity .2s;pointer-events:none}
+  .aviso.on{opacity:1}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <img src="data:image/png;base64,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" alt="Grupo Los Panchos">
+  <h1>Grupo Los Panchos Querétaro</h1>
+  <p class="suc">Sucursal Corregidora · Servicio a domicilio</p>
+  <div class="estado" id="estado"><i></i><span>Abierto</span></div>
+  <div><button class="instalar" id="instalar">📲 Instalar en mi celular</button></div>
+</header>
+
+<div class="promo">
+  <div class="ico">🥤</div>
+  <div><b>Tu primer pedido directo lleva agua de Jamaica GRATIS</b><span>Pide directo y paga precio de mostrador, más barato que en las apps.</span></div>
+</div>
+
+<button class="repetir" id="repetir"></button>
+
+<div class="favs-wrap">
+<h2 class="sub">⭐ Favoritos de la casa</h2>
+<div class="favs" id="favs"></div>
+</div>
+
+<div class="buscar">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+  <input id="q" type="search" placeholder="Buscar: chilaquiles, pastor, torta…" autocomplete="off">
+</div>
+
+<div class="tiles-wrap">
+  <h2 class="sub">📋 Nuestro menú</h2>
+  <div class="tiles" id="tiles"></div>
+</div>
+
+<div class="catbar" id="catbar">
+  <button class="volver" id="volver">← Todas las categorías</button>
+  <nav class="cats" id="cats"></nav>
+</div>
+<main id="menu"></main>
+<div class="vacio" id="vacio">No encontramos ese platillo.</div>
+<div class="pie">Grupo Los Panchos · WhatsApp 744 817 6464<br>Horario: todos los días de 8:00 a.m. a 2:00 a.m.<br><button class="lnk" data-privacidad>Aviso de privacidad</button></div>
+
+<div class="barra" id="barra">
+  <button id="verPedido"><span><span class="n" id="bn">0</span>Ver mi pedido</span><span id="bt">$0</span></button>
+</div>
+
+<div class="hoja" id="hoja" aria-hidden="true">
+  <div class="cab"><button id="cerrar" aria-label="Regresar">←</button><h3>Tu pedido</h3></div>
+
+  <div class="bloque">
+    <h4>Lo que pediste</h4>
+    <div id="lineas"></div>
+    <label class="campo" for="notas">Indicaciones (opcional)</label>
+    <textarea class="inp" id="notas" placeholder="Ej. chilaquiles salsa verde, sin cebolla, salsa aparte…"></textarea>
+  </div>
+
+  <div class="bloque">
+    <h4>¿Cómo lo quieres?</h4>
+    <div class="pagos modo">
+      <label><input type="radio" name="modo" value="domicilio" checked>🛵<br>A domicilio</label>
+      <label><input type="radio" name="modo" value="recoger">🏃<br>Paso a recoger</label>
+    </div>
+    <label class="campo" for="nombre" style="margin-top:12px">Nombre</label>
+    <input class="inp" id="nombre" autocomplete="name" placeholder="¿A nombre de quién?">
+    <label class="campo" for="tel">Teléfono (10 dígitos)</label>
+    <input class="inp" id="tel" type="tel" inputmode="numeric" autocomplete="tel" placeholder="442 123 4567">
+  </div>
+
+  <div class="bloque" id="bloqueRecoger" style="display:none">
+    <h4>Pasa por él a nuestro local</h4>
+    <div class="tarifa" style="margin-top:0"><b>Grupo Los Panchos Corregidora</b><br>Prol. Corregidora Nte. 180, El Cerrito, Querétaro<br><a href="https://www.google.com/maps/dir/?api=1&destination=20.6024719,-100.3932257" target="_blank" rel="noopener" style="color:var(--vino);font-weight:700">📍 Cómo llegar</a></div>
+    <label class="campo" for="hora" style="margin-top:12px">¿A qué hora pasas?</label>
+    <select class="inp" id="hora"></select>
+    <p class="tarifa" style="margin-top:10px">Te avisamos por WhatsApp cuando tu pedido esté listo. Sin costo de envío.</p>
+  </div>
+
+  <div class="bloque" id="bloqueDomicilio">
+    <h4>¿A dónde te lo llevamos?</h4>
+    <label class="campo" for="calle">Calle y número</label>
+    <input class="inp" id="calle" autocomplete="street-address" placeholder="Ej. Av. Universidad 123, int. 4">
+    <label class="campo" for="colonia">Colonia</label>
+    <input class="inp" id="colonia" placeholder="Ej. El Cerrito">
+    <label class="campo" for="refs">Referencias (opcional)</label>
+    <input class="inp" id="refs" placeholder="Ej. portón negro, frente a la tienda">
+    <div id="gpsBox" style="display:none">
+      <button type="button" class="gps" id="gpsBtn">📍 Mandar mi ubicación exacta</button>
+      <div class="gpsEdo" id="gpsEdo">Toca el botón estando en tu casa y acepta el permiso de ubicación. Te decimos el costo de envío al momento.</div>
+      <div class="cotiza" id="cotiza" style="display:none">
+        <div class="cf"><span>Distancia aprox. desde nuestra cocina</span><b id="cDist"></b></div>
+        <div class="cf g"><span>Tu envío</span><b id="cEnvio"></b></div>
+        <div class="cbtns"><button type="button" class="si" id="cSi">✅ Acepto el envío</button><button type="button" class="no" id="cNo">No, gracias</button></div>
+        <div class="cmsg" id="cMsg"></div>
+      </div>
+    </div>
+    <div class="tarifa"><b>Envío:</b> hasta 5 km, $30 · cada km adicional, $5.<br><span id="tarifaNota">Te confirmamos el costo exacto con tu ubicación 📍.</span></div>
+  </div>
+
+  <div class="bloque">
+    <h4>¿Cómo pagas?</h4>
+    <div class="pagos">
+      <label><input type="radio" name="pago" value="Efectivo" checked>💵<br>Efectivo</label>
+      <label><input type="radio" name="pago" value="Transferencia">🏦<br>Transferencia</label>
+      <label><input type="radio" name="pago" value="Tarjeta (link de pago)">💳<br>Tarjeta</label>
+    </div>
+    <div id="cajaEfectivo">
+      <label class="campo" for="cambio" style="margin-top:12px">¿Con cuánto pagas? (para llevarte cambio)</label>
+      <input class="inp" id="cambio" type="text" inputmode="numeric" placeholder="Ej. 500">
+    </div>
+    <p id="txtTarjeta" class="tarifa" style="display:none;margin-top:12px">Te mandamos un link de pago por WhatsApp para pagar con tarjeta.</p>
+  </div>
+
+  <div class="bloque">
+    <label class="regalo"><input type="checkbox" id="primero"><span><b>Es mi primer pedido directo</b><br><span style="color:var(--gris)">Te regalamos un agua de Jamaica 🥤</span></span></label>
+    <label class="regalo" style="margin-top:14px"><input type="checkbox" id="promos"><span><b>Quiero recibir promos por WhatsApp</b><br><span style="color:var(--gris)">Te das de baja cuando quieras respondiendo BAJA.</span></span></label>
+  </div>
+
+  <div class="bloque">
+    <div class="tot"><span>Comida</span><span id="sub">$0</span></div>
+    <div class="tot"><span>Envío</span><span id="envioTot">desde $30</span></div>
+    <div class="tot g"><span>Total</span><span id="tot">$0 + envío</span></div>
+  </div>
+
+  <p class="err" id="err"></p>
+  <a class="enviar" id="enviar" href="#" target="_blank" rel="noopener">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3a.5.5 0 0 0 0-.4l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7a2.8 2.8 0 0 0 1.8-1.3 2.3 2.3 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg>
+    Enviar pedido por WhatsApp
+  </a>
+  <button class="copiar" id="copiar">¿No se abrió WhatsApp? Copia tu pedido</button>
+  <div class="bloque" style="margin-top:16px" id="pasosUbic">
+    <h4>📍 Después mándanos tu ubicación</h4>
+    <div style="font-size:14px;line-height:1.5">Ya en WhatsApp, en el mismo chat:<br>
+    <b>Android:</b> toca 📎 → Ubicación → <b>Enviar tu ubicación actual</b><br>
+    <b>iPhone:</b> toca + → Ubicación → <b>Enviar mi ubicación actual</b><br>
+    <span style="color:var(--gris)">Así el repartidor llega directo a tu puerta y te confirmamos el envío.</span></div>
+  </div>
+  <p class="nota">Si WhatsApp no se abre, escríbenos al 744 817 6464.<br>Al enviar tu pedido aceptas nuestro <button class="lnk" data-privacidad>aviso de privacidad</button>.</p>
+</div>
+
+<div class="aviso" id="aviso"></div>
+
+<!-- Detalle del platillo -->
+<div class="velo" id="veloDet">
+  <div class="ventana" role="dialog" aria-modal="true" aria-labelledby="detNom">
+    <button class="x" data-cerrar aria-label="Cerrar">✕</button>
+    <img class="det-foto" id="detFoto" alt="">
+    <div class="det-cuerpo">
+      <h3 id="detNom"></h3>
+      <div class="det-pre" id="detPre"></div>
+      <p class="det-des" id="detDes"></p>
+      <label class="campo" for="detNota">¿Algún cambio? (opcional)</label>
+      <input class="inp" id="detNota" placeholder="Ej. sin cebolla, salsa verde, bien dorado…" maxlength="120">
+    </div>
+    <div class="det-pie">
+      <div class="step"><button id="detMenos" aria-label="Quitar uno">−</button><b id="detCant">1</b><button id="detMas" aria-label="Agregar uno">+</button></div>
+      <button class="ok" id="detOk">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Pedido enviado -->
+<div class="velo" id="veloListo">
+  <div class="ventana listo" role="dialog" aria-modal="true">
+    <div class="pal">✓</div>
+    <h3>¡Tu pedido se mandó a WhatsApp!</h3>
+    <div class="folio" id="lsFolio"></div>
+    <p>Si WhatsApp no te dejó enviarlo, regresa a la conversación y toca <b>enviar</b>.</p>
+    <p id="lsTxt">Te confirmamos por WhatsApp el tiempo de entrega y, si no usaste el botón de ubicación, el costo de envío.</p>
+    <a class="bt wa" id="lsWa" href="#" target="_blank" rel="noopener">Abrir WhatsApp otra vez</a>
+    <button class="bt otro" id="lsOtro">Hacer otro pedido</button>
+  </div>
+</div>
+
+<!-- Estado del pedido (se abre con el enlace que llega por WhatsApp) -->
+<div class="velo" id="veloEstado">
+  <div class="ventana listo" role="dialog" aria-modal="true">
+    <button class="x" data-cerrar aria-label="Cerrar">✕</button>
+    <div class="pal" id="esIco">✓</div>
+    <h3 id="esTit"></h3>
+    <div class="folio" id="esFolio"></div>
+    <div class="pasos-ped" id="esPasos"></div>
+    <p id="esTxt"></p>
+    <div class="resumen-ped" id="esRes"></div>
+    <a class="bt wa" id="esWa" href="#" target="_blank" rel="noopener">Escribirnos por WhatsApp</a>
+    <button class="bt otro" id="esMenu">Ver el menú</button>
+  </div>
+</div>
+
+<!-- Aviso de privacidad -->
+<div class="velo" id="veloPriv">
+  <div class="ventana legal" role="dialog" aria-modal="true">
+    <button class="x" data-cerrar aria-label="Cerrar">✕</button>
+    <h3>Aviso de privacidad</h3>
+    <p><b>Grupo Los Panchos</b>, con domicilio en Prol. Corregidora Nte. 180, El Cerrito, Santiago de Querétaro, Qro., es responsable del uso de tus datos personales.</p>
+    <p><b>Qué datos usamos:</b> nombre, teléfono, dirección, referencias y, si nos la compartes, tu ubicación.</p>
+    <p><b>Para qué:</b> preparar y entregar tu pedido, contactarte sobre él y, si tú nos lo pides, mandarte promociones por WhatsApp.</p>
+    <p><b>Con quién los compartimos:</b> con nadie, salvo lo necesario para entregarte el pedido. No vendemos tus datos.</p>
+    <p><b>Tus derechos:</b> puedes pedir que corrijamos, borremos o dejemos de usar tus datos escribiéndonos por WhatsApp al 744 817 6464.</p>
+    <p>Esta página guarda tus datos de entrega solo en tu celular, para que no los vuelvas a escribir.</p>
+  </div>
+</div>
+
+<script>
+const WHATSAPP = '527448176464';
+const PAGINA = 'https://grupolospanchos.github.io/pedidos/';
+const SUCURSAL = 'Corregidora';
+const ABRE = 8, CIERRA = 2; // 8:00 a.m. a 2:00 a.m.
+const USAR_GPS = true;   // true solo en la versión publicada fuera de Claude
+let gps = null;             // {lat, lng, prec}
+/* Cocina Corregidora y tarifa de envío */
+const LOCAL = {lat: 20.6024719, lng: -100.3932257};
+const ENVIO_BASE = 30, KM_INCLUIDOS = 5, POR_KM = 5;
+const FACTOR_CALLE = 1.3;   // la distancia en línea recta se multiplica por esto para aproximar el recorrido por calles
+let envio = null;           // {km, costo, acepto: null|true|false}
+function distanciaKm(a, b){
+  const R = 6371, rad = x => x * Math.PI / 180;
+  const dLat = rad(b.lat - a.lat), dLng = rad(b.lng - a.lng);
+  const h = Math.sin(dLat/2)**2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+function cotizar(){
+  if (!gps || LOCAL.lat === null) return;
+  const km = Math.round(distanciaKm(LOCAL, gps) * FACTOR_CALLE * 10) / 10;
+  const extra = Math.max(0, Math.ceil(km - KM_INCLUIDOS));
+  envio = {km, costo: ENVIO_BASE + extra * POR_KM, acepto: null};
+  $('cDist').textContent = km.toLocaleString('es-MX') + ' km';
+  $('cEnvio').textContent = pesos(envio.costo);
+  $('cSi').classList.remove('on'); $('cNo').classList.remove('on'); $('cMsg').style.display = 'none';
+  $('cotiza').style.display = 'block';
+  $('tarifaNota').textContent = 'Cada km empezado después de los 5 km cuenta como km completo.';
+  actualizar();
+}
+function decidirEnvio(si){
+  if (!envio) return;
+  envio.acepto = si;
+  $('cSi').classList.toggle('on', si); $('cNo').classList.toggle('on', !si);
+  const m = $('cMsg'); m.style.display = 'block';
+  if (si){ m.style.color = 'var(--verde)'; m.textContent = 'Listo. Tu total ya incluye el envío.'; }
+  else { m.style.color = 'var(--rojo)'; m.textContent = 'Sin problema, tu pedido no se manda. Si cambias de opinión, toca "Acepto el envío".'; }
+  if ($('err').style.display === 'block') revisar();
+  actualizar();
+}
+
+const MENU = [
+ {c:'Gusanos', i:'🌯', p:[['Gusano vegetariano',90,'70de63bbcacf006103f070a70a52b152'],['Gusano de pastor',90,'5f4c91dbd97b35dbe650be0ac1344502'],['Gusano de chuleta',90,'506171366b461087ca176adc61978fa4'],['Gusano de chorizo',90,'6728c3471b75ee3f83b0b1cf9db3437e'],['Gusano campechano',90,'70de63bbcacf006103f070a70a52b152'],['Gusano hawaiano',95,'af3476489fa59db4e2e585e5b9e68b08'],['Gusano mexicano',95,'625fdcc9124ba9357a7b6ea86f2ba87c'],['Gusano norteño',99,'19301614da35095b507cf86b52418ac2'],['Gusano americano',99,'5f4c91dbd97b35dbe650be0ac1344502'],['Gusano de suadero',99,'19301614da35095b507cf86b52418ac2'],['Gusano de arrachera',105,'6fc139f56d66c04545a57ae5b32d34a4'],['Gusano de bistec de res',105,'6fc139f56d66c04545a57ae5b32d34a4'],['Gusano de pollo',105,'625fdcc9124ba9357a7b6ea86f2ba87c']]},
+ {c:'Charolas', i:'🍽️', p:[['Charola de pastor',160,'9b00b1a1c85b5a27febe1bccac080a8a'],['Charola de chuleta',160,'66e9f558b8cb216ed71703304914700b'],['Charola de longaniza',160,'5e2e5864653f688246e688c239e78057'],['Charola campechana',160,'bbe244808b9b2df58a3d240f438d9c68'],['Charola vegetariana',160,'262f75772bf332b2ebd68ff59d4b79d7'],['Charola hawaiana',165,'39273f726c0a5e802c05c9dc09891dbc'],['Charola americana',165,'5ee71c0136fbe83a36c18b831192b9ba'],['Charola mexicana',165,'213706a221a3a253bca0b8e4b256f01c'],['Charola de suadero',170,'66e9f558b8cb216ed71703304914700b'],['Charola de arrachera',170,'35c941aba3a857206d4baeec8c340cf2'],['Charola norteña',175,'da812beef0188e4a44d270d135d16e14'],['Charola de bistec de res',220,'35c941aba3a857206d4baeec8c340cf2'],['Charola Especial (600 g)',285,'5ee71c0136fbe83a36c18b831192b9ba'],['Charola Suprema (600 g)',285,'2c3a96b5e51795ccfcd8d2016f14d220'],['Charola Imposible (800 g)',385,'5ee71c0136fbe83a36c18b831192b9ba']]},
+ {c:'Chilaquiles', i:'🥘', p:[['Chilaquiles sencillos',90,'e10802b7b2bc778b995d82f673c09d1e'],['Chilaquiles vegetarianos',90,'361dffa68b6027778ee2658e8d9ec74a'],['Chilaquiles de pastor',95,'2b00a56bd1a670b781a3e5db7097660c'],['Chilaquiles con milanesa',95,'e10802b7b2bc778b995d82f673c09d1e'],['Chilaquiles con chuleta',95,'7c2a84715fa508d804d8f31bb76442ff'],['Chilaquiles con chorizo',95,'e10802b7b2bc778b995d82f673c09d1e'],['Chilaquiles campechanos',95,'3772e659a327e18b42dbfc6e85259642'],['Chilaquiles con huevo',95,'a586ad196eb83f28cced134627177c90'],['Chilaquiles con jamón',95,'6dc946bda7b9a58dad784c4a2a40b072'],['Chilaquiles con huevo y jamón',95,'3de0663cb31865a25cdf5a86b58bf790'],['Chilaquiles con huevo y chorizo',95,'a586ad196eb83f28cced134627177c90'],['Chilaquiles con alambre',95,'4bec4dc4558680693d0f5d6332247ba8'],['Chilaquiles con arrachera',105,'7f7734d4f768bd8642a0fcf867799c9f'],['Chilaquiles con bistec de res',105,'361dffa68b6027778ee2658e8d9ec74a'],['Chilaquiles con suadero',105,'4bec4dc4558680693d0f5d6332247ba8'],['Chilaquiles con pollo',105,'c4d41a36a0980c68f0345cd51cd600e8']]},
+ {c:'Tacos', i:'🌮', p:[['Taco al pastor',16,'be9dcd5d138be5ac76d8868dd665cb3c'],['Taco de chuleta',16,'d149587cd440a06125cba037601ea7fb'],['Taco de chorizo',16,'6d1cbb230d68595c768b137de526c466'],['Taco campechano',16,'9b37430cda95cec6523c7db3bac5ef31'],['Taco de suadero',16,'c0141840322c38386368de10859f6562'],['Taco de arrachera de cerdo',19,'34a12aa4181ec204564b57c05924e20d'],['Taco de bistec de res',22,'56e5e91eaed495ab629bdcee2befca34']]},
+ {c:'Alambres', i:'🍢', p:[['Alambre vegetariano',135,'7a68870d23395fe870d9e3902badae87'],['Alambre al pastor',150,'23ecce1d8e0dc63d4d1624d0f3daea07'],['Alambre campechano',150,'d7c44149ef2a7e2d9ba68f1611c28b75'],['Alambre de chuleta',150,'bfeefbc314141c576acbcee9b2c5f097'],['Alambre hawaiano',150,'621ba6cbe92f43aae21aca7474c3343f'],['Alambre de champiñones',150,'d1a738905259ff9d66447f91d336cbb4'],['Alambre queso carne',165,'7b6e56b901baeb550b90d787284175d8'],['Alambre de pollo',165,'bfeefbc314141c576acbcee9b2c5f097'],['Alambre de bistec de res',165,'cfdc486b23d81531ae123d7377781feb'],['Super Pancho',275,'3a5bcc7a8eef671f0a748ab39d3789d1']]},
+ {c:'Hamburguesas', i:'🍔', p:[['Hamburguesa clásica',70,'f684605f9b6f2d325d33622f9a856d9c'],['Hamburguesa doble',105,'b65fb97abab786270cebd51a6be617be'],['Hamburguesa hawaiana',95,'206c5f5d91c568fa01f7002285ef43d6'],['Hamburguesa americana',95,'f1c5ee1b736fd8a36378ebdb014c58ca'],['Hamburguesa oaxaqueña',95,'fb4eef133dcb88677a5fbb0d2866d24d'],['Hamburguesa especial',99,'dc7e89cfd45c9cabcfdbae23d8db9fa0'],['Hamburguesa BBQ Burger',99,'87a324de11824211cb857adca3b28c8c'],['Hamburguesa La Pastorera',99,'8e6b9ccd5fad92ecc0ecc35c290c5e96'],['Hamburguesa La Champi',99,'b65fb97abab786270cebd51a6be617be'],['Hamburguesa La Suprema',99,'fb4eef133dcb88677a5fbb0d2866d24d'],['Hamburguesa Super',125,'28b3c16ca170b0a5f2219ffa6cda3632']]},
+ {c:'Gringas', i:'🥙', p:[['Gringa de pastor',59,'efb63237cdaf97f73df73abca9967bbb'],['Gringa de chorizo',59,'a2778c7842da571dd96d385be480cc4e'],['Gringa campechana',59,'ab07e4dc87bfd9514aca7d5ae7d8a4df'],['Gringa de chuleta',59,'f554a83e2cdf2b4aff3e52b9bf90ca24'],['Gringa de suadero',69,'6d18b33616a9cf2ffbc68e5854fafe37']]},
+ {c:'Quesadillas', i:'🧀', p:[['Quesadilla de queso',24,'7447a31ecf3c93dba7b802a76927af3c'],['Quesadilla campechana',44,'b230b5c55fefef647c2fbfac58820451'],['Quesadilla de champiñón',44,'c20bde77712552895e9e1d80ea7b64f1'],['Quesadilla de chuleta',44,'976e81bf83f1d5f8a91d956ce6872c0d'],['Quesadilla de pastor',44,'123f43ba7b76e8121359ea020abaa2fd'],['Quesadilla de chorizo',44,'8621d68b7045d2da5e2b38e26ff55761'],['Quesadilla de suadero',49,'b230b5c55fefef647c2fbfac58820451'],['Quesadilla de arrachera',49,'b230b5c55fefef647c2fbfac58820451'],['Quesadilla de bistec de res',49,'7447a31ecf3c93dba7b802a76927af3c']]},
+ {c:'Volcanes', i:'🌋', p:[['Volcán de pastor',22,'d4b57799580c568c7ebcb4943ca845e6'],['Volcán de chuleta',22,'685163e298aa8827be5fbc9c2f0fea8c'],['Volcán campechano',22,'cdd8d1c0206fbde7f95d00b06b0a5ec2'],['Volcán de chorizo',22,'cdd8d1c0206fbde7f95d00b06b0a5ec2'],['Volcán de suadero',22,'d4b57799580c568c7ebcb4943ca845e6'],['Volcán de arrachera',27,'685163e298aa8827be5fbc9c2f0fea8c'],['Volcán de bistec de res',27,'685163e298aa8827be5fbc9c2f0fea8c']]},
+ {c:'Enchiladas', i:'🌶️', p:[['Enchiladas sencillas',90,'d10bc06cc21418313ef1224cce3342bf'],['Enchiladas vegetarianas',90,'04eb466d3366618f0f6c5c717d908975'],['Enchiladas de pastor',95,'645c7e3ecc3515bdc9cd6c67fa87f482'],['Enchiladas con milanesa',95,'506611cdaffde7289189a2d90dcb82bf'],['Enchiladas con chuleta',95,'506611cdaffde7289189a2d90dcb82bf'],['Enchiladas con chorizo',95,'a1edb655ca996a502e54aa5f33568dc9'],['Enchiladas campechanas',95,'699c861ad863eb183730531a4265c032'],['Enchiladas con huevo',95,'a81f601ab93060507567e858d6ffb9ff'],['Enchiladas con jamón',95,'4e24226c44c93135639a30f7e745bccd'],['Enchiladas con huevo y jamón',95,'2c4f85c2eeea6487c4286d26d7d18644'],['Enchiladas con huevo y chorizo',95,'a81f601ab93060507567e858d6ffb9ff'],['Enchiladas con alambre',95,'e4dcff8612029ab7ab8d1e64ab645ba3'],['Enchiladas con arrachera',105,'699c861ad863eb183730531a4265c032'],['Enchiladas con bistec de res',105,'506611cdaffde7289189a2d90dcb82bf'],['Enchiladas con suadero',105,'699c861ad863eb183730531a4265c032'],['Enchiladas con pollo',105,'3007fc9c015c25335ba77fb40fada736']]},
+ {c:'Tortas', i:'🥖', p:[['Torta de pastor',85,'20388eb3a9d1e20506294fc7f62242f3'],['Torta de chuleta',85,'a7eccd98dedfd5291e3d114c299f9ff4'],['Torta de chorizo',85,'34030a84726270901047cf24b1cac26d'],['Torta campechana',85,'c3395a3e7fc4f5730f7432fdd3aa9736'],['Torta de milanesa',85,'502af226e610b43afa98e47cbe80de73'],['Torta de arrachera',95,'a7eccd98dedfd5291e3d114c299f9ff4']]},
+ {c:'Tortas especiales', i:'⭐', p:[['Torta Toluqueña',90,'34030a84726270901047cf24b1cac26d'],['Torta Rusa',90,'d13bcceb578c442955c151797de3a2d0'],['Torta Italiana',90,'4bafa94a460818492b2723436d62136f'],['Torta Hawaiana',90,'3da360d9ee8af58df8bd0926fabda490'],['Torta Brasileña',90,'20388eb3a9d1e20506294fc7f62242f3'],['Torta Lambada',90,'6404995254263111d7f1df34d6f8f504'],['Torta Mexicana',90,'95c2671e3e9ca52dc7ab17751a6c6f78'],['Torta Norteña',90,'a7eccd98dedfd5291e3d114c299f9ff4'],['Torta Española',90,'088ad3fad6f731678b039e5ee3e7a26d'],['Torta Alemana',90,'9934161fe621e1cac8874c061f6f4f83'],['Torta Pachuqueña',90,'502af226e610b43afa98e47cbe80de73'],['Torta Caribeña',90,'3da360d9ee8af58df8bd0926fabda490'],['Torta Oaxaqueña',90,'7838ee6dc0a2ecfd7fe5ddcb7e6b39e7'],['Torta Trevi',90,'6abbfaee992e05d78b8812100b33d2a2'],['Torta Texana',90,'a7eccd98dedfd5291e3d114c299f9ff4'],['Torta Estrella',90,'d55883969c1ea785f8dd758ddb8f98e9'],['Torta La Niño Pobre',135,'153223e1c36f53f3d75e34827b5bb529']]},
+ {c:'Chapatas', i:'🍞', p:[['Chapata vegetariana',80,'98e022ed35d586c54db0780188c58241'],['Chapata de jamón',80,'7dbd3de988a22e3872db57a5aa71c8f7'],['Chapata de arrachera',99,'0cf597b4f7e43af90ed8dd34f5cf7ea3'],['Chapata de pollo',99,'fce0dfbb8b7f7a73e0b02dfb2efb33cc'],['Chapata de bistec de res',99,'ec1b1f521a45350ae7d5a7e8a8f3a2f6'],['Chapata de suadero',99,'2865579fb391742fc0cb2978dc2e9191']]},
+ {c:'Hot dogs', i:'🌭', p:[['Hot dog sencillo',27,'346afe0fd52a7ca9f5fdaf557969898d'],['Hot dog especial',37,'44c76af4446b03acbdc8f4159f78433f'],['Hot dog norteño',37,'579204d58eae3ab7656e202e7deda672']]},
+ {c:'Ensaladas', i:'🥗', p:[['Ensalada de pastor',89,'530472b7b8656b82116bd7ba120dc6f0'],['Ensalada de pollo',95,'7f8fc09eb20e44b3a973ae92d015dd8f'],['Ensalada de arrachera',95,'343b3b8e8a328da3b20c483389d5436d']]},
+ {c:'Huevos', i:'🍳', p:[['Huevo revuelto con jamón',65,'u:photo-1779094543933-1531a4a286f8'],['Huevo revuelto con tocino',65,'u:photo-1759216280661-e785edc3922e'],['Huevo revuelto con salchicha',65,'u:photo-1709754521379-00166805eea4'],['Huevo revuelto a la mexicana',65,'u:photo-1593619566002-8bf042dd1cfb'],['Huevos estrellados',65,'u:photo-1760192716247-382af2aa9b35']]},
+ {c:'Por kilo', i:'⚖️', p:[['Kilo de pastor',380,'17a44f42831e25cb84a75ea827134d42'],['Kilo de chuleta',380,'ddef805da738bda48e049238cc6429a7'],['Kilo campechano',380,'ddef805da738bda48e049238cc6429a7'],['Kilo de alambre',380,'7caea11d46cea055988254db6bd1a4eb'],['Kilo de bistec',430,'7caea11d46cea055988254db6bd1a4eb']]},
+ {c:'Paquetes', i:'🎁', p:[['Paquete 1: El Solitario',165],['Paquete 2: Pareja',215],['Paquete 3: Familiar',425]]},
+ {c:'Bebidas', i:'🥤', p:[['Refresco línea Pepsi',35,'b57f2c8964a366843340075e3b4f0b77'],['Coca-Cola normal o Zero',35,'97097de9d00f20fb43b14d4c68a0fcf7'],['Agua de sabor ½ litro',30,'190ebcecb38876448e7a69fc70ca4ec4'],['Agua de sabor 1 litro',50,'6009d109f4532f8b67e47380f8530cd4'],['Agua natural',15],['Café',25,'88ca6d2b2f251375c909ab5f3d6362da']]}
+];
+const DESC = {"Taco al pastor": "Carne de cerdo marinada en achiote al estilo trompo, en tortilla caliente con piña, cebolla, cilantro y un toque de limón.", "Taco de chuleta": "Chuleta de cerdo sazonada y asada a la plancha, en tortilla caliente con cebolla, cilantro, salsa y limón.", "Taco de chorizo": "Chorizo mexicano frito hasta quedar crujiente, en tortilla caliente con cebolla, cilantro, salsa y limón.", "Taco campechano": "Chuleta y chorizo asados juntos, en tortilla caliente con cebolla, cilantro, salsa al gusto y limón.", "Taco de suadero": "Suadero cocido lentamente y dorado hasta quedar crujiente, con cebolla, cilantro, salsa verde o roja y limón.", "Taco de arrachera de cerdo": "Arrachera de cerdo marinada y asada a la plancha, con cebolla, cilantro, salsa al gusto y limón.", "Taco de bistec de res": "Bistec de res asado a la plancha hasta quedar jugoso, con cebolla, cilantro, salsa al gusto y limón.", "Volcán de pastor": "Tortilla tostada crujiente con costra de queso fundido y carne al pastor. Lleva cebollita, cilantro, salsas caseras y limón.", "Volcán de chuleta": "Tortilla tostada crujiente con costra de queso fundido y chuleta de cerdo. Lleva cebollita, cilantro, salsas caseras y limón.", "Volcán campechano": "Tortilla tostada crujiente con costra de queso fundido y carnes campechanas (chuleta y chorizo). Lleva cebollita, cilantro, salsas caseras y limón.", "Volcán de chorizo": "Tortilla tostada crujiente con costra de queso fundido y chorizo de la casa. Lleva cebollita, cilantro, salsas caseras y limón.", "Volcán de suadero": "Tortilla tostada crujiente con costra de queso fundido y suadero. Lleva cebollita, cilantro, salsas caseras y limón.", "Volcán de arrachera": "Tortilla tostada crujiente con costra de queso fundido y arrachera. Lleva cebollita, cilantro, salsas caseras y limón.", "Volcán de bistec de res": "Tortilla tostada crujiente con costra de queso fundido y bistec de res. Lleva cebollita, cilantro, salsas caseras y limón.", "Gringa de pastor": "Preparada con dos tortillas de harina, mezcla de queso fundido y sabrosa carne al pastor. Lleva cebollita, cilantro, salsas caseras y limones frescos.", "Gringa de chorizo": "Preparada con dos tortillas de harina, mezcla de queso fundido y chorizo de la casa. Lleva cebollita, cilantro, salsas caseras y limones frescos.", "Gringa campechana": "Preparada con dos tortillas de harina, mezcla de queso fundido y carnes mixtas campechanas. Lleva cebollita, cilantro, salsas caseras y limones frescos.", "Gringa de chuleta": "Preparada con dos tortillas de harina, mezcla de queso fundido y tierna chuleta de cerdo. Lleva cebollita, cilantro, salsas caseras y limones frescos.", "Gringa de suadero": "Preparada con dos tortillas de harina, mezcla de queso fundido y tierno suadero chilango. Lleva cebollita, cilantro, salsas caseras y limones frescos.", "Quesadilla de queso": "Tortilla de harina doradita con nuestra deliciosa mezcla de quesos fundidos. Se acompaña con verduritas frescas, salsas de la casa y limones para sazonar.", "Quesadilla campechana": "Tortilla de harina rellena de mezcla de quesos y carnes campechanas doraditas. Viene con verduritas, salsas de la casa y limones frescos.", "Quesadilla de champiñón": "Tortilla de harina con mezcla de quesos fundidos y champiñones tiernos salteados. Servida con verduritas, salsas de la casa y limones selectos.", "Quesadilla de chuleta": "Tortilla de harina con mezcla de quesos derretidos y chuleta de cerdo sazonada. Lleva verduritas frescas, salsas de la casa y limones para disfrutar.", "Quesadilla de pastor": "Tortilla de harina con mezcla de quesos y deliciosa carne al pastor con su adobo casero. Trae verduritas, salsas de la casa y limones para acompañar.", "Quesadilla de chorizo": "Tortilla de harina con mezcla de quesos fundidos y chorizo bien dorado a la plancha. Acompañada de verduritas, salsas caseras y limones para disfrutar.", "Quesadilla de suadero": "Tortilla de harina rellena de mezcla de quesos y suadero chilango tierno y crujiente. Incluye verduritas, salsas de la casa y limones para saborear.", "Quesadilla de arrachera": "Tortilla de harina con mezcla de quesos y arrachera de cerdo marinada de alta calidad. Lleva verduritas, salsas de la casa y limones para acompañar.", "Quesadilla de bistec de res": "Tortilla de harina con mezcla de quesos derretidos y jugoso bistec de res asado. Servida con verduritas, salsas de la casa y limones frescos.", "Alambre vegetariano": "Generosa porción de pimiento morrón, cebolla asada y champiñones con mezcla de queso derretido. Se sirve con tortillas calientes y ricas salsas caseras.", "Alambre al pastor": "Gran porción de carne al pastor cocinada a la plancha con pimiento morrón, cebolla y mezcla de queso derretido. Incluye tortillas calientes y ricas salsas.", "Alambre campechano": "Excelente mezcla de chuleta y chorizo con pimiento morrón, cebolla y queso fundido. Una buena porción servida con tortillas calientes y sabrosas salsas.", "Alambre de chuleta": "Trozos de chuleta de cerdo asados con pimiento morrón, cebolla picada y abundante mezcla de queso derretido. Viene acompañado de tortillas y salsas caseras.", "Alambre hawaiano": "Combinación dulce y salada de chuleta con piña asada, pimiento morrón, cebolla y mezcla de queso derretido. Servido con tortillas de la casa y salsas.", "Alambre de champiñones": "Buena porción de champiñones frescos salteados con pimiento morrón, cebolla y una costra de mezcla de queso derretido. Incluye tortillas calientes y salsas.", "Alambre de pollo": "Pechuga de pollo jugosa asada a la plancha con pimiento morrón, cebolla y mezcla de queso fundido. Servido con tortillas calientes y salsas de la casa.", "Alambre de bistec de res": "Finas tiras de bistec de res a la plancha con pimiento morrón, cebolla asada y mezcla de queso derretido. Gran porción con tortillas calientes y salsas.", "Super Pancho": "Casi un kilo de puro sabor con todas nuestras carnes juntas, pimiento morrón, cebolla y mezcla de queso fundido. Incluye suficientes tortillas calientes y salsas.", "Gusano vegetariano": "Tortilla extragrande de harina con base de frijoles, vegetales asados, cebolla caramelizada, cilantro, mezcla de quesos, aguacatito, salsas y limones.", "Gusano de pastor": "Carne al pastor en tortilla extragrande de harina con base de frijoles, cebolla caramelizada, cilantro, mezcla de quesos derretidos, aguacatito, salsas y limones.", "Gusano de chuleta": "Chuleta de cerdo asada en tortilla extragrande de harina con base de frijoles, cebolla caramelizada, cilantro, mezcla de quesos fundidos, aguacatito y salsas.", "Gusano de chorizo": "Chorizo mexicano frito en tortilla extragrande de harina con base de frijoles, cebolla caramelizada, cilantro, mezcla de quesos fundidos, aguacatito y salsas.", "Gusano campechano": "Chuleta y chorizo combinados en tortilla extragrande de harina con base de frijoles, cebolla caramelizada, cilantro, mezcla de quesos derretidos, aguacatito y salsas.", "Gusano hawaiano": "Chuleta, jamón y piña en tortilla extragrande de harina con base de frijoles, cebolla caramelizada, cilantro, mezcla de quesos fundidos, aguacatito y salsas.", "Gusano mexicano": "Pastor, tocino, jamón y pimiento en tortilla extragrande de harina con base de frijoles, cebolla caramelizada, cilantro, mezcla de quesos derretidos y aguacatito.", "Gusano norteño": "Bistec de res y chorizo en tortilla extragrande de harina con base de frijoles, cebolla caramelizada, cilantro, mezcla de quesos fundidos, aguacatito y salsas.", "Gusano americano": "Chuleta, pastor y tocino en tortilla extragrande de harina con base de frijoles, cebolla caramelizada, cilantro, mezcla de quesos derretidos, aguacatito y salsas.", "Gusano de suadero": "Suadero chilango en tortilla extragrande de harina con base de frijoles, cebolla caramelizada, cilantro, mezcla de quesos fundidos, aguacatito, salsas y limones.", "Gusano de arrachera": "Arrachera de cerdo premium en tortilla extragrande de harina con base de frijoles, cebolla caramelizada, cilantro, mezcla de quesos fundidos, aguacatito y salsas.", "Gusano de bistec de res": "Bistec de res jugoso en tortilla extragrande de harina con base de frijoles, cebolla caramelizada, cilantro, mezcla de quesos fundidos, aguacatito y salsas.", "Gusano de pollo": "Pechuga de pollo asada en tortilla extragrande de harina con base de frijoles, cebolla caramelizada, cilantro, mezcla de quesos fundidos, aguacatito y salsas.", "Chilaquiles sencillos": "Para empezar el día con todo un buen plato de totopos artesanales crujientes ahogados en salsa casera. Lleva su crema espesa, mezcla de quesos fundidos, cebolla, cilantro, aguacate fresco, frijolitos refritos a un lado y un bolillo doradito para acompañar.", "Chilaquiles vegetarianos": "Una joya sin carne hecha con totopo artesanal crujiente bañado en salsa roja tradicional, coronado con champiñones tiernos salteados, pimientos, crema y mezcla de quesos. Trae aguacate, cebollita, cilantro, frijoles refritos y su bolillo caliente.", "Chilaquiles de pastor": "El mero sabor urbano sobre una cama de totopos artesanales crujientes y salsa de la casa. Van cargados con abundante carne al pastor doradita directo del trompo, crema, mezcla de quesos, aguacate, cebolla, cilantro, frijoles refritos y bolillo crujiente.", "Chilaquiles con milanesa": "Gran porción de totopo artesanal crujiente bien bañado en salsa de la casa, acompañado por una milanesa de pollo super crujiente y dorada al momento. Servidos con crema, mezcla de quesos fundidos, cebolla, cilantro, aguacate, frijoles refritos y bolillo.", "Chilaquiles con chuleta": "Sabor casero garantizado con trozos de chuleta de cerdo sazonada a la plancha, servidos encima de totopos artesanales crujientes ahogados en salsa. Incluye crema, mezcla de quesos, cebolla, cilantro, aguacate fresco, frijolitos refritos y su bolillo caliente.", "Chilaquiles con chorizo": "Totopos artesanales crujientes bien doraditos y bañados en salsa roja, coronados con chorizo mexicano frito y bien sazonado. Se entregan con crema, mezcla de quesos, cebollita, cilantro, aguacate, frijoles refritos y un bolillo calientito.", "Chilaquiles campechanos": "La mejor combinación de la casa chuleta y chorizo de primera juntos sobre totopos artesanales crujientes ahogados en nuestra gran salsa. Trae crema, mezcla de quesos fundidos, cebolla, cilantro, aguacate, frijolitos refritos y bolillo de la panaderia.", "Chilaquiles con huevo": "Desayuno completo con dos huevos preparados como a ti te gusten, montados en totopos artesanales crujientes con salsa de la casa, crema, mezcla de quesos derretidos, cebolla, cilantro, aguacate, frijoles refritos y un bolillo para hacer tu torta.", "Chilaquiles con jamón": "Finas rebanadas de jamón pasadas por la plancha sobre una excelente porción de totopos artesanales crujientes bañados en salsa. Servido con crema, mezcla de quesos fundidos, cebolla, cilantro, aguacate fresco, frijoles refritos y bolillo crujiente.", "Chilaquiles con alambre": "Una porción brutal de nuestro famoso alambre con pimientos cebolla y costra de queso sobre totopos artesanales crujientes bañados en salsa. Incluye crema, mezcla de quesos fundidos, cebollita, cilantro, aguacate, frijoles refritos y un bolillo.", "Chilaquiles con arrachera": "Corte tierno de arrachera de cerdo premium marinada a la plancha colocada sobre totopos artesanales crujientes bañados en nuestra salsa especial. Servidos con crema, mezcla de quesos fundidos, cebolla, cilantro, aguacate, frijolitos refritos y bolillo.", "Chilaquiles con bistec de res": "Bistec de res cortado en finas tiras asadas en su jugo, servido sobre totopos artesanales crujientes ahogados en salsa tradicional. Viene con crema, mezcla de quesos fundidos, cebollita, cilantro, aguacate, frijoles refritos y su bolillo.", "Chilaquiles con suadero": "Suadero tradicional suave por dentro y bien doradito por fuera sobre totopos artesanales crujientes cubiertos de salsa roja artesanal. Trae crema, mezcla de quesos, cebolla picada, cilantro, aguacate fresco, frijoles refritos y bolillo calientito.", "Chilaquiles con pollo": "Pechuga de pollo deshebrada tierna y abundante sobre totopos artesanales crujientes bañados en nuestra gran salsa roja. Se acompaña con crema fresca, mezcla de quesos derretidos, cebolla, cilantro, aguacate, frijolitos refritos y bolillo asado.", "Enchiladas sencillas": "Cuatro tortillas de maíz rellenas de jamón y queso bañadas por completo en nuestra gran salsa roja artesanal. Van servidas con crema espesa, mezcla de quesos, cebollita picada, cilantro fresco, aguacate, frijoles refritos y un bolillo calientito.", "Enchiladas vegetarianas": "Opción fresca de cuatro tortillas de maíz rellenas de jamón y queso bañadas en salsa roja con un topping de champiñones y vegetales salteados. Acompañadas de crema, mezcla de quesos, cebolla, cilantro, aguacate, frijoles refritos y bolillo.", "Enchiladas de pastor": "Cuatro tortillas de maíz rellenas de jamón y queso ahogadas en salsa roja, cubiertas con deliciosa carne al pastor doradita. Servidas con crema, mezcla de quesos fundidos, cebollita, cilantro, aguacate, frijoles refritos y bolillo crujiente.", "Enchiladas con milanesa": "Milanesa de pollo crujiente colocada sobre cuatro tortillas de maíz rellenas de jamón y queso bañadas en salsa roja casera. Trae crema, mezcla de quesos derretidos, cebolla, cilantro, aguacate fresco, frijolitos refritos y bolillo caliente.", "Enchiladas con chuleta": "Trozos de chuleta sazonada a la plancha acompañando cuatro tortillas de maíz rellenas de jamón y queso bañadas en salsa roja tradicional. Incluye crema, mezcla de quesos, cebolla, cilantro, aguacate, frijoles refritos de la casa y su bolillo.", "Enchiladas con chorizo": "Chorizo mexicano frito al momento sobre cuatro tortillas de maíz rellenas de jamón y queso cubiertas de salsa roja de la casa. Servidas con crema espesa, mezcla de quesos, cebollita picada, cilantro, aguacate, frijoles refritos y bolillo.", "Enchiladas campechanas": "Mix perfecto de chuleta y chorizo a la plancha sobre cuatro tortillas de maíz rellenas de jamón y queso bañadas en salsa roja casera. Trae crema, mezcla de quesos derretidos, cebolla, cilantro, aguacate, frijolitos refritos y un bolillo.", "Enchiladas con huevo": "Dos huevos al gusto montados sobre cuatro tortillas de maíz rellenas de jamón y queso bañadas en salsa roja artesanal. Servidas con crema, mezcla de quesos, cebolla picada, cilantro, aguacate fresco, frijoles refritos y bolillo.", "Enchiladas con jamón": "Finas tiras de jamón dorado extra sobre cuatro tortillas de maíz rellenas de jamón y queso bañadas en nuestra salsa roja tradicional. Viene con crema, mezcla de quesos, cebolla, cilantro, aguacate, frijoles refritos y bolillo calientito.", "Enchiladas con alambre": "Gran porción de nuestro alambre de la casa con pimientos y queso fundido sobre cuatro tortillas de maíz rellenas de jamón y queso bañadas en salsa roja. Servido con crema, mezcla de quesos, cebolla, cilantro, aguacate, frijoles refritos y bolillo.", "Enchiladas con arrachera": "Arrachera de cerdo premium marinada a la plancha coronando cuatro tortillas de maíz rellenas de jamón y queso bañadas en salsa roja. Acompañadas de crema, mezcla de quesos fundidos, cebolla, cilantro, aguacate, frijoles refritos y bolillo.", "Enchiladas con bistec de res": "Finas tiras de bistec de res asado en su jugo sobre cuatro tortillas de maíz rellenas de jamón y queso bañadas en salsa roja casera. Trae crema, mezcla de quesos derretidos, cebollita, cilantro, aguacate, frijoles refritos y bolillo caliente.", "Enchiladas con suadero": "Suadero tradicional tierno y crujiente sobre cuatro tortillas de maíz rellenas de jamón y queso bañadas en salsa roja tradicional. Servido con crema espesa, mezcla de quesos, cebolla, cilantro, aguacate fresco, frijoles refritos y bolillo.", "Enchiladas con pollo": "Pechuga de pollo deshebrada jugosa sobre cuatro tortillas de maíz rellenas de jamón y queso bañadas en nuestra salsa roja artesanal. Viene con crema, mezcla de quesos derretidos, cebolla, cilantro, aguacate, frijolitos refritos y su bolillo.", "Torta de pastor": "El auténtico sabor del trompo dentro de una telera extragrande con ajonjolí untada con mayonesa y frijoles refritos. Cargada con deliciosa carne al pastor marinada, queso fundido, jitomate, aguacate fresco y sus chiles en vinagre.", "Torta de chuleta": "Jugosos trozos de chuleta de cerdo sazonada a la plancha con queso derretido, servidos en telera extragrande con ajonjolí. Lleva la base perfecta de mayonesa, frijoles, jitomate fresco, aguacate y chiles en vinagre de la casa.", "Torta de chorizo": "Para los que buscan un gran sabor abundante chorizo mexicano bien frito y doradito a la plancha con queso fundido. Todo dentro de nuestra telera extragrande con ajonjolí untada con mayonesa y frijoles, acompañada de jitomate, aguacate y chiles en vinagre.", "Torta campechana": "La combinación estrella de la plancha chuleta picada y chorizo dorado con una buena capa de queso fundido. Servida en telera extragrande con ajonjolí con mayonesa, frijoles refritos, jitomate, aguacate fresco y chiles en vinagre.", "Torta de milanesa": "Una señora milanesa de pollo super crujiente y dorada a la perfección con queso fundido. Armada en telera extragrande con ajonjolí untada con mayonesa y frijoles, con sus rodajas de jitomate, aguacate fresco y chiles en vinagre.", "Torta Toluqueña": "Una de las consentidas de la casa armada en telera extragrande con ajonjolí untada con mayonesa y frijoles. Lleva milanesa crujiente, chorizo bien dorado, bastante quesillo derretido, jitomate, aguacate fresco y chiles en vinagre.", "Torta Rusa": "Riquísima combinación en telera extragrande con ajonjolí preparada con mayonesa y frijoles refritos. Va rellena de milanesa de pollo doradita, pierna sazonada, una señora costra de quesillo fundido, rodajas de jitomate, aguacate y chiles en vinagre.", "Torta Italiana": "Sabor espectacular dentro de nuestra telera extragrande con ajonjolí untada con frijoles y mayonesa. Viene repleta de jamón premium de la casa, queso amarillo, abundante quesillo derretido, jitomate fresco, aguacate y chiles en vinagre.", "Torta Hawaiana": "El toque agridulce perfecto en telera extragrande con ajonjolí con su clásica base de mayonesa y frijoles. Va cargada con pierna jugosa, jamón tierno, piña dulce asada a la plancha, mucho quesillo fundido, jitomate, aguacate y chiles en vinagre.", "Torta Brasileña": "De las más pedidas por la clientela en telera extragrande con ajonjolí untada con mayonesa y frijoles calientes. Lleva una crujiente milanesa, jamón asado a la plancha, una gran porción de quesillo derretido, rebanadas de jitomate, aguacate fresco y chiles en vinagre.", "Torta Lambada": "Una bomba de sabor en nuestra telera extragrande con ajonjolí con base de frijoles y mayonesa. Viene rellena de pierna sazonada, chorizo frito, huevo revuelto en su punto y abundante quesillo fundido, acompañada de jitomate, aguacate y chiles en vinagre.", "Torta Mexicana": "Clásico antojo preparado al momento en telera extragrande con ajonjolí untada con mayonesa y frijoles refritos. Se rellena con jamón tierno, salchicha abierta y doradita, bastante quesillo fundido, jitomate fresco, aguacate y chiles en vinagre.", "Torta Norteña": "Estilo único del norte montado en telera extragrande con ajonjolí con su indispensable base de mayonesa y frijoles. Trae pierna jugosa, chorizo bien frito, una buena costra de quesillo derretido, rodajas de jitomate, aguacate fresco y chiles en vinagre.", "Torta Española": "Un manjar para cualquier hora en telera extragrande con ajonjolí untada con mayonesa y frijoles. Viene repleta de chorizo mexicano frito, huevo revuelto, abundante quesillo fundido, jitomate, aguacate y sus chiles en vinagre para amarrar el sabor.", "Torta Alemana": "Excelente combinación de carnes en telera extragrande con ajonjolí con base tradicional de mayonesa y frijoles. Rellena de salchicha asada a la plancha, chorizo de la casa, un monton de quesillo derretido, jitomate fresco, aguacate y chiles en vinagre.", "Torta Pachuqueña": "Para los que buscan algo diferente armada en telera extragrande con ajonjolí untada con mayonesa y frijoles. Lleva milanesa crujiente de pollo, rebanadas de piña dulce asada, una capa densa de quesillo fundido, jitomate, aguacate fresco y chiles en vinagre.", "Torta Caribeña": "Tremenda mezcla tropical en telera extragrande con ajonjolí con base de frijoles refritos y mayonesa. Rellena con milanesa dorada, pierna jugosa, piña asada a la plancha, abundante quesillo derretido, rodajas de jitomate, aguacate fresco y chiles en vinagre.", "Torta Oaxaqueña": "Gran tradición hecha torta en telera extragrande con ajonjolí preparada con mayonesa y frijoles refritos de la casa. Va rellena de pierna sazonada, salchicha abierta a la plancha, una gran porción de quesillo derretido, jitomate fresco, aguacate y chiles en vinagre.", "Torta Trevi": "Receta de antaño armada en telera extragrande con ajonjolí con su untada de mayonesa y frijoles calientes. Viene bien surtida con pierna horneada jugosa, jamón tierno, bastante quesillo fundido, rodajas de jitomate, aguacate fresco y chiles en vinagre.", "Torta Texana": "Sabor sureño agridulce montado en telera extragrande con ajonjolí con base untada de mayonesa y frijoles. Cargada con nuestra pierna de la casa, piña dulce pasada por la plancha, una costra de quesillo derretido, jitomate, aguacate y chiles en vinagre.", "Torta Estrella": "La reina del menú en nuestra telera extragrande con ajonjolí con su clásica base de frijoles refritos y mayonesa. Viene bien armada con pierna jugosa, jamón, queso blanco fresco, abundante quesillo fundido, jitomate, aguacate y chiles en vinagre.", "Torta La Niño Pobre": "Una verdadera obra maestra para el estómago armada en telera extragrande con ajonjolí untada con frijoles y mayonesa. Va rellena con absolutamente de todo un poco de todas nuestras carnes especiales y un cerro de quesillo derretido, jitomate, aguacate y chiles.", "Chapata vegetariana": "Exquisito pan chapata artesanal de hierbas finas crujiente, relleno de champiñones salteados y vegetales de la huerta. Acompañado de lechuga italiana seleccionada, jitomate fresco, cebolla caramelizada y aguacate suave.", "Chapata de jamón": "Finas rebanadas de jamón pasadas por la plancha dentro de un pan chapata artesanal de hierbas finas. Se complementa con una base fresca de lechuga italiana, rodajas de jitomate, cebolla caramelizada y aguacate.", "Chapata de arrachera": "Una verdadera joya hecha con arrachera de cerdo premium marinada a la plancha y montada en pan chapata artesanal de hierbas finas. Servida con lechuga italiana, jitomate, cebolla caramelizada y aguacate fresco.", "Chapata de pollo": "Tiras de pechuga de pollo jugosa bien sazonadas a la plancha, acomodadas en pan chapata artesanal de hierbas finas crujiente. Incluye su porción de lechuga italiana, jitomate, cebolla caramelizada y aguacate.", "Chapata de bistec de res": "Finas tiras de bistec de res asado a la perfección en su propio jugo, servidas dentro de un pan chapata artesanal de hierbas finas. Acompañado de lechuga italiana, jitomate fresco, cebolla caramelizada y aguacate.", "Chapata de suadero": "Suadero tradicional tierno por dentro y crujiente por fuera dentro de nuestro pan chapata artesanal de hierbas finas. Se entrega bien preparado con lechuga italiana, jitomate fresco, cebolla caramelizada y aguacate.", "Hamburguesa clásica": "Jugosa carne asada a la plancha combinada con queso americano derretido. Va en pan artesanal con ajonjolí negro recién hecho junto con lechuga italiana, jitomate, aguacate, chiles en vinagre, mayonesa y una buena orden de papas fritas.", "Hamburguesa doble": "Para los de gran apetito doble porción de carne a la plancha con jamón tierno, queso Oaxaca fundido y queso amarillo. Servida en pan artesanal con ajonjolí negro recién hecho con lechuga italiana, jitomate, aguacate, chiles en vinagre y papas fritas.", "Hamburguesa hawaiana": "Delicioso toque agridulce con jamón de primera, queso amarillo y una rebanada de piña jugosa asada sobre nuestra carne de la casa. Todo dentro de pan artesanal con ajonjolí negro recién hecho con lechuga italiana, jitomate, aguacate, chiles en vinagre y papas.", "Hamburguesa americana": "Combinación ganadora de tocino bien dorado, queso amarillo y piña asada encima de una jugosa carne seleccionada. Va bien armada en pan artesanal con ajonjolí negro recién hecho con lechuga italiana, jitomate, aguacate, chiles en vinagre y papas fritas.", "Hamburguesa oaxaqueña": "Gran sabor tradicional con jamón premium, queso amarillo y una generosa porción de queso Oaxaca deshebrado y fundido sobre la carne. Montada en pan artesanal con ajonjolí negro recién hecho con lechuga italiana, jitomate, aguacate, chiles en vinagre y papas fritas.", "Hamburguesa especial": "Una de las más completas armada con jamón, tocino crujiente, queso Oaxaca derretido y queso amarillo sobre nuestra carne a la plancha. Servida en pan artesanal con ajonjolí negro recién hecho con lechuga italiana, jitomate, aguacate, chiles en vinagre y papas.", "Hamburguesa BBQ Burger": "Bañada en nuestra exquisita salsa bbq artesanal con jamón, tocino bien crujiente y una rebanada de queso amarillo fundido sobre la carne asada. Va en pan artesanal con ajonjolí negro recién hecho con lechuga italiana, jitomate, aguacate, chiles en vinagre y papas.", "Hamburguesa La Pastorera": "Auténtica fusion taquera hecha con carne al pastor, jamón, tocino dorado, piña asada y nuestra mezcla secreta de quesos fundidos sobre la carne. En pan artesanal con ajonjolí negro recién hecho con lechuga italiana, jitomate, aguacate, chiles en vinagre y papas fritas.", "Hamburguesa La Champi": "Un manjar cubierto con champiñones tiernos salteados a la plancha, jamón, tocino crujiente y una mezcla de quesos derretidos sobre la carne jugosa. Todo dentro de pan artesanal con ajonjolí negro recién hecho con lechuga italiana, jitomate, aguacate y papas.", "Hamburguesa La Suprema": "Una bomba de carnes que lleva salchicha abierta, jamón, tocino crujiente, pierna de cerdo sazonada y abundante mezcla de quesos fundidos con la carne asada. Montada en pan artesanal con ajonjolí negro recién hecho con lechuga italiana, jitomate, aguacate y papas.", "Hamburguesa Super": "Nuestra creación más imponente armada con doble carne a la plancha, doble porción de jamón, doble tocino super crujiente y pierna horneada de la casa. Servida en pan artesanal con ajonjolí negro recién hecho con lechuga italiana, jitomate, aguacate y papas fritas.", "Hot dog sencillo": "El antojo rápido ideal hecho con pan suave calentado al vapor y salchicha de primera calidad. Viene bien preparado con jitomate fresco picado, cebolla, mayonesa, catsup, mostaza y chiles en vinagre de la casa.", "Hot dog especial": "La combinación perfecta con una salchicha premium envuelta en tocino crujiente y cubierta con una costra de queso Oaxaca gratinado. Todo dentro de pan suave con jitomate, cebolla, mayonesa, catsup, mostaza y chiles.", "Hot dog norteño": "Mucho sabor en pan suave con salchicha de primera, coronado con chorizo de la casa bien frito y una generosa capa de queso Oaxaca gratinado. Se entrega con jitomate, cebolla, mayonesa, catsup, mostaza y chiles en vinagre.", "Ensalada de pastor": "Servida en su molde especial para mantener la frescura. Base abundante de lechuga italiana seleccionada, zanahoria rallada, manzana dulce, arándanos, nuez picada, pepino fresco y jícama crujiente, coronada con sabrosa carne al pastor del trompo.", "Ensalada de pollo": "Servida en su molde especial para disfrutar donde sea. Lleva una cama fresca de lechuga italiana con zanahoria, manzana seleccionada, arándanos deshidratados, nuez picada, pepino y jícama crujiente, cubierta con tiras de pechuga de pollo deshebrada.", "Ensalada de arrachera": "Una opción ligera pero bien servida en su molde especial. Base fresca de lechuga italiana, zanahoria rallada, manzana, arándanos, nuez picada, pepino y jícama, coronada con tierna arrachera de cerdo premium cocinada a la plancha.", "Charola de pastor": "El banquete parrandero ideal para compartir en la mesa con una excelente porción de nuestra carne al pastor marinada directo del trompo. Incluye verduras frescas y cocidas aparte, variedad de salsas caseras, limones y suficientes tortillas calientes para armar tus propios tacos.", "Charola de chuleta": "Para armar una buena comida familiar les preparamos una generosa porción de chuleta de cerdo tierna picada a la plancha con el sazón de la casa. Viene acompañada con verduras frescas y cocidas, nuestra barra de salsas, limones y una buena tanda de tortillas calientes.", "Charola de longaniza": "Gran porción al centro de longaniza premium frita y dorada a la perfección para los amantes del buen taco. El paquete te incluye verduras frescas y cocidas aparte, una gran variedad de salsas de la casa, porción de limones y suficientes tortillas calientes.", "Charola campechana": "La mezcla estrella que nunca falla uniendo la chuleta picada con el chorizo frito bien dorado a la plancha en porción familiar. Se entrega con su porción de verduras frescas y cocidas, limones, ricas salsas caseras y un cerro de tortillas calientes para taquear.", "Charola vegetariana": "Una opción buenísima y super abundante cargada con champiñones tiernos salteados, tiras de chile morron, piña dulce asada, cebolla cocida y nopales tiernos a la plancha. Trae verduras aparte, salsas de la casa, limones frescos y tortillas calientes para tus tacos.", "Charola hawaiana": "Sabor agridulce en una presentación grande ideal para compartir hecha con chuleta de cerdo, jamón premium asado y rebanadas de piña dulce a la plancha. Incluye su respectiva porción de verduras frescas y cocidas aparte, salsas caseras, limones y tortillas de maíz calientes.", "Charola americana": "Una joya de la plancha que lleva una porción familiar de chuleta picada y chorizo dorado cubierta por completo con una costra de mezcla de quesos derretidos. Se entrega bien equipada con verduras frescas y cocidas aparte, salsas, limones y bastantes tortillas.", "Charola mexicana": "Un verdadero festival de sabor para la familia con carne al pastor, tocino crujiente, jamón asado, chile morron salteado y una densa capa de quesos fundidos. Viene con verduras aparte, limones, nuestras ricas salsas y tortillas calientes para armar los tacos.", "Charola de suadero": "El mero sabor taquero en porción familiar con suadero tradicional tierno por dentro y bien crujiente por fuera cortado al momento. Se acompaña con verduras frescas y cocidas aparte, variedad de salsas caseras de la casa, limones frescos y suficientes tortillas calientes.", "Charola de arrachera": "Corte premium para compartir al centro hecho con una excelente porción de arrachera de cerdo de primera calidad marinada a la plancha. Trae sus porciones de verduras frescas y cocidas aparte, salsas artesanales, limones y bastantes tortillas calientes listas para comer.", "Charola norteña": "Sabor del norte para toda la mesa uniendo finas tiras de bistec de res asado, chorizo de la casa y mucha mezcla de quesos gratinados a la perfección. Incluye sus complementos de verduras frescas y cocidas aparte, salsas de la plancha, limones frescos y tortillas.", "Charola de bistec de res": "Gran porción familiar de bistec de res seleccionado de primera calidad asado al momento en su propio jugo sobre la plancha. Se entrega completo con verduras frescas y cocidas aparte, variedad de salsas de la casa, limones y una buena porción de tortillas calientes.", "Charola Especial (600 g)": "Una señora orden de seiscientos gramos de pura felicidad combinando de forma espectacular bistec de res, chuleta de cerdo, carne al pastor y cebolla cocida a la plancha. Incluye verduras aparte, ricas salsas caseras, porción de limones y tortillas calientes para la mesa.", "Charola Suprema (600 g)": "Para los tragones profesionales traemos seiscientos gramos cargados con suadero crujiente, carne al pastor del trompo, chorizo frito y su buena cebolla cocida asada. Viene con verduras frescas y cocidas aparte, salsas de la casa, limones frescos y tortillas suficientes.", "Charola Imposible (800 g)": "Nuestra creación más colosal con ochocientos gramos de proteína pura que es CASI UN KILO combinando suadero, pastor, chorizo, chuleta, bistec de res y cebolla cocida a la plancha. Viene con verduras aparte, salsas de la casa, limones y tortillas calientes de sobra.", "Kilo de pastor": "Un kilo completo de nuestra riquísima carne al pastor marinada y cortada directo del trompo. Viene empacada y lista para la mesa acompañada con nuestra variedad de salsas de la casa, limones frescos cortados y una porción abundante de tortillas calientes para tus tacos.", "Kilo de chuleta": "Un kilo completo de chuleta de cerdo premium tierna picada y asada al momento en la plancha con la receta secreta. Se entrega con el equipamiento completo de nuestra variedad de salsas caseras, limones frescos y suficientes tortillas calientes para comer en grande.", "Kilo campechano": "Un kilo completo de la combinación ganadora de la casa uniendo chuleta picada y chorizo frito bien sazonado a la plancha. Incluye para su acompañamiento nuestra variedad de salsas caseras de la plancha, porción de limones frescos y bastantes tortillas calientes.", "Kilo de alambre": "Un kilo completo de nuestro famoso alambre de la casa cocinado a la plancha con pimiento morrón, cebolla asada y un monton de mezcla de quesos fundidos. Se acompaña con nuestra variedad de salsas caseras, limones frescos y una porción grande de tortillas calientes.", "Kilo de bistec": "Un kilo completo de bistec de res seleccionado de primera calidad cortado en finas tiras y asado en su propio jugo a la perfección. Viene acompañado de nuestra variedad de salsas caseras, limones frescos y una porción abundante de tortillas calientes para armar los tacos.", "Alambre queso carne": "Sabor intenso con porción extra de mezcla de queso derretido y carnes seleccionadas con pimiento morrón y cebolla. Se acompaña con tortillas calientes y ricas salsas.", "Chilaquiles con huevo y jamón": "Huevo revuelto con jamón tierno en su punto sobre totopos artesanales crujientes ahogados en salsa casera roja. Van bien servidos con crema, mezcla de quesos derretidos, cebolla, cilantro, aguacate fresco, frijolitos refritos y bolillo calientito.", "Chilaquiles con huevo y chorizo": "Un clásico de las mañanas huevo revuelto con chorizo bien dorado montado sobre totopos artesanales crujientes con salsa tradicional. Acompañados de crema, mezcla de quesos, cebolla, cilantro, aguacate, frijoles refritos y su bolillo.", "Enchiladas con huevo y jamón": "Huevo revuelto con jamón tierno acompañando cuatro tortillas de maíz rellenas de jamón y queso bañadas en salsa roja. Incluye crema fresca, mezcla de quesos derretidos, cebolla, cilantro, aguacate fresco, frijolitos refritos y un bolillo.", "Enchiladas con huevo y chorizo": "Huevo revuelto con chorizo frito de la casa al lado de cuatro tortillas de maíz rellenas de jamón y queso bañadas en salsa roja artesanal. Trae crema, mezcla de quesos, cebollita, cilantro, aguacate, frijoles refritos y su bolillo.", "Torta de arrachera": "Arrachera de cerdo marinada a la plancha con queso fundido, en telera extragrande con ajonjolí untada con mayonesa y frijoles. Lleva jitomate, aguacate fresco y chiles en vinagre."};
+
+
+const $ = id => document.getElementById(id);
+const pesos = n => '$' + n.toLocaleString('es-MX');
+const carrito = {}; // id -> cantidad
+const datos = {};
+MENU.forEach((cat, ci) => cat.p.forEach((it, ii) => { datos[ci+'-'+ii] = {n: it[0], p: it[1], c: cat.c, f: it[2] || null, d: DESC[it[0]] || ''}; }));
+const notas = {};    // id -> indicación del cliente para ese platillo
+function modo(){ const r = document.querySelector('input[name=modo]:checked'); return r ? r.value : 'domicilio'; }
+const recoge = () => modo() === 'recoger';
+function llenarHoras(){
+  const sel = $('hora'); if (!sel) return;
+  const antes = sel.value;
+  let ahora;
+  try { const p = new Intl.DateTimeFormat('en-GB', {hour:'2-digit', minute:'2-digit', hourCycle:'h23', timeZone:'America/Mexico_City'}).format(new Date()).split(':'); ahora = (+p[0]) * 60 + (+p[1]); }
+  catch(e){ const d = new Date(); ahora = d.getHours() * 60 + d.getMinutes(); }
+  let ini = abierto() ? ahora + 30 : ABRE * 60 + 30;
+  ini = Math.ceil(ini / 15) * 15;
+  const fin = (CIERRA + 24) * 60;            // 2:00 a.m. del día siguiente
+  const opciones = [abierto() ? 'Lo antes posible' : 'En cuanto abran (8:00 a.m.)'];
+  for (let m = ini, n = 0; n < 16; m += 15, n++){
+    const real = m % (24 * 60);
+    if (abierto() && m > fin) break;
+    const h = Math.floor(real / 60), mi = real % 60, h12 = ((h + 11) % 12) + 1;
+    opciones.push(h12 + ':' + String(mi).padStart(2, '0') + (h < 12 ? ' a.m.' : ' p.m.'));
+  }
+  sel.innerHTML = opciones.map(o => `<option>${o}</option>`).join('');
+  if (opciones.includes(antes)) sel.value = antes;
+}
+const IMG = h => h.startsWith('u:') ? 'https://images.unsplash.com/' + h.slice(2) + '?w=700&q=72&auto=format&fit=crop' : 'https://tb-static.uber.com/prod/image-proc/processed_images/' + h + '/d03e52b3c8af19d8fa8222e23efd9cfa.jpeg';
+const PORTADAS = {'Gusanos':'Gusano de pastor','Charolas':'Charola de pastor','Chilaquiles':'Chilaquiles de pastor','Tacos':'Taco al pastor','Alambres':'Alambre al pastor','Hamburguesas':'Hamburguesa especial','Gringas':'Gringa de pastor','Quesadillas':'Quesadilla de pastor','Volcanes':'Volcán de pastor','Enchiladas':'Enchiladas sencillas','Tortas':'Torta de pastor','Tortas especiales':'Torta Hawaiana','Chapatas':'Chapata de pollo','Hot dogs':'Hot dog especial','Ensaladas':'Ensalada de pollo','Huevos':'Huevo revuelto a la mexicana','Por kilo':'Kilo de pastor','Bebidas':'Agua de sabor 1 litro'};
+const slug = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+const FAVORITOS = ['Gusano de pastor','Charola de pastor','Chilaquiles con pollo','Alambre al pastor','Gringa de pastor','Hamburguesa especial'];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let folio = nuevoFolio();
+function nuevoFolio(){ const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let f = ''; for (let i = 0; i < 4; i++) f += c[Math.floor(Math.random()*c.length)]; return f; }
+function idPorNombre(n){ return Object.keys(datos).find(k => datos[k].n === n); }
+
+/* ---------- Horario ---------- */
+function horaMX(){
+  try{
+    const h = new Intl.DateTimeFormat('es-MX',{hour:'numeric',hourCycle:'h23',timeZone:'America/Mexico_City'}).format(new Date());
+    return parseInt(h,10);
+  }catch(e){ return new Date().getHours(); }
+}
+function abierto(){ const h = horaMX(); return h >= ABRE || h < CIERRA; }
+function pintarEstado(){
+  const e = $('estado');
+  if (abierto()){ e.classList.remove('cerrado'); e.querySelector('span').textContent = 'Abierto · hasta las 2:00 a.m.'; }
+  else { e.classList.add('cerrado'); e.querySelector('span').textContent = 'Cerrado · abrimos a las 8:00 a.m.'; }
+}
+
+/* ---------- Menú ---------- */
+function controlHTML(id){
+  const q = carrito[id] || 0;
+  if (!q) return `<button class="add" data-mas="${id}">Agregar</button>`;
+  return `<div class="step"><button data-menos="${id}" aria-label="Quitar uno">−</button><b>${q}</b><button data-mas="${id}" aria-label="Agregar uno">+</button></div>`;
+}
+function pintarMenu(){
+  $('cats').innerHTML = MENU.map((c,ci) => `<button data-cat="${ci}">${c.i} ${c.c}</button>`).join('');
+  $('tiles').innerHTML = MENU.map((c,ci) => { const id = PORTADAS[c.c] ? idPorNombre(PORTADAS[c.c]) : null, f = id && datos[id].f; return `
+    <div class="tile" data-ir="${ci}">
+      ${f ? `<img src="${IMG(f)}" alt="" loading="lazy" onerror="this.remove()">` : `<div class="emo">${c.i}</div>`}
+      <div class="tn"><b>${c.i} ${c.c}</b><span>${c.p.length} ${c.p.length === 1 ? 'platillo' : 'platillos'}</span></div>
+    </div>`; }).join('');
+  $('menu').innerHTML = MENU.map((c,ci) => `
+    <section id="cat${ci}" data-sec="${ci}">
+      <h2>${c.i} ${c.c}</h2>
+      ${c.p.map((it,ii) => { const id = ci+'-'+ii; return `
+        <div class="item" data-item="${id}" data-busca="${quitarAcentos((it[0]+' '+c.c).toLowerCase())}">
+          ${it[2] ? `<img class="foto" src="${IMG(it[2])}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : ''}
+          <div class="txt"><div class="nom">${it[0]}</div><div class="pre">${pesos(it[1])}</div>${DESC[it[0]] ? `<div class="des">${esc(DESC[it[0]])}</div>` : ''}</div>
+          <div class="ctl" id="ctl${id}">${controlHTML(id)}</div>
+        </div>`; }).join('')}
+    </section>`).join('');
+  $('favs').innerHTML = FAVORITOS.map(idPorNombre).filter(Boolean).map(id => { const d = datos[id]; return `
+    <div class="fav" data-ver="${id}">
+      ${d.f ? `<img src="${IMG(d.f)}" alt="" loading="lazy">` : ''}
+      <div class="fi"><div class="nom">${d.n}</div><div class="pre">${pesos(d.p)}</div></div>
+    </div>`; }).join('');
+}
+function quitarAcentos(s){ return s.normalize('NFD').replace(/[̀-ͯ]/g,''); }
+
+function cambiar(id, d){
+  carrito[id] = Math.max(0, (carrito[id]||0) + d);
+  if (!carrito[id]) { delete carrito[id]; delete notas[id]; }
+  const ctl = $('ctl'+id); if (ctl) ctl.innerHTML = controlHTML(id);
+  actualizar();
+}
+function resumen(){
+  let n = 0, t = 0;
+  for (const id in carrito){ n += carrito[id]; t += carrito[id]*datos[id].p; }
+  return {n, t};
+}
+function actualizar(){
+  const {n, t} = resumen();
+  $('barra').style.display = n ? 'block' : 'none';
+  $('bn').textContent = n; $('bt').textContent = pesos(t);
+  $('sub').textContent = pesos(t);
+  if (recoge()){ $('envioTot').textContent = 'Sin costo (recoges)'; $('tot').textContent = pesos(t); }
+  else if (envio && envio.acepto !== false){ $('envioTot').textContent = pesos(envio.costo); $('tot').textContent = pesos(t + envio.costo); }
+  else { $('envioTot').textContent = 'desde $30'; $('tot').textContent = pesos(t) + ' + envío'; }
+  if ($('hoja').classList.contains('on')) pintarLineas();
+  armarEnlace();
+}
+function pintarLineas(){
+  const ids = Object.keys(carrito);
+  if (!ids.length){ $('lineas').innerHTML = '<p style="color:var(--gris);font-size:14px;margin:4px 0">Todavía no agregas nada.</p>'; return; }
+  $('lineas').innerHTML = ids.map(id => { const d = datos[id], q = carrito[id]; return `
+    <div class="linea">
+      <div class="txt">${d.n}<small>${pesos(d.p)} c/u</small>${notas[id] ? `<span class="nota-it">↳ ${esc(notas[id])}</span>` : ''}</div>
+      <div class="step chico"><button data-menos="${id}">−</button><b>${q}</b><button data-mas="${id}">+</button></div>
+      <div class="imp">${pesos(q*d.p)}</div>
+    </div>`; }).join('');
+}
+
+/* ---------- Mensaje de WhatsApp ---------- */
+const val = id => $(id).value.trim();
+function pagoElegido(){ return document.querySelector('input[name=pago]:checked').value; }
+function mensaje(){
+  const {t} = resumen();
+  const L = [];
+  L.push((recoge() ? '*PEDIDO PARA RECOGER #' : '*PEDIDO NUEVO #') + folio + ' – ' + SUCURSAL + '*');
+  L.push('Hora: ' + horaTexto());
+  L.push('');
+  for (const id in carrito){ const d = datos[id]; L.push(carrito[id] + ' × ' + d.n + ' — ' + pesos(carrito[id]*d.p)); if (notas[id]) L.push('   ↳ ' + notas[id]); }
+  if ($('primero').checked) L.push('1 × Agua de Jamaica — *REGALO 1er pedido*');
+  L.push('');
+  L.push('Comida: ' + pesos(t));
+  if (recoge()){
+    L.push('*Total a cobrar: ' + pesos(t) + '* (pasa a recoger, sin envío)');
+  } else if (envio && envio.acepto){
+    L.push('Envío: ' + pesos(envio.costo) + ' (' + envio.km.toLocaleString('es-MX') + ' km aprox.) — *aceptado por el cliente*');
+    L.push('*Total a cobrar: ' + pesos(t + envio.costo) + '*');
+  } else L.push('Envío: por confirmar (hasta 5 km $30, +$5 por km)');
+  if (val('notas')) { L.push(''); L.push('Indicaciones: ' + val('notas')); }
+  L.push('');
+  L.push('Nombre: ' + val('nombre'));
+  L.push('Tel: ' + val('tel'));
+  if (recoge()){
+    L.push('🏃 *Pasa a recoger:* ' + ($('hora').value || 'Lo antes posible'));
+  } else {
+  L.push('Dirección: ' + val('calle'));
+  L.push('Colonia: ' + val('colonia'));
+  if (val('refs')) L.push('Referencias: ' + val('refs'));
+  if (gps) L.push('📍 Ubicación exacta (GPS): https://maps.google.com/?q=' + gps.lat.toFixed(6) + ',' + gps.lng.toFixed(6));
+  if (gps && LOCAL.lat !== null) L.push('🛵 Ruta desde la cocina: https://www.google.com/maps/dir/?api=1&origin=' + LOCAL.lat + ',' + LOCAL.lng + '&destination=' + gps.lat.toFixed(6) + ',' + gps.lng.toFixed(6) + '&travelmode=driving');
+  else if (val('calle') && val('colonia')) L.push('Mapa: https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(val('calle') + ', ' + val('colonia') + ', Querétaro, Qro.'));
+  }
+  L.push('Promos por WhatsApp: ' + ($('promos').checked ? 'Sí ✅' : 'No'));
+  let pago = 'Pago: ' + pagoElegido();
+  if (pagoElegido() === 'Efectivo' && val('cambio')) pago += ' (paga con $' + val('cambio').replace(/[^0-9.]/g,'') + ')';
+  L.push(pago);
+  L.push('');
+  if (!gps && !recoge()) L.push('📍 Ahorita les mando mi ubicación por aquí.');
+  L.push('');
+  L.push('━━━━━━━━━━━━━━');
+  L.push('👇 *TOCA AQUÍ PARA VER TU PEDIDO* 👇');
+  L.push(PAGINA + '?p=' + folio);
+  return L.join('\n');
+}
+function horaTexto(){
+  try { return new Intl.DateTimeFormat('es-MX', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false, timeZone:'America/Mexico_City'}).format(new Date()); }
+  catch(e){ return new Date().toLocaleString(); }
+}
+function armarEnlace(){
+  $('enviar').href = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(mensaje());
+}
+function revisar(){
+  const faltan = [];
+  ['nombre','tel','calle','colonia'].forEach(id => $(id).classList.remove('mal'));
+  if (!resumen().n) faltan.push('agrega al menos un platillo');
+  if (!val('nombre')) { faltan.push('tu nombre'); $('nombre').classList.add('mal'); }
+  if (val('tel').replace(/\D/g,'').length < 10) { faltan.push('tu teléfono a 10 dígitos'); $('tel').classList.add('mal'); }
+  if (!recoge()){
+    if (!val('calle')) { faltan.push('calle y número'); $('calle').classList.add('mal'); }
+    if (!val('colonia')) { faltan.push('colonia'); $('colonia').classList.add('mal'); }
+    if (envio && envio.acepto !== true) faltan.push('aceptar el costo de envío');
+  }
+  if (faltan.length){ $('err').textContent = 'Falta: ' + faltan.join(', ') + '.'; $('err').style.display = 'block'; return false; }
+  $('err').style.display = 'none'; return true;
+}
+
+/* ---------- Recordar datos del cliente en su celular ---------- */
+const CAMPOS = ['nombre','tel','calle','colonia','refs'];
+function guardar(){ try{ const o = {}; CAMPOS.forEach(k => o[k] = $(k).value); o.promos = $('promos').checked; localStorage.setItem('glp_cliente', JSON.stringify(o)); }catch(e){} }
+function cargar(){ try{ const o = JSON.parse(localStorage.getItem('glp_cliente')||'{}'); CAMPOS.forEach(k => { if (o[k]) $(k).value = o[k]; }); if (o.promos) $('promos').checked = true; }catch(e){} }
+
+/* ---------- Ubicación exacta con un botón ---------- */
+function pedirGPS(){
+  const edo = $('gpsEdo'), btn = $('gpsBtn');
+  if (!navigator.geolocation){ edo.className = 'gpsEdo mal'; edo.textContent = 'Tu celular no permite compartir ubicación desde aquí. Mándala por WhatsApp después de enviar.'; return; }
+  edo.className = 'gpsEdo'; edo.textContent = 'Buscando tu ubicación…'; btn.disabled = true;
+  navigator.geolocation.getCurrentPosition(p => {
+    gps = {lat: p.coords.latitude, lng: p.coords.longitude, prec: Math.round(p.coords.accuracy)};
+    btn.disabled = false; btn.classList.add('listo'); btn.textContent = '✅ Ubicación lista · tocar para actualizar';
+    edo.className = 'gpsEdo ok';
+    edo.innerHTML = 'Listo, va con tu pedido (precisión de unos ' + gps.prec + ' m). <a href="https://maps.google.com/?q=' + gps.lat + ',' + gps.lng + '" target="_blank" rel="noopener">Revisar en el mapa</a>';
+    $('pasosUbic').style.display = 'none';
+    cotizar();
+    armarEnlace();
+  }, e => {
+    btn.disabled = false; edo.className = 'gpsEdo mal';
+    edo.textContent = e.code === 1
+      ? 'No se dio permiso de ubicación. Actívalo y vuelve a tocar el botón, o mándala por WhatsApp después de enviar.'
+      : 'No pudimos ubicarte. Intenta de nuevo (mejor con el GPS prendido) o mándala por WhatsApp después de enviar.';
+  }, {enableHighAccuracy: true, timeout: 20000, maximumAge: 0});
+}
+if (USAR_GPS){
+  $('gpsBox').style.display = 'block'; $('gpsBtn').addEventListener('click', pedirGPS);
+  $('cSi').addEventListener('click', () => decidirEnvio(true));
+  $('cNo').addEventListener('click', () => decidirEnvio(false));
+}
+
+function aviso(t, ms){ const a = $('aviso'); a.textContent = t; a.classList.add('on'); clearTimeout(aviso.t); aviso.t = setTimeout(()=>a.classList.remove('on'), ms || 2200); }
+
+/* ---------- Eventos ---------- */
+document.addEventListener('click', e => {
+  const mas = e.target.closest('[data-mas]'), menos = e.target.closest('[data-menos]'), cat = e.target.closest('[data-cat]');
+  const ir = e.target.closest('[data-ir]'), ver = e.target.closest('[data-ver]'), item = e.target.closest('.item'), priv = e.target.closest('[data-privacidad]'), cerrar = e.target.closest('[data-cerrar]');
+  if (mas) cambiar(mas.dataset.mas, 1);
+  else if (menos) cambiar(menos.dataset.menos, -1);
+  else if (cat) irCategoria(+cat.dataset.cat, true);
+  else if (ir) irCategoria(+ir.dataset.ir, false);
+  else if (ver) abrirDetalle(ver.dataset.ver);
+  else if (item) abrirDetalle(item.dataset.item);
+  else if (priv) abrirVelo('veloPriv');
+  else if (cerrar) cerrarVelo(cerrar.closest('.velo').id);
+  else if (e.target.classList.contains('velo') && e.target.id !== 'veloListo') cerrarVelo(e.target.id);
+});
+
+/* ---------- Ventanas ---------- */
+function abrirVelo(id){ $(id).classList.add('on'); document.body.style.overflow = 'hidden'; }
+function cerrarVelo(id){ $(id).classList.remove('on'); if (!$('hoja').classList.contains('on') && !document.querySelector('.velo.on')) document.body.style.overflow = ''; }
+
+/* ---------- Detalle del platillo ---------- */
+let detId = null, detQ = 1;
+function pintarDetalle(){
+  const d = datos[detId], ya = !!carrito[detId];
+  $('detCant').textContent = detQ;
+  $('detOk').textContent = detQ === 0 ? 'Quitar del pedido' : (ya ? 'Actualizar' : 'Agregar') + ' · ' + pesos(detQ * d.p);
+}
+function abrirDetalle(id){
+  const d = datos[id]; if (!d) return;
+  detId = id; detQ = carrito[id] || 1;
+  const f = $('detFoto');
+  if (d.f){ f.src = IMG(d.f); f.style.display = 'block'; } else { f.removeAttribute('src'); f.style.display = 'none'; }
+  $('detNom').textContent = d.n; $('detPre').textContent = pesos(d.p);
+  $('detDes').textContent = d.d; $('detDes').style.display = d.d ? 'block' : 'none';
+  $('detNota').value = notas[id] || '';
+  pintarDetalle(); abrirVelo('veloDet');
+}
+$('detMas').onclick = () => { detQ++; pintarDetalle(); };
+$('detMenos').onclick = () => { detQ = Math.max(carrito[detId] ? 0 : 1, detQ - 1); pintarDetalle(); };
+$('detOk').onclick = () => {
+  const id = detId, nota = $('detNota').value.trim();
+  if (detQ === 0){ delete carrito[id]; delete notas[id]; }
+  else { carrito[id] = detQ; if (nota) notas[id] = nota; else delete notas[id]; }
+  const ctl = $('ctl'+id); if (ctl) ctl.innerHTML = controlHTML(id);
+  actualizar(); cerrarVelo('veloDet');
+  aviso(detQ === 0 ? 'Quitado de tu pedido' : 'Listo: ' + datos[id].n);
+};
+
+/* ---------- Pedido enviado ---------- */
+function guardarUltimo(){
+  try {
+    const items = Object.keys(carrito).map(id => ({n: datos[id].n, q: carrito[id], nota: notas[id] || ''}));
+    localStorage.setItem('glp_ultimo', JSON.stringify({items, t: resumen().t, folio, r: recoge(), env: (!recoge() && envio && envio.acepto) ? envio.costo : null, ts: Date.now()}));
+  } catch(e){}
+}
+function mostrarListo(){
+  $('lsFolio').textContent = 'Pedido #' + folio;
+  $('lsTxt').textContent = recoge() ? 'Te avisamos por WhatsApp cuando tu pedido esté listo para recoger.' : 'Te confirmamos por WhatsApp el tiempo de entrega y, si no usaste el botón de ubicación, el costo de envío.';
+  $('lsWa').href = $('enviar').href;
+  abrirVelo('veloListo');
+}
+$('lsOtro').onclick = () => {
+  const ids = Object.keys(carrito);
+  ids.forEach(id => { delete carrito[id]; delete notas[id]; const c = $('ctl'+id); if (c) c.innerHTML = controlHTML(id); });
+  $('notas').value = ''; $('primero').checked = false;
+  folio = nuevoFolio();
+  cerrarVelo('veloListo'); $('hoja').classList.remove('on'); document.body.style.overflow = '';
+  actualizar(); pintarRepetir(); scrollInicio = 0; irInicio();
+};
+
+/* ---------- Repetir mi último pedido ---------- */
+function ultimo(){
+  try {
+    const u = JSON.parse(localStorage.getItem('glp_ultimo') || 'null');
+    if (!u || !u.items) return null;
+    const items = u.items.map(x => ({id: idPorNombre(x.n), q: x.q, nota: x.nota})).filter(x => x.id);
+    return items.length ? items : null;
+  } catch(e){ return null; }
+}
+function pintarRepetir(){
+  const u = ultimo(), b = $('repetir');
+  if (!u || Object.keys(carrito).length){ b.style.display = 'none'; return; }
+  const n = u.reduce((a, x) => a + x.q, 0), t = u.reduce((a, x) => a + x.q * datos[x.id].p, 0);
+  b.innerHTML = '🔁 Repetir mi último pedido<small>' + n + (n === 1 ? ' artículo' : ' artículos') + ' · ' + pesos(t) + ' + envío</small>';
+  b.style.display = 'block';
+}
+$('repetir').onclick = () => {
+  const u = ultimo(); if (!u) return;
+  u.forEach(x => { carrito[x.id] = x.q; if (x.nota) notas[x.id] = x.nota; const c = $('ctl'+x.id); if (c) c.innerHTML = controlHTML(x.id); });
+  $('repetir').style.display = 'none';
+  actualizar(); $('verPedido').click();
+};
+
+/* ---------- Instalar como app ---------- */
+let promptInstalar = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); promptInstalar = e; $('instalar').style.display = 'inline-block'; });
+const esIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone;
+if (USAR_GPS && esIOS) $('instalar').style.display = 'inline-block';
+$('instalar').onclick = async () => {
+  if (promptInstalar){ promptInstalar.prompt(); try { await promptInstalar.userChoice; } catch(e){} promptInstalar = null; $('instalar').style.display = 'none'; }
+  else aviso('En iPhone: toca Compartir ⬆️ y luego "Agregar a inicio"', 5000);
+};
+if (USAR_GPS && 'serviceWorker' in navigator){ try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch(e){} }
+$('verPedido').onclick = () => { if (recoge()) llenarHoras(); pintarLineas(); $('hoja').classList.add('on'); $('hoja').scrollTop = 0; document.body.style.overflow = 'hidden'; };
+$('cerrar').onclick = () => { $('hoja').classList.remove('on'); document.body.style.overflow = ''; };
+function aplicarModo(){
+  const r = recoge();
+  $('bloqueRecoger').style.display = r ? 'block' : 'none';
+  $('bloqueDomicilio').style.display = r ? 'none' : 'block';
+  $('pasosUbic').style.display = (r || gps) ? 'none' : 'block';
+  $('cambio').previousElementSibling.textContent = r ? '¿Con cuánto pagas? (para tenerte el cambio)' : '¿Con cuánto pagas? (para llevarte cambio)';
+  if (r) llenarHoras();
+  try { localStorage.setItem('glp_modo', modo()); } catch(e){}
+  if ($('err').style.display === 'block') revisar();
+  actualizar();
+}
+document.querySelectorAll('input[name=modo]').forEach(x => x.addEventListener('change', aplicarModo));
+try { const m = localStorage.getItem('glp_modo'); if (m === 'recoger') document.querySelector('input[name=modo][value=recoger]').checked = true; } catch(e){}
+document.querySelectorAll('input[name=pago]').forEach(r => r.addEventListener('change', () => {
+  $('cajaEfectivo').style.display = pagoElegido() === 'Efectivo' ? 'block' : 'none';
+  $('txtTarjeta').style.display = pagoElegido().startsWith('Tarjeta') ? 'block' : 'none';
+  armarEnlace();
+}));
+$('hoja').addEventListener('input', () => { guardar(); armarEnlace(); if ($('err').style.display === 'block') revisar(); });
+$('hoja').addEventListener('change', armarEnlace);
+$('enviar').addEventListener('click', e => { if (!revisar()) { e.preventDefault(); $('err').scrollIntoView({behavior:'smooth', block:'center'}); return; } armarEnlace(); guardar(); guardarUltimo(); setTimeout(mostrarListo, 700); });
+$('copiar').addEventListener('click', async () => {
+  if (!revisar()) return;
+  try { await navigator.clipboard.writeText(mensaje()); aviso('Pedido copiado. Pégalo en WhatsApp al 744 817 6464'); }
+  catch(e){ aviso('No se pudo copiar. Escríbenos al 744 817 6464'); }
+});
+
+function filtrar(){
+  const q = quitarAcentos($('q').value.trim().toLowerCase());
+  if (!q){ document.querySelectorAll('main section, .item').forEach(e => e.style.display = ''); $('vacio').style.display = 'none'; desdeHash(); return; }
+  vista('buscar');
+  let hay = 0;
+  document.querySelectorAll('section').forEach(sec => {
+    let vis = 0;
+    sec.querySelectorAll('.item').forEach(it => { const ok = !q || it.dataset.busca.includes(q); it.style.display = ok ? '' : 'none'; if (ok) vis++; });
+    sec.style.display = vis ? '' : 'none'; hay += vis;
+  });
+  $('vacio').style.display = hay ? 'none' : 'block';
+}
+$('q').addEventListener('input', filtrar);
+
+/* ---------- Vistas: inicio con cuadritos / una categoría / búsqueda ---------- */
+let vinoDeInicio = false, scrollInicio = 0;
+try { history.scrollRestoration = 'manual'; } catch(e){}
+function vista(v){ document.body.classList.remove('v-inicio','v-cat','v-buscar'); document.body.classList.add('v-' + v); }
+function mostrarCategoria(ci){
+  vista('cat');
+  document.querySelectorAll('main section').forEach(sec => sec.classList.toggle('actual', sec.dataset.sec === String(ci)));
+  document.querySelectorAll('.cats button').forEach(b => b.classList.toggle('on', b.dataset.cat === String(ci)));
+  const b = document.querySelector('.cats button[data-cat="' + ci + '"]'), nav = $('cats');
+  if (b) nav.scrollLeft = b.offsetLeft - nav.clientWidth/2 + b.clientWidth/2;
+  window.scrollTo(0, 0);
+}
+function desdeHash(){
+  if ($('q').value.trim()) return;
+  const m = location.hash.match(/^#c-(.+)$/);
+  const ci = m ? MENU.findIndex(c => slug(c.c) === m[1]) : -1;
+  if (ci >= 0) mostrarCategoria(ci);
+  else { vista('inicio'); vinoDeInicio = false; const y = scrollInicio; window.scrollTo(0, y); requestAnimationFrame(() => window.scrollTo(0, y)); }
+}
+function irCategoria(ci, reemplazar){
+  const h = '#c-' + slug(MENU[ci].c);
+  if (reemplazar){ history.replaceState(null, '', h); mostrarCategoria(ci); }
+  else { scrollInicio = window.scrollY; vinoDeInicio = true; location.hash = h; }
+}
+function irInicio(){ history.replaceState(null, '', location.pathname + location.search); desdeHash(); }
+window.addEventListener('hashchange', desdeHash);
+$('volver').onclick = () => { if (vinoDeInicio) history.back(); else irInicio(); };
+
+/* ---------- Estado del pedido (enlace desde WhatsApp) ----------
+   ?p=FOLIO  → lo manda el cliente en su mensaje (pedido enviado)
+   ?ok       → respuesta rápida de la cocina: confirmado / preparando
+   ?camino   → ya salió el repartidor      ?listo → listo para recoger */
+function verEstado(){
+  const q = new URLSearchParams(location.search);
+  const clave = ['camino','listo','ok','p'].find(k => q.has(k));
+  if (!clave) return;
+  const nivel = {p:1, ok:2, camino:3, listo:3}[clave];
+  let f = (q.get(clave) || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+  let u = null;
+  try { u = JSON.parse(localStorage.getItem('glp_ultimo') || 'null'); } catch(e){}
+  if (u && (!u.folio || (f ? u.folio !== f : !(u.ts && Date.now() - u.ts < 6*3600e3)))) u = null;
+  if (!f && u) f = u.folio;
+  const rec = clave === 'listo' ? true : clave === 'camino' ? false : (u ? !!u.r : null);
+  const tercero = rec === true ? 'Listo para recoger' : rec === false ? 'En camino' : 'En camino o listo';
+  const tit = {1:'Pedido enviado', 2:'¡Pedido confirmado!', 3: rec ? '¡Listo para recoger!' : '¡Tu pedido va en camino!'}[nivel];
+  const ico = {1:'✓', 2:'🔥', 3: rec ? '🏃' : '🛵'}[nivel];
+  const txt = {
+    1: 'Tu pedido se envió por WhatsApp. En unos minutos te confirmamos por ahí' + (rec ? ' a qué hora pasar.' : ' el tiempo de entrega.'),
+    2: 'Ya lo estamos preparando. Te avisamos por WhatsApp cuando ' + (rec === true ? 'esté listo para recoger.' : rec === false ? 'salga a tu domicilio.' : 'esté listo.'),
+    3: rec ? 'Pasa por él a Prol. Corregidora Nte. 180, El Cerrito. <a href="https://www.google.com/maps/dir/?api=1&destination=20.6024719,-100.3932257" target="_blank" rel="noopener">📍 Cómo llegar</a>' : 'El repartidor ya salió hacia tu domicilio.'
+  }[nivel];
+  $('esIco').textContent = ico;
+  $('esTit').textContent = tit;
+  $('esFolio').textContent = f ? 'Pedido #' + f : '';
+  $('esFolio').style.display = f ? '' : 'none';
+  $('esPasos').innerHTML = ['Enviado', 'Preparando', tercero].map((n, i) =>
+    '<div class="' + (i + 1 < nivel ? 'hecho' : i + 1 === nivel ? 'hecho ahora' : '') + '"><i>' + (i + 1 <= nivel ? '✓' : i + 1) + '</i>' + n + '</div>').join('');
+  $('esTxt').innerHTML = txt;
+  if (u && u.items && u.items.length){
+    const tot = u.r ? 'Total: ' + pesos(u.t) : (u.env != null ? 'Total: ' + pesos(u.t + u.env) + ' con envío' : 'Comida: ' + pesos(u.t) + ' + envío');
+    $('esRes').innerHTML = u.items.map(x => esc(x.q + ' × ' + x.n)).join('<br>') + '<br><b>' + tot + '</b>';
+    $('esRes').style.display = '';
+  } else $('esRes').style.display = 'none';
+  $('esWa').href = 'https://wa.me/' + WHATSAPP + (f ? '?text=' + encodeURIComponent('Hola, sobre mi pedido #' + f + ': ') : '');
+  history.replaceState(null, '', location.pathname + location.hash);
+  abrirVelo('veloEstado');
+}
+$('esMenu').onclick = () => cerrarVelo('veloEstado');
+
+pintarMenu();
+desdeHash();
+pintarEstado(); setInterval(pintarEstado, 60000);
+cargar(); aplicarModo(); pintarRepetir();
+verEstado();
+</script>
+
+<style id="vst"></style>
+<style>
+#opbar{position:fixed;top:0;left:0;right:0;z-index:99;display:flex;gap:6px;padding:8px;background:#1f1a17;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+#opbar button{flex:1;padding:10px 2px;border-radius:10px;border:none;font-weight:800;font-size:13px;background:#f3ece1;color:#1f1a17}
+#opbar button.on{background:#c9a24a}
+body{padding-top:58px}
+</style>
+<div id="opbar"><button data-v="0">Ahora</button><button data-v="A">A Franja</button><button data-v="B">B Abajo</button><button data-v="C">C Etiqueta</button></div>
+<script>
+(function(){
+  const V = {
+    'A': `.tile .tn{background:rgba(110,20,33,.95);padding:7px 10px 8px;border-top:2px solid var(--oro)}
+.tile .tn b{font-size:16px} .tile .tn span{color:var(--oro2);opacity:1}`,
+    'B': `.tile{aspect-ratio:auto;background:#fff;border:1px solid var(--linea);display:flex;flex-direction:column}
+.tile .tf{position:relative;aspect-ratio:4/3;background:linear-gradient(150deg,var(--vino2),#3e0b13)}
+.tile .tn{position:static;background:none;color:var(--tinta);padding:8px 10px 9px}
+.tile .tn b{font-size:16px;color:var(--vino)} .tile .tn span{color:var(--gris);opacity:1}`,
+    'C': `.tile .tn{background:none;padding:8px}
+.tile .tn b{display:inline-block;background:#fff;color:var(--vino);padding:5px 10px;border-radius:10px;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.tile .tn span{display:none}`
+  };
+  document.querySelectorAll('.tile').forEach(t => { const f = document.createElement('div'); f.className = 'tf'; const m = t.querySelector('img,.emo'); t.insertBefore(f, t.firstChild); if (m) f.appendChild(m); });
+  function poner(k){
+    document.getElementById('vst').textContent = V[k] || '';
+    document.querySelectorAll('#opbar button').forEach(b => b.classList.toggle('on', b.dataset.v === k));
+  }
+  document.querySelectorAll('#opbar button').forEach(b => b.onclick = () => poner(b.dataset.v));
+  poner('0');
+  setTimeout(() => { const t = document.getElementById('tiles'); if (t) window.scrollTo(0, t.getBoundingClientRect().top + scrollY - 70); }, 300);
+})();
+</script>
+</body>
+</html>
