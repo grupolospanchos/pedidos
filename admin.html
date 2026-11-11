@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#6e1421">
+<title>Panel · Grupo Los Panchos</title>
+<link rel="manifest" href="manifest-panel.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --vino:#6e1421; --vino2:#8c1d2c; --oro:#c9a24a; --oro2:#e8cc84;
+    --crema:#fbf6ee; --tinta:#1f1a17; --gris:#6f6760; --linea:#eadfce;
+    --verde:#1f8f4e; --rojo:#c0392b; --azul:#2563eb; --ambar:#b7791f;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:Inter,system-ui,sans-serif;background:var(--crema);color:var(--tinta);-webkit-tap-highlight-color:transparent;padding-bottom:84px}
+  button{font-family:inherit;cursor:pointer}
+  input,select,textarea{font-family:inherit;font-size:16px}
+  a{color:var(--vino)}
+  .oculto{display:none!important}
+
+  /* Barra superior */
+  .top{position:sticky;top:0;z-index:30;background:linear-gradient(160deg,var(--vino),#4a0d16);color:#fff;display:flex;align-items:center;gap:10px;padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top))}
+  .top img{width:34px;height:34px;border-radius:50%}
+  .top h1{font-family:Archivo,sans-serif;font-size:17px;margin:0;flex:1;line-height:1.1}
+  .top h1 small{display:block;font-family:Inter,sans-serif;font-weight:600;font-size:11.5px;opacity:.8}
+  .pill{display:inline-flex;align-items:center;gap:6px;border:none;border-radius:999px;padding:6px 11px;font-weight:700;font-size:12.5px;background:rgba(255,255,255,.14);color:#fff}
+  .pill i{width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block}
+  .pill.cerrado i{background:#f87171}
+  .yo{width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,255,255,.5);background:#ffffff22;color:#fff;font-weight:800;padding:0;overflow:hidden}
+  .yo img{width:100%;height:100%;object-fit:cover}
+  .menuYo{position:absolute;right:10px;top:56px;background:#fff;color:var(--tinta);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.2);padding:12px;min-width:220px;z-index:40}
+  .menuYo p{margin:0 0 8px;font-size:13px;color:var(--gris)}
+  .menuYo b{color:var(--tinta);display:block;font-size:14px}
+
+  .vista{max-width:820px;margin:0 auto;padding:12px}
+  h2.t{font-family:Archivo,sans-serif;font-size:20px;margin:6px 2px 10px}
+  .card{background:#fff;border:1px solid var(--linea);border-radius:16px;padding:14px;margin-bottom:12px}
+  .card h3{margin:0 0 4px;font-size:16px}
+  .card .ayuda{font-size:13px;color:var(--gris);margin:0 0 10px;line-height:1.4}
+  .fila{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{border:1.5px solid var(--linea);background:#fff;border-radius:999px;padding:8px 13px;font-weight:700;font-size:13.5px;white-space:nowrap;color:var(--tinta)}
+  .chip.on{background:var(--vino);border-color:var(--vino);color:#fff}
+  .bt{border:none;border-radius:12px;padding:12px 14px;font-weight:800;font-size:14.5px;background:#f3ece1;color:var(--tinta)}
+  .bt.p{background:var(--vino);color:#fff}
+  .bt.v{background:var(--verde);color:#fff}
+  .bt.r{background:#fde8e8;color:var(--rojo)}
+  .bt.a{background:#e8efff;color:var(--azul)}
+  .bt.w{background:#25d366;color:#fff}
+  .bt.full{width:100%}
+  .bt:disabled{opacity:.5}
+  .inp{width:100%;border:1.5px solid var(--linea);border-radius:12px;padding:11px 12px;background:#fff;color:var(--tinta)}
+  .inp:focus{outline:none;border-color:var(--vino)}
+  label.l{display:block;font-size:13px;font-weight:700;color:var(--gris);margin:10px 0 5px}
+  .sw{position:relative;width:48px;height:28px;flex:none}
+  .sw input{opacity:0;width:0;height:0;position:absolute}
+  .sw span{position:absolute;inset:0;background:#d9cfc2;border-radius:999px;transition:.2s}
+  .sw span::before{content:'';position:absolute;width:22px;height:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+  .sw input:checked + span{background:var(--verde)}
+  .sw input:checked + span::before{transform:translateX(20px)}
+  .vacio{text-align:center;color:var(--gris);padding:30px 10px;font-size:14.5px}
+  .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--tinta);color:#fff;padding:11px 16px;border-radius:12px;font-size:14px;z-index:90;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;text-align:center}
+  .toast.on{opacity:1}
+
+  /* Navegación inferior */
+  .nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;border-top:1px solid var(--linea);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+  .nav button{flex:1;border:none;background:none;padding:8px 2px 9px;font-size:11.5px;font-weight:700;color:var(--gris);position:relative}
+  .nav button span{display:block;font-size:21px;line-height:1.2}
+  .nav button.on{color:var(--vino)}
+  .nav .badge{position:absolute;top:4px;left:calc(50% + 6px);background:var(--rojo);color:#fff;border-radius:999px;font-size:11px;min-width:18px;height:18px;line-height:18px;padding:0 5px}
+
+  /* Pedidos */
+  .barraPed{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+  .barraPed .chips{flex:1}
+  .ico-bt{border:1.5px solid var(--linea);background:#fff;border-radius:12px;width:42px;height:40px;font-size:18px;padding:0}
+  .ico-bt.on{border-color:var(--verde);background:#eaf7ef}
+  .ped{background:#fff;border:1px solid var(--linea);border-left:6px solid #d9cfc2;border-radius:16px;padding:12px 14px;margin-bottom:12px}
+  .ped.e-nuevo{border-left-color:var(--rojo);box-shadow:0 0 0 3px #fde8e8}
+  .ped.e-confirmado{border-left-color:var(--ambar)}
+  .ped.e-camino,.ped.e-listo{border-left-color:var(--azul)}
+  .ped.e-entregado{border-left-color:var(--verde);opacity:.85}
+  .ped.e-cancelado{opacity:.6}
+  .ped .ph{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .ped .ph b{font-family:Archivo,sans-serif;font-size:19px}
+  .tag{display:inline-block;border-radius:999px;padding:3px 9px;font-size:12px;font-weight:800;background:#f3ece1}
+  .tag.nuevo{background:var(--rojo);color:#fff}
+  .tag.confirmado{background:#fdf1dc;color:var(--ambar)}
+  .tag.camino,.tag.listo{background:#e8efff;color:var(--azul)}
+  .tag.entregado{background:#eaf7ef;color:var(--verde)}
+  .tag.cancelado{background:#eee;color:#777}
+  .tag.wa{background:#e7f8ee;color:#128c4a}
+  .ped .hace{margin-left:auto;font-size:12.5px;color:var(--gris);font-weight:600}
+  .ped .hace.tarde{color:var(--rojo);font-weight:800}
+  .ped .cli{margin-top:6px;font-size:14.5px}
+  .ped .cli a{font-weight:700;text-decoration:none}
+  .ped ul{list-style:none;margin:8px 0;padding:8px 10px;background:#faf6ef;border-radius:10px}
+  .ped li{display:flex;gap:8px;font-size:14.5px;padding:2px 0}
+  .ped li b{min-width:28px}
+  .ped li span{flex:1}
+  .ped li i{font-style:normal;color:var(--gris)}
+  .ped li small{display:block;color:var(--vino);font-weight:600}
+  .ped .lin{font-size:14px;margin:4px 0;line-height:1.4}
+  .ped .tot{font-size:14.5px;margin:6px 0}
+  .ped .acc{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .ped .acc .bt{flex:1;min-width:120px;padding:11px 10px}
+  .mins{display:flex;gap:6px;margin-top:10px;align-items:center;flex-wrap:wrap}
+  .mins span{font-size:13px;font-weight:700;color:var(--gris)}
+  .mins button{border:1.5px solid var(--linea);background:#fff;border-radius:10px;padding:7px 10px;font-weight:800;font-size:13.5px}
+  .mins button.on{background:var(--ambar);border-color:var(--ambar);color:#fff}
+
+  /* Tienda */
+  .estadoGrande{display:flex;align-items:center;gap:12px}
+  .estadoGrande .dot{width:18px;height:18px;border-radius:50%;background:var(--verde);flex:none;box-shadow:0 0 0 5px #eaf7ef}
+  .estadoGrande.cerrado .dot{background:var(--rojo);box-shadow:0 0 0 5px #fde8e8}
+  .estadoGrande b{font-size:19px;display:block}
+  .estadoGrande small{color:var(--gris);font-size:13.5px}
+  .opciones{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:10px}
+  .dia{display:grid;grid-template-columns:36px minmax(0,1fr) minmax(0,1fr) 50px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--linea)}
+  .dia:last-child{border-bottom:none}
+  .dia b{font-size:14.5px}
+  .dia input[type=time]{padding:9px 4px;font-size:15px;min-width:0;width:100%}
+  .dia.off input[type=time]{opacity:.35}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .togRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px dashed var(--linea)}
+  .togRow:last-child{border-bottom:none}
+  .togRow span{font-weight:600;font-size:15px}
+  .guardarBar{position:sticky;bottom:84px;z-index:20;margin-top:6px}
+  .equipo li{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px dashed var(--linea);font-size:14.5px}
+  .equipo li span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .equipo ul{list-style:none;margin:0;padding:0}
+
+  /* Menú */
+  .mItem{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--linea);border-radius:14px;padding:8px 10px;margin-bottom:8px;cursor:pointer}
+  .mItem img,.mItem .sinfoto{width:58px;height:58px;border-radius:10px;object-fit:cover;flex:none;background:#f3ece1}
+  .mItem .sinfoto{display:flex;align-items:center;justify-content:center;font-size:22px}
+  .mItem .tx{flex:1;min-width:0}
+  .mItem .tx b{display:block;font-size:14.5px;line-height:1.25}
+  .mItem .tx span{font-size:13.5px;color:var(--gris)}
+  .mItem.agot .tx b{text-decoration:line-through;color:var(--gris)}
+  .mItem.ocul{opacity:.55}
+  .mini{display:inline-block;font-size:11px;font-weight:800;border-radius:6px;padding:2px 6px;margin-left:4px;vertical-align:1px}
+  .mini.ag{background:#fde8e8;color:var(--rojo)}
+  .mini.oc{background:#eee;color:#666}
+  .mini.ed{background:#fbf3e3;color:var(--ambar)}
+  .mini.nv{background:#e8efff;color:var(--azul)}
+  .catT{font-family:Archivo,sans-serif;font-size:16px;margin:16px 2px 8px}
+
+  /* Hojas (ventanas desde abajo) */
+  .velo{position:fixed;inset:0;background:rgba(20,10,8,.55);z-index:60;display:none;align-items:flex-end;justify-content:center}
+  .velo.on{display:flex}
+  .hoja{background:#fff;width:100%;max-width:620px;max-height:94vh;overflow-y:auto;border-radius:20px 20px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom));position:relative}
+  .hoja h3{font-family:Archivo,sans-serif;font-size:19px;margin:0 40px 8px 0}
+  .hoja .x{position:absolute;top:10px;right:10px;width:38px;height:38px;border-radius:50%;border:none;background:#f3ece1;font-size:18px}
+  .fotoGrande{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px;background:#f3ece1;display:block}
+  .fotoVacia{width:100%;aspect-ratio:4/3;border-radius:14px;background:#f3ece1;display:flex;align-items:center;justify-content:center;color:var(--gris);font-weight:700}
+  .resultados button{display:flex;width:100%;justify-content:space-between;border:none;background:#faf6ef;border-radius:10px;padding:10px 12px;margin-top:6px;font-size:14.5px;text-align:left}
+  .lineaM{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--linea);font-size:14.5px}
+  .lineaM span{flex:1}
+  .lineaM button{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--linea);background:#fff;font-weight:800;font-size:16px}
+
+  /* Métricas */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+  .kpi{background:#fff;border:1px solid var(--linea);border-radius:14px;padding:12px}
+  .kpi small{display:block;font-size:12.5px;color:var(--gris);font-weight:700}
+  .kpi b{display:block;font-family:Archivo,sans-serif;font-size:23px;margin-top:2px}
+  .kpi em{font-style:normal;font-size:12px;font-weight:800}
+  .kpi em.up{color:var(--verde)} .kpi em.down{color:var(--rojo)} .kpi em.eq{color:var(--gris)}
+  .barras{display:flex;align-items:flex-end;gap:3px;height:140px;padding-top:8px}
+  .barras div{flex:1;background:var(--vino2);border-radius:5px 5px 0 0;position:relative;min-height:2px}
+  .barras div.cero{background:#eadfce}
+  .ejes{display:flex;gap:3px;font-size:10.5px;color:var(--gris);margin-top:4px}
+  .ejes span{flex:1;text-align:left;overflow:visible;white-space:nowrap}
+  .hbar{display:flex;align-items:center;gap:8px;font-size:14px;margin:7px 0}
+  .hbar .n{width:44%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hbar .b{flex:1;background:#f3ece1;border-radius:6px;height:20px;position:relative;overflow:hidden}
+  .hbar .b i{position:absolute;left:0;top:0;bottom:0;background:var(--oro);border-radius:6px}
+  .hbar .v{width:74px;text-align:right;font-weight:700;font-size:13px}
+  .split{display:flex;height:26px;border-radius:8px;overflow:hidden;margin:8px 0 6px}
+  .split div{display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden}
+  .leyenda{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--gris)}
+  .leyenda i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+
+  /* Clientes */
+  .cliR{background:#fff;border:1px solid var(--linea);border-radius:14px;padding:11px 12px;margin-bottom:8px}
+  .cliR .fila b{flex:1;font-size:15px}
+  .cliR p{margin:3px 0 0;font-size:13.5px;color:var(--gris)}
+  .cliR .acc{display:flex;gap:6px;margin-top:8px}
+  .cliR .acc .bt{padding:8px 10px;font-size:13px}
+  .hist{margin-top:8px;font-size:13px;background:#faf6ef;border-radius:10px;padding:8px 10px}
+
+  /* Pantallas de entrada */
+  .entrada{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(160deg,var(--vino),#3b0a12)}
+  .entrada .caja{background:#fff;border-radius:22px;padding:26px 22px;max-width:420px;width:100%;text-align:center}
+  .entrada img{width:84px;height:84px;border-radius:50%}
+  .entrada h2{font-family:Archivo,sans-serif;margin:10px 0 6px}
+  .entrada p{color:var(--gris);font-size:14.5px;line-height:1.5}
+  .entrada ol{text-align:left;font-size:14px;line-height:1.55;padding-left:20px}
+  .google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;border:1.5px solid var(--linea);background:#fff;border-radius:12px;padding:13px;font-weight:800;font-size:15.5px;margin-top:12px}
+</style>
+</head>
+<body>
+
+<!-- Falta conectar Firebase -->
+<div class="entrada oculto" id="pSetup">
+  <div class="caja">
+    <img src="icon-192.png" alt="">
+    <h2>Panel de administrador</h2>
+    <p>El panel ya está listo, solo falta conectarlo a la base de datos gratuita de Google (Firebase).</p>
+    <ol>
+      <li>Crear el proyecto en Firebase con tu cuenta de Google (plan gratis, sin tarjeta).</li>
+      <li>Activar la base de datos y el inicio de sesión con Google.</li>
+      <li>Pasarle a Claude la configuración para conectarlo.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- Iniciar sesión -->
+<div class="entrada oculto" id="pLogin">
+  <div class="caja">
+    <img src="icon-192.png" alt="">
+    <h2>Panel de administrador</h2>
+    <p>Grupo Los Panchos · Entra con la cuenta de Google autorizada.</p>
+    <button class="google" id="btEntrar"><svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.5-4.5 2.4-7.2 2.4-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Entrar con Google</button>
+    <p id="loginErr" style="color:var(--rojo);display:none"></p>
+  </div>
+</div>
+
+<!-- Sin permiso -->
+<div class="entrada oculto" id="pNoAuth">
+  <div class="caja">
+    <img src="icon-192.png" alt="">
+    <h2>Sin acceso</h2>
+    <p>La cuenta <b id="naEmail"></b> no tiene permiso para entrar al panel. Pídele al dueño que te agregue en <b>Tienda → Equipo</b>.</p>
+    <button class="bt full" id="btSalir2">Entrar con otra cuenta</button>
+  </div>
+</div>
+
+<!-- App -->
+<div id="pApp" class="oculto">
+  <header class="top">
+    <img src="icon-192.png" alt="">
+    <h1>Panel Los Panchos<small id="topSuc">Sucursal Corregidora</small></h1>
+    <button class="pill" id="topEstado"><i></i><span>…</span></button>
+    <button class="yo" id="btYo"></button>
+  </header>
+  <div class="menuYo oculto" id="menuYo">
+    <p><b id="yoNombre"></b><span id="yoEmail"></span><br>Rol: <span id="yoRol"></span></p>
+    <a class="bt full" href="./" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;margin-bottom:8px">Ver la página de pedidos</a>
+    <button class="bt full r" id="btSalir">Cerrar sesión</button>
+  </div>
+
+  <!-- PEDIDOS -->
+  <section class="vista" id="vPedidos">
+    <div class="barraPed">
+      <div class="chips" id="filtroPed">
+        <button class="chip on" data-f="activos">Activos</button>
+        <button class="chip" data-f="hoy">Hoy</button>
+        <button class="chip" data-f="ayer">Ayer</button>
+      </div>
+      <button class="ico-bt" id="btSonido" title="Sonido de pedido nuevo">🔕</button>
+      <button class="ico-bt" id="btPantalla" title="Mantener la pantalla encendida">🖥️</button>
+      <button class="ico-bt" id="btAvisoAuto" title="Abrir WhatsApp al cambiar el estado">💬</button>
+    </div>
+    <button class="bt p full" id="btManual" style="margin-bottom:12px">＋ Registrar pedido que llegó por WhatsApp o teléfono</button>
+    <div id="listaPed"></div>
+  </section>
+
+  <!-- TIENDA -->
+  <section class="vista oculto" id="vTienda">
+    <h2 class="t">Tienda</h2>
+    <div class="card">
+      <div class="estadoGrande" id="egCaja"><div class="dot"></div><div><b id="egTit">…</b><small id="egSub"></small></div></div>
+      <div id="egAcciones"></div>
+    </div>
+
+    <div id="tiendaAjustes">
+    <div class="card">
+      <h3>🕗 Horario de cada día</h3>
+      <p class="ayuda">La página abre y cierra sola con este horario. Si cierra después de medianoche (ej. 2:00 a.m.), se cuenta como el mismo día.</p>
+      <div id="horario"></div>
+      <button class="bt full" id="btCopiarHorario" style="margin-top:10px">Usar el horario del lunes para todos los días</button>
+    </div>
+
+    <div class="card">
+      <h3>📢 Aviso para los clientes</h3>
+      <p class="ayuda">Sale en una franja dorada arriba de la página. Déjalo vacío para quitarlo.</p>
+      <textarea class="inp" id="tAviso" rows="2" maxlength="160" placeholder="Ej. Hoy 2x1 en gringas de 6 a 9 p.m. 🔥"></textarea>
+      <div class="chips" style="margin-top:8px" id="sugAviso">
+        <button class="chip" data-t="🔥 Hoy 2x1 en gringas de 6 a 9 p.m.">2x1 gringas</button>
+        <button class="chip" data-t="⏱️ Hoy tenemos mucha demanda: tu pedido puede tardar un poco más.">Mucha demanda</button>
+        <button class="chip" data-t="🎉 Envío gratis en pedidos de más de $300 solo hoy.">Envío gratis</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🥤 Promoción y regalo</h3>
+      <div class="togRow"><span>Mostrar recuadro de promoción</span><label class="sw"><input type="checkbox" id="tPromoOn"><span></span></label></div>
+      <label class="l" for="tPromoT">Título</label>
+      <input class="inp" id="tPromoT" maxlength="90">
+      <label class="l" for="tPromoS">Texto</label>
+      <input class="inp" id="tPromoS" maxlength="140">
+      <div class="togRow" style="margin-top:6px"><span>Casilla "Es mi primer pedido" (Jamaica de regalo)</span><label class="sw"><input type="checkbox" id="tRegalo"><span></span></label></div>
+    </div>
+
+    <div class="card">
+      <h3>🛵 Envío y pedido mínimo</h3>
+      <div class="grid2">
+        <div><label class="l" for="tBase">Envío base ($)</label><input class="inp" id="tBase" type="number" inputmode="numeric" min="0"></div>
+        <div><label class="l" for="tKm">Km incluidos</label><input class="inp" id="tKm" type="number" inputmode="decimal" min="0"></div>
+        <div><label class="l" for="tPorKm">$ por km extra</label><input class="inp" id="tPorKm" type="number" inputmode="numeric" min="0"></div>
+        <div><label class="l" for="tFactor">Ajuste por calles</label><input class="inp" id="tFactor" type="number" inputmode="decimal" step="0.05" min="1" max="2"></div>
+        <div><label class="l" for="tMinimo">Pedido mínimo a domicilio ($)</label><input class="inp" id="tMinimo" type="number" inputmode="numeric" min="0"></div>
+        <div><label class="l" for="tEntrega">Tiempo de entrega normal (min)</label><input class="inp" id="tEntrega" type="number" inputmode="numeric" min="5"></div>
+      </div>
+      <p class="ayuda" style="margin-top:8px">"Ajuste por calles": la distancia en línea recta se multiplica por este número para parecerse a lo que recorre el repartidor (1.3 = 30% más). Pedido mínimo en 0 = sin mínimo.</p>
+    </div>
+
+    <div class="card">
+      <h3>💳 Formas de pago que aceptas</h3>
+      <div class="togRow"><span>💵 Efectivo</span><label class="sw"><input type="checkbox" id="tEfectivo"><span></span></label></div>
+      <div class="togRow"><span>🏦 Transferencia</span><label class="sw"><input type="checkbox" id="tTransf"><span></span></label></div>
+      <div class="togRow"><span>💳 Tarjeta (link de pago)</span><label class="sw"><input type="checkbox" id="tTarjeta"><span></span></label></div>
+    </div>
+
+    <div class="guardarBar"><button class="bt p full" id="btGuardarTienda" style="box-shadow:0 6px 18px rgba(110,20,33,.3)">Guardar cambios de la tienda</button></div>
+
+    <div class="card equipo oculto" id="cEquipo" style="margin-top:12px">
+      <h3>👥 Equipo con acceso al panel</h3>
+      <p class="ayuda"><b>Admin</b> ve todo. <b>Cocina</b> ve pedidos, puede marcar platillos agotados y cerrar la tienda.</p>
+      <ul id="listaEquipo"></ul>
+      <label class="l" for="eqEmail">Correo de Gmail</label>
+      <input class="inp" id="eqEmail" type="email" placeholder="nombre@gmail.com" autocomplete="off">
+      <div class="grid2">
+        <div><label class="l" for="eqNombre">Nombre</label><input class="inp" id="eqNombre" placeholder="Ej. Jorge"></div>
+        <div><label class="l" for="eqRol">Rol</label><select class="inp" id="eqRol"><option value="cocina">Cocina</option><option value="admin">Admin</option></select></div>
+      </div>
+      <button class="bt v full" id="btAgregarEq" style="margin-top:10px">Agregar al equipo</button>
+    </div>
+    </div>
+  </section>
+
+  <!-- MENÚ -->
+  <section class="vista oculto" id="vMenu">
+    <h2 class="t">Menú</h2>
+    <input class="inp" id="mBuscar" type="search" placeholder="Buscar platillo…" autocomplete="off">
+    <div class="chips" id="mCats" style="margin:10px 0 4px"></div>
+    <div class="fila" style="margin:8px 0">
+      <button class="bt v" id="btNuevoPlat" style="flex:1">＋ Agregar platillo nuevo</button>
+      <button class="chip" id="mSoloAgot">Ver agotados</button>
+    </div>
+    <div id="listaMenu"></div>
+  </section>
+
+  <!-- MÉTRICAS -->
+  <section class="vista oculto" id="vMetricas">
+    <h2 class="t">Métricas</h2>
+    <div class="chips" id="rangos" style="margin-bottom:10px">
+      <button class="chip on" data-r="hoy">Hoy</button>
+      <button class="chip" data-r="ayer">Ayer</button>
+      <button class="chip" data-r="7">7 días</button>
+      <button class="chip" data-r="30">30 días</button>
+      <button class="chip" data-r="mes">Este mes</button>
+      <button class="chip" data-r="mesant">Mes pasado</button>
+    </div>
+    <div id="metricas"><div class="vacio">Cargando…</div></div>
+  </section>
+
+  <!-- CLIENTES -->
+  <section class="vista oculto" id="vClientes">
+    <h2 class="t">Clientes</h2>
+    <input class="inp" id="cBuscar" type="search" placeholder="Buscar por nombre o teléfono…" autocomplete="off">
+    <div class="chips" id="cFiltros" style="margin:10px 0">
+      <button class="chip on" data-c="todos">Todos</button>
+      <button class="chip" data-c="promos">Aceptan promos</button>
+      <button class="chip" data-c="frecuentes">Frecuentes (3+)</button>
+      <button class="chip" data-c="dormidos">Sin pedir 14+ días</button>
+      <button class="chip" data-c="nuevos">Nuevos (7 días)</button>
+    </div>
+    <div class="fila" style="margin-bottom:10px">
+      <button class="bt" id="btCopiarTels" style="flex:1">📋 Copiar teléfonos</button>
+      <button class="bt" id="btCsvClientes" style="flex:1">⬇️ Descargar lista</button>
+    </div>
+    <div id="cResumen" class="ayuda" style="font-size:13px;color:var(--gris);margin:0 2px 8px"></div>
+    <div id="listaCli"></div>
+  </section>
+
+  <nav class="nav" id="nav">
+    <button data-v="Pedidos" class="on"><span>🧾</span>Pedidos<em class="badge oculto" id="badgePed"></em></button>
+    <button data-v="Tienda"><span>🏪</span>Tienda</button>
+    <button data-v="Menu"><span>🍽️</span>Menú</button>
+    <button data-v="Metricas" data-solo="admin"><span>📊</span>Métricas</button>
+    <button data-v="Clientes" data-solo="admin"><span>👥</span>Clientes</button>
+  </nav>
+</div>
+
+<!-- Editor de platillo -->
+<div class="velo" id="hPlat">
+  <div class="hoja">
+    <button class="x" data-cerrar>✕</button>
+    <h3 id="epTit">Platillo</h3>
+    <div id="epFotoCaja"></div>
+    <div class="fila" style="margin-top:8px">
+      <label class="bt a" style="flex:1;text-align:center">📷 Cambiar foto<input type="file" accept="image/*" id="epArchivo" style="display:none"></label>
+      <button class="bt" id="epFotoOriginal" style="flex:1">↩ Foto original</button>
+    </div>
+    <div id="epNombreCaja"><label class="l" for="epNombre">Nombre</label><input class="inp" id="epNombre" maxlength="70"></div>
+    <div id="epCatCaja"><label class="l" for="epCat">Categoría</label><select class="inp" id="epCat"></select></div>
+    <label class="l" for="epPrecio">Precio ($) <span id="epPrecioOrig" style="font-weight:600"></span></label>
+    <input class="inp" id="epPrecio" type="number" inputmode="numeric" min="0">
+    <label class="l" for="epDesc">Descripción</label>
+    <textarea class="inp" id="epDesc" rows="4" maxlength="400"></textarea>
+    <div class="togRow"><span>Agotado por ahora</span><label class="sw"><input type="checkbox" id="epAgot"><span></span></label></div>
+    <div class="togRow"><span>Ocultar del menú</span><label class="sw"><input type="checkbox" id="epOcul"><span></span></label></div>
+    <div class="fila" style="margin-top:12px">
+      <button class="bt" id="epRestaurar" style="flex:1">Restaurar original</button>
+      <button class="bt r" id="epBorrar" style="flex:1">Eliminar platillo</button>
+    </div>
+    <button class="bt p full" id="epGuardar" style="margin-top:10px">Guardar</button>
+  </div>
+</div>
+
+<!-- Pedido manual -->
+<div class="velo" id="hManual">
+  <div class="hoja">
+    <button class="x" data-cerrar>✕</button>
+    <h3>Registrar pedido de WhatsApp / teléfono</h3>
+    <p class="ayuda" style="font-size:13px;color:var(--gris);margin:0 0 6px">Así también cuenta en métricas y clientes.</p>
+    <input class="inp" id="pmBuscar" type="search" placeholder="Busca y toca para agregar: gusano, torta…" autocomplete="off">
+    <div class="resultados" id="pmRes"></div>
+    <div id="pmLineas" style="margin-top:8px"></div>
+    <div class="grid2">
+      <div><label class="l" for="pmNombre">Nombre</label><input class="inp" id="pmNombre"></div>
+      <div><label class="l" for="pmTel">Teléfono</label><input class="inp" id="pmTel" type="tel" inputmode="numeric"></div>
+    </div>
+    <div class="chips" style="margin-top:10px" id="pmModo">
+      <button class="chip on" data-m="domicilio">🛵 Domicilio</button>
+      <button class="chip" data-m="recoger">🏃 Recoger</button>
+    </div>
+    <div id="pmDomCaja">
+      <label class="l" for="pmDir">Dirección</label><input class="inp" id="pmDir" placeholder="Calle, número y colonia">
+      <label class="l" for="pmEnvio">Envío ($)</label><input class="inp" id="pmEnvio" type="number" inputmode="numeric" min="0">
+    </div>
+    <div class="grid2">
+      <div><label class="l" for="pmPago">Pago</label><select class="inp" id="pmPago"><option>Efectivo</option><option>Transferencia</option><option>Tarjeta (link de pago)</option></select></div>
+      <div><label class="l" for="pmEstado">Estado</label><select class="inp" id="pmEstado"><option value="confirmado">Preparando</option><option value="entregado">Ya entregado</option></select></div>
+    </div>
+    <label class="l" for="pmNotas">Notas</label><input class="inp" id="pmNotas">
+    <div class="togRow"><span>Acepta promos por WhatsApp</span><label class="sw"><input type="checkbox" id="pmPromos"><span></span></label></div>
+    <div class="tot" id="pmTotal" style="font-weight:800;font-size:16px;margin:10px 0"></div>
+    <button class="bt p full" id="pmGuardar">Guardar pedido</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="menu-base.js?v=1794362623"></script>
+<script src="fb-config.js?v=1794362623"></script>
+<script>
+/* =========================================================
+   Panel de administrador · Grupo Los Panchos
+   ========================================================= */
+const PAGINA = 'https://grupolospanchos.github.io/pedidos/';
+const SUCURSAL = 'Corregidora';
+const $ = id => document.getElementById(id);
+const pesos = n => '$' + Math.round(+n || 0).toLocaleString('es-MX');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const slug = t => String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+const quitarAcentos = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g,'');
+const IMG0 = h => h.startsWith('u:') ? 'https://images.unsplash.com/' + h.slice(2) + '?w=400&q=70&auto=format&fit=crop' : 'https://tb-static.uber.com/prod/image-proc/processed_images/' + h + '/d03e52b3c8af19d8fa8222e23efd9cfa.jpeg';
+const FOTOS = {};
+function IMG(h){ if (!h) return ''; return h.startsWith('fb:') ? (FOTOS[h.slice(3)] || '') : IMG0(h); }
+function toast(t, ms){ const e = $('toast'); e.textContent = t; e.classList.add('on'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('on'), ms || 2600); }
+function abrir(id){ $(id).classList.add('on'); document.body.style.overflow = 'hidden'; }
+function cerrar(id){ $(id).classList.remove('on'); if (!document.querySelector('.velo.on')) document.body.style.overflow = ''; }
+document.addEventListener('click', e => {
+  const x = e.target.closest('[data-cerrar]'); if (x) cerrar(x.closest('.velo').id);
+  else if (e.target.classList.contains('velo')) cerrar(e.target.id);
+  if (!e.target.closest('#menuYo') && !e.target.closest('#btYo')) $('menuYo').classList.add('oculto');
+});
+const pref = (k, v) => { try { if (v === undefined) return JSON.parse(localStorage.getItem('glpp_' + k)); localStorage.setItem('glpp_' + k, JSON.stringify(v)); } catch(e){ return null; } };
+function aleatorio(n, abc){ const c = abc || 'abcdefghijkmnpqrstuvwxyz23456789'; let t = ''; try { const a = new Uint8Array(n); crypto.getRandomValues(a); a.forEach(x => t += c[x % c.length]); } catch(e){ for (let i = 0; i < n; i++) t += c[Math.floor(Math.random() * c.length)]; } return t; }
+
+/* ---------- Tiempo (Querétaro, UTC-6 todo el año) ---------- */
+const OFF = 6 * 3600e3, DIA = 86400e3, CORTE = 5 * 3600e3;   // el "día de trabajo" va de 5:00 a.m. a 5:00 a.m.
+const inicioDia = ms => Math.floor((ms - OFF - CORTE) / DIA) * DIA + CORTE + OFF;
+const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const DIAS_C = ['dom','lun','mar','mié','jue','vie','sáb'];
+const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const local = ms => new Date(ms - OFF);
+function horaDe(ms){ const d = local(ms), h = d.getUTCHours(), m = d.getUTCMinutes(); return ((h + 11) % 12 + 1) + ':' + String(m).padStart(2,'0') + (h < 12 ? ' a.m.' : ' p.m.'); }
+function fechaDe(ms){ const d = local(ms); return DIAS_C[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + MESES[d.getUTCMonth()]; }
+function hace(ms){ const m = Math.max(0, Math.round((Date.now() - ms) / 60000)); if (m < 1) return 'ahorita'; if (m < 60) return 'hace ' + m + ' min'; const h = Math.floor(m / 60); if (h < 24) return 'hace ' + h + ' h ' + (m % 60 ? (m % 60) + ' min' : ''); const d = Math.floor(h / 24); return 'hace ' + d + (d === 1 ? ' día' : ' días'); }
+const aMin = s => { const x = String(s || '0:00').split(':'); return (+x[0]) * 60 + (+x[1] || 0); };
+const hora12 = m => { m = ((m % 1440) + 1440) % 1440; const h = Math.floor(m / 60), mi = m % 60; return ((h + 11) % 12 + 1) + ':' + String(mi).padStart(2,'0') + (h < 12 ? ' a.m.' : ' p.m.'); };
+
+/* ---------- Tienda: mismos cálculos que la página ---------- */
+const TIENDA_DEF = {
+  modo: 'auto', hasta: null, motivo: '',
+  horario: [0,1,2,3,4,5,6].map(() => ({on: true, a: '08:00', c: '02:00'})),
+  aviso: '', promo: {on: true, t: 'Tu primer pedido directo lleva agua de Jamaica GRATIS', s: 'Pide directo y paga precio de mostrador, más barato que en las apps.'},
+  regalo: true, minimo: 0, entrega: 40,
+  envio: {base: 30, km: 5, porKm: 5, factor: 1.3},
+  pagos: {efectivo: true, transferencia: true, tarjeta: true}
+};
+let TIENDA = JSON.parse(JSON.stringify(TIENDA_DEF));
+function completarTienda(t){
+  const x = Object.assign(JSON.parse(JSON.stringify(TIENDA_DEF)), t || {});
+  if (!Array.isArray(x.horario) || x.horario.length !== 7) x.horario = JSON.parse(JSON.stringify(TIENDA_DEF.horario));
+  x.envio = Object.assign({}, TIENDA_DEF.envio, x.envio || {});
+  x.pagos = Object.assign({}, TIENDA_DEF.pagos, x.pagos || {});
+  x.promo = Object.assign({}, TIENDA_DEF.promo, x.promo || {});
+  return x;
+}
+function ventanaDia(d){ const h = TIENDA.horario[d]; if (!h || !h.on) return null; const a = aMin(h.a); let c = aMin(h.c); if (c <= a) c += 1440; return {a, c}; }
+function porHorario(ms){
+  const d = local(ms || Date.now()), dia = d.getUTCDay(), min = d.getUTCHours() * 60 + d.getUTCMinutes();
+  const hoy = ventanaDia(dia); if (hoy && min >= hoy.a && min < hoy.c) return {abierto: true, cierra: hoy.c};
+  const ay = ventanaDia((dia + 6) % 7); if (ay && ay.c > 1440 && min < ay.c - 1440) return {abierto: true, cierra: ay.c - 1440};
+  return {abierto: false};
+}
+const forzado = m => TIENDA.modo === m && (!TIENDA.hasta || Date.now() < TIENDA.hasta);
+function abierto(){ if (forzado('cerrado')) return false; if (forzado('abierto')) return true; return porHorario().abierto; }
+function siguienteApertura(desde){
+  const ref = desde || Date.now(), base = Math.floor((ref - OFF) / DIA) * DIA;
+  for (let i = 0; i < 8; i++){
+    const dia = new Date(base + i * DIA).getUTCDay(), v = ventanaDia(dia); if (!v) continue;
+    const t = base + i * DIA + v.a * 60000 + OFF; if (t > ref) return t;
+  }
+  return null;
+}
+function textoApertura(ms){ if (!ms) return ''; const hoy = Math.floor((Date.now() - OFF) / DIA), d = Math.floor((ms - OFF) / DIA); return (d === hoy ? 'hoy' : d === hoy + 1 ? 'mañana' : 'el ' + DIAS[local(ms).getUTCDay()]) + ' a las ' + horaDe(ms); }
+function cierreHoyMs(){ const p = porHorario(); if (!p.abierto) return null; const base = Math.floor((Date.now() - OFF) / DIA) * DIA; let t = base + p.cierra * 60000 + OFF; if (t < Date.now()) t += DIA; return t; }
+function resumenEstado(){
+  if (forzado('cerrado')){
+    let sub = TIENDA.hasta ? (porHorario(TIENDA.hasta).abierto ? 'Vuelve a abrir sola a las ' + horaDe(TIENDA.hasta) : 'Abre ' + textoApertura(siguienteApertura(TIENDA.hasta))) : 'Cerrada hasta que la vuelvas a abrir';
+    return {abierta: false, tit: 'Cerrada' + (TIENDA.motivo ? ': ' + TIENDA.motivo : ''), sub, manual: true};
+  }
+  if (forzado('abierto')) return {abierta: true, tit: 'Abierta (fuera de horario)', sub: TIENDA.hasta ? 'Hasta las ' + horaDe(TIENDA.hasta) : 'Hasta que la cierres', manual: true};
+  const p = porHorario();
+  if (p.abierto) return {abierta: true, tit: 'Abierta', sub: 'Horario automático · cierra a las ' + hora12(p.cierra), manual: false};
+  return {abierta: false, tit: 'Cerrada por horario', sub: 'Abre ' + textoApertura(siguienteApertura()), manual: false};
+}
+
+/* ---------- Menú (base + cambios del panel) ---------- */
+const MENU_BASE = window.MENU_BASE || [], DESC_BASE = window.DESC_BASE || {};
+let MENU_AJ = {cambios: {}, nuevos: []};
+function itemsMenu(){
+  const out = [];
+  MENU_BASE.forEach(c => c.p.forEach(it => {
+    const k = slug(it[0]), x = MENU_AJ.cambios[k] || {};
+    out.push({k, base: true, c: c.c, i: c.i, n: it[0], p: (x.p != null && x.p !== '') ? +x.p : it[1], p0: it[1], f: x.f != null ? x.f : (it[2] || ''), f0: it[2] || '', d: x.d != null ? x.d : (DESC_BASE[it[0]] || ''), d0: DESC_BASE[it[0]] || '', a: !!x.a, o: !!x.o, editado: Object.keys(x).some(z => ['p','d','f'].includes(z))});
+  }));
+  (MENU_AJ.nuevos || []).forEach(nv => { const c = MENU_BASE.find(c => c.c === nv.c); out.push({k: 'n-' + nv.id, id: nv.id, base: false, c: nv.c, i: c ? c.i : '🍽️', n: nv.n, p: +nv.p || 0, p0: null, f: nv.f || '', f0: '', d: nv.d || '', d0: '', a: !!nv.a, o: !!nv.o, nuevo: true}); });
+  return out;
+}
+const catDe = n => { for (const c of MENU_BASE) if (c.p.some(it => it[0] === n)) return c.c; const nv = (MENU_AJ.nuevos || []).find(x => x.n === n); return nv ? nv.c : 'Otros'; };
+async function cargarFotosFB(lista){
+  const ids = [...new Set(lista.filter(h => h && h.startsWith('fb:')).map(h => h.slice(3)))].filter(id => !FOTOS[id]);
+  for (const id of ids){
+    let u = null; try { u = localStorage.getItem('glp_foto_' + id); } catch(e){}
+    if (!u){ try { u = await API.foto(id); if (u) try { localStorage.setItem('glp_foto_' + id, u); } catch(e){} } catch(e){} }
+    if (u) FOTOS[id] = u;
+  }
+  return ids.length > 0;
+}
+
+/* ---------- Arranque y sesión ---------- */
+let API = window.GLP_ADMIN || null, YO = null, PESTANA = 'Pedidos';
+function mostrar(p){ ['pSetup','pLogin','pNoAuth','pApp'].forEach(x => $(x).classList.toggle('oculto', x !== p)); }
+function iniciar(){
+  API = window.GLP_ADMIN;
+  API.alSesion(u => {
+    YO = u;
+    if (!u){ mostrar('pLogin'); return; }
+    if (!u.rol){ $('naEmail').textContent = u.email; mostrar('pNoAuth'); return; }
+    entrarApp();
+  });
+}
+if (!window.GLP_FB || !window.GLP_FB.firebase) mostrar('pSetup');
+else if (API) iniciar();
+else { window.addEventListener('glp-admin', iniciar, {once: true}); setTimeout(() => { if (!API && !window.GLP_ADMIN) mostrar('pSetup'); }, 15000); }
+
+$('btEntrar').onclick = async () => {
+  $('loginErr').style.display = 'none';
+  try { await API.entrar(); }
+  catch(e){ $('loginErr').textContent = 'No se pudo entrar: ' + (e && (e.code || e.message) || 'error') + '. Si se bloqueó la ventana emergente, permítela e inténtalo otra vez.'; $('loginErr').style.display = 'block'; }
+};
+$('btSalir').onclick = $('btSalir2').onclick = () => API.salir();
+$('btYo').onclick = () => $('menuYo').classList.toggle('oculto');
+
+let iniciado = false;
+async function entrarApp(){
+  mostrar('pApp');
+  $('btYo').innerHTML = YO.foto ? '<img src="' + esc(YO.foto) + '" alt="">' : esc((YO.nombre || YO.email)[0].toUpperCase());
+  $('yoNombre').textContent = YO.nombre || ''; $('yoEmail').textContent = YO.email; $('yoRol').textContent = {'dueño':'Dueño', admin:'Admin', cocina:'Cocina'}[YO.rol] || YO.rol;
+  const esCocina = YO.rol === 'cocina';
+  document.querySelectorAll('#nav [data-solo=admin]').forEach(b => b.classList.toggle('oculto', esCocina));
+  $('tiendaAjustes').classList.toggle('oculto', esCocina);
+  $('cEquipo').classList.toggle('oculto', YO.rol !== 'dueño');
+  $('btNuevoPlat').classList.toggle('oculto', esCocina);
+  if (iniciado) return; iniciado = true;
+  try { const a = await API.ajustes(); TIENDA = completarTienda(a.tienda); MENU_AJ = Object.assign({cambios: {}, nuevos: []}, a.menu || {}); } catch(e){ toast('No se pudieron leer los ajustes'); }
+  API.escucharTienda(t => { TIENDA = completarTienda(t); pintarTop(); if (PESTANA === 'Tienda') pintarEstadoTienda(); });
+  pintarTop(); setInterval(pintarTop, 30000);
+  iniciarPedidos();
+  if (YO.rol === 'dueño') pintarEquipo();
+  irA(pref('pestana') && !(esCocina && ['Metricas','Clientes'].includes(pref('pestana'))) ? pref('pestana') : 'Pedidos');
+}
+function irA(v){
+  PESTANA = v; pref('pestana', v);
+  ['Pedidos','Tienda','Menu','Metricas','Clientes'].forEach(x => $('v' + x).classList.toggle('oculto', x !== v));
+  document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  window.scrollTo(0, 0);
+  if (v === 'Tienda') pintarTienda();
+  if (v === 'Menu') pintarMenu();
+  if (v === 'Metricas') cargarMetricas();
+  if (v === 'Clientes') cargarClientes();
+}
+$('nav').onclick = e => { const b = e.target.closest('button'); if (b) irA(b.dataset.v); };
+function pintarTop(){
+  const r = resumenEstado(), b = $('topEstado');
+  b.classList.toggle('cerrado', !r.abierta);
+  b.querySelector('span').textContent = r.abierta ? 'Abierta' : 'Cerrada';
+}
+$('topEstado').onclick = () => irA('Tienda');
+
+/* =========================================================
+   PEDIDOS
+   ========================================================= */
+let PEDIDOS = [], filtroPed = 'activos', vistos = new Set(), primeraCarga = true, alarma = null, audio = null;
+const ACTIVOS = ['nuevo','confirmado','camino','listo'];
+const NOM_EDO = {nuevo:'Nuevo', confirmado:'Preparando', camino:'En camino', listo:'Listo para recoger', entregado:'Entregado', cancelado:'Cancelado'};
+const minSel = {};   // minutos elegidos por pedido
+function iniciarPedidos(){
+  pintarBotonesPed();
+  API.escucharPedidos(Date.now() - 2 * DIA, (lista, err) => {
+    if (!lista){ $('listaPed').innerHTML = '<div class="vacio">No se pudieron leer los pedidos (' + esc(err && (err.code || err.message)) + ').</div>'; return; }
+    const nuevos = lista.filter(p => p.estado === 'nuevo' && !vistos.has(p.id));
+    lista.forEach(p => vistos.add(p.id));
+    PEDIDOS = lista;
+    if (!primeraCarga && nuevos.length) avisarNuevo(nuevos);
+    primeraCarga = false;
+    pintarPedidos();
+  });
+  setInterval(() => { if (PESTANA === 'Pedidos') pintarPedidos(); revisarAlarma(); }, 30000);
+}
+function pintarBotonesPed(){
+  $('btSonido').textContent = pref('sonido') ? '🔔' : '🔕'; $('btSonido').classList.toggle('on', !!pref('sonido'));
+  $('btAvisoAuto').classList.toggle('on', pref('avisoAuto') !== false);
+  $('btPantalla').classList.toggle('on', !!wakeLock);
+}
+$('filtroPed').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; filtroPed = b.dataset.f; document.querySelectorAll('#filtroPed .chip').forEach(x => x.classList.toggle('on', x === b)); pintarPedidos(); };
+$('btSonido').onclick = () => { const on = !pref('sonido'); pref('sonido', on); if (on){ asegurarAudio(); pitido(); toast('Sonido activado: suena cuando llega un pedido'); } pintarBotonesPed(); };
+$('btAvisoAuto').onclick = () => { const on = pref('avisoAuto') === false; pref('avisoAuto', on); toast(on ? 'Al cambiar el estado se abre WhatsApp con el mensaje para el cliente' : 'Ya no se abre WhatsApp al cambiar el estado'); pintarBotonesPed(); };
+let wakeLock = null;
+$('btPantalla').onclick = async () => {
+  if (wakeLock){ try { await wakeLock.release(); } catch(e){} wakeLock = null; pref('pantalla', false); toast('La pantalla se puede apagar'); }
+  else { await pedirPantalla(); pref('pantalla', !!wakeLock); toast(wakeLock ? 'La pantalla se queda encendida mientras el panel esté abierto' : 'Este celular no permite mantener la pantalla encendida'); }
+  pintarBotonesPed();
+};
+async function pedirPantalla(){ try { if ('wakeLock' in navigator){ wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; pintarBotonesPed(); }); } } catch(e){ wakeLock = null; } }
+document.addEventListener('visibilitychange', () => { if (!document.hidden && pref('pantalla') && !wakeLock) pedirPantalla().then(pintarBotonesPed); });
+function asegurarAudio(){ try { if (!audio) audio = new (window.AudioContext || window.webkitAudioContext)(); if (audio.state === 'suspended') audio.resume(); } catch(e){} }
+function pitido(){
+  if (!pref('sonido')) return; asegurarAudio(); if (!audio) return;
+  const t0 = audio.currentTime;
+  [0, .22, .44].forEach((d, i) => { const o = audio.createOscillator(), g = audio.createGain(); o.type = 'square'; o.frequency.value = i === 2 ? 1320 : 990; g.gain.setValueAtTime(.0001, t0 + d); g.gain.exponentialRampToValueAtTime(.25, t0 + d + .02); g.gain.exponentialRampToValueAtTime(.0001, t0 + d + .18); o.connect(g).connect(audio.destination); o.start(t0 + d); o.stop(t0 + d + .2); });
+}
+function avisarNuevo(nuevos){
+  pitido(); try { navigator.vibrate && navigator.vibrate([300, 120, 300]); } catch(e){}
+  toast('🔔 Pedido nuevo #' + nuevos[0].folio + ' · ' + pesos(nuevos[0].total), 5000);
+  try { if (document.hidden && 'Notification' in window && Notification.permission === 'granted') new Notification('Pedido nuevo #' + nuevos[0].folio, {body: (nuevos[0].nombre || '') + ' · ' + pesos(nuevos[0].total), icon: 'icon-192.png'}); } catch(e){}
+  revisarAlarma();
+}
+function revisarAlarma(){
+  const pend = PEDIDOS.filter(p => p.estado === 'nuevo').length;
+  document.title = (pend ? '(' + pend + ') ' : '') + 'Panel · Grupo Los Panchos';
+  const b = $('badgePed'); b.textContent = pend; b.classList.toggle('oculto', !pend);
+  clearInterval(alarma); alarma = null;
+  if (pend && pref('sonido')) alarma = setInterval(() => { if (PEDIDOS.some(p => p.estado === 'nuevo')) pitido(); else { clearInterval(alarma); alarma = null; } }, 25000);
+}
+function filtrarPed(){
+  const hoy = inicioDia(Date.now());
+  if (filtroPed === 'activos') return PEDIDOS.filter(p => ACTIVOS.includes(p.estado)).sort((a, b) => (ACTIVOS.indexOf(a.estado) - ACTIVOS.indexOf(b.estado)) || (a.ts - b.ts));
+  if (filtroPed === 'hoy') return PEDIDOS.filter(p => p.ts >= hoy);
+  return PEDIDOS.filter(p => p.ts >= hoy - DIA && p.ts < hoy);
+}
+function pintarPedidos(){
+  revisarAlarma();
+  const l = filtrarPed();
+  const conteo = PEDIDOS.filter(p => ACTIVOS.includes(p.estado)).length;
+  document.querySelector('#filtroPed [data-f=activos]').textContent = 'Activos' + (conteo ? ' (' + conteo + ')' : '');
+  if (!l.length){ $('listaPed').innerHTML = '<div class="vacio">' + (filtroPed === 'activos' ? 'No hay pedidos pendientes. 🙌<br><small>Los pedidos nuevos aparecen aquí solos' + (pref('sonido') ? ' y suena la alarma.' : '. Activa la 🔔 para que suene.') + '</small>' : 'Sin pedidos en este día.') + '</div>'; return; }
+  const tot = l.filter(p => !['cancelado','nuevo'].includes(p.estado)).reduce((a, p) => a + (+p.total || 0), 0);
+  $('listaPed').innerHTML = (filtroPed !== 'activos' ? '<p class="ayuda" style="font-size:13.5px;color:var(--gris);margin:0 2px 10px">' + l.length + ' pedidos · ventas confirmadas ' + pesos(tot) + '</p>' : '') + l.map(tarjeta).join('');
+}
+function tarjeta(p){
+  const rec = p.modo === 'recoger', min = Math.round((Date.now() - p.ts) / 60000);
+  const tarde = (p.estado === 'nuevo' && min >= 5) || (p.estado === 'confirmado' && min >= (+TIENDA.entrega || 40) + 15);
+  const tel = String(p.tel || '').replace(/\D/g, '');
+  const lin = (p.items || []).map(i => '<li><b>' + i.q + '×</b><span>' + esc(i.n) + (i.nota ? '<small>↳ ' + esc(i.nota) + '</small>' : '') + '</span><i>' + pesos(i.q * i.p) + '</i></li>').join('');
+  let dir = '';
+  if (rec) dir = '<div class="lin">🏃 <b>Pasa a recoger:</b> ' + esc(p.hora || 'Lo antes posible') + '</div>';
+  else {
+    dir = '<div class="lin">📍 ' + esc([p.calle, p.colonia].filter(Boolean).join(', ') || 'Dirección por WhatsApp') + (p.refs ? '<br><small>Ref: ' + esc(p.refs) + '</small>' : '') + '</div>';
+    const ligas = [];
+    if (p.gps) ligas.push('<a href="https://www.google.com/maps/dir/?api=1&destination=' + p.gps.lat + ',' + p.gps.lng + '&travelmode=driving" target="_blank" rel="noopener">🛵 Ruta en Maps</a>');
+    else if (p.calle) ligas.push('<a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent([p.calle, p.colonia, 'Querétaro'].join(', ')) + '" target="_blank" rel="noopener">🗺️ Buscar en Maps</a>');
+    if (ligas.length) dir += '<div class="lin">' + ligas.join(' · ') + '</div>';
+  }
+  const camb = p.pago === 'Efectivo' && p.cambio ? ' · paga con $' + esc(p.cambio) + ((+p.cambio > +p.total) ? ' → cambio <b>' + pesos(+p.cambio - +p.total) + '</b>' : '') : '';
+  let acc = '';
+  const ms = minSel[p.id] || +TIENDA.entrega || 40;
+  if (p.estado === 'nuevo'){
+    acc = '<div class="mins"><span>' + (rec ? 'Listo en:' : 'Llega en:') + '</span>' + [15, 20, 30, 40, 50, 60].map(m => '<button data-min="' + m + '" data-id="' + p.id + '" class="' + (m === ms ? 'on' : '') + '">' + m + '</button>').join('') + '<span>min</span></div>' +
+      '<div class="acc"><button class="bt v" data-acc="confirmado" data-id="' + p.id + '">✅ Confirmar</button><button class="bt r" data-acc="cancelado" data-id="' + p.id + '">✕ Cancelar</button></div>';
+  } else if (p.estado === 'confirmado'){
+    acc = '<div class="acc">' + (rec ? '<button class="bt a" data-acc="listo" data-id="' + p.id + '">🏃 Ya está listo</button>' : '<button class="bt a" data-acc="camino" data-id="' + p.id + '">🛵 Salió a entregar</button>') + '<button class="bt r" data-acc="cancelado" data-id="' + p.id + '">✕ Cancelar</button></div>';
+  } else if (p.estado === 'camino' || p.estado === 'listo'){
+    acc = '<div class="acc"><button class="bt v" data-acc="entregado" data-id="' + p.id + '">✔ Entregado</button></div>';
+  }
+  acc += '<div class="acc">' + (tel ? '<button class="bt w" data-wa="' + p.id + '">💬 Avisar al cliente</button>' : '') + '<button class="bt" data-ticket="' + p.id + '">🖨️ Ticket</button></div>';
+  return '<div class="ped e-' + p.estado + '">' +
+    '<div class="ph"><b>#' + esc(p.folio) + '</b><span class="tag ' + p.estado + '">' + NOM_EDO[p.estado] + '</span><span class="tag">' + (rec ? '🏃 Recoger' : '🛵 Domicilio') + '</span>' + (p.canal === 'whatsapp' ? '<span class="tag wa">WhatsApp</span>' : '') + '<span class="hace' + (tarde ? ' tarde' : '') + '">' + horaDe(p.ts) + ' · ' + hace(p.ts) + '</span></div>' +
+    '<div class="cli">👤 <b>' + esc(p.nombre || 'Sin nombre') + '</b>' + (tel ? ' · <a href="tel:' + tel + '">📞 ' + tel.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') + '</a>' : '') + (p.promos ? ' · <span class="tag" style="font-size:11px">promos ✅</span>' : '') + '</div>' +
+    '<ul>' + lin + (p.regalo ? '<li><b>1×</b><span>Agua de Jamaica <small>REGALO 1er pedido</small></span><i>$0</i></li>' : '') + '</ul>' +
+    '<div class="tot">Comida ' + pesos(p.subtotal) + (rec ? '' : ' · Envío ' + (p.envio != null ? pesos(p.envio) + (p.km ? ' (' + p.km + ' km)' : '') : '<b>por confirmar</b>')) + ' · <b>Total ' + pesos(p.total) + '</b></div>' +
+    '<div class="lin">' + ({Efectivo:'💵', Transferencia:'🏦'}[p.pago] || '💳') + ' ' + esc(p.pago || '') + camb + '</div>' +
+    dir + (p.notas ? '<div class="lin">📝 ' + esc(p.notas) + '</div>' : '') +
+    (p.min && p.estado !== 'nuevo' ? '<div class="lin" style="color:var(--gris)">⏱️ Le dijimos ' + p.min + ' min' + (p.t_confirmado ? ' (confirmado ' + horaDe(p.t_confirmado) + ')' : '') + '</div>' : '') +
+    acc + '</div>';
+}
+const confirmarDoble = {};
+$('listaPed').onclick = async e => {
+  const m = e.target.closest('[data-min]');
+  if (m){ minSel[m.dataset.id] = +m.dataset.min; pintarPedidos(); return; }
+  const w = e.target.closest('[data-wa]');
+  if (w){ const p = PEDIDOS.find(x => x.id === w.dataset.wa); if (p) window.open(ligaWa(p, p.estado), '_blank'); return; }
+  const t = e.target.closest('[data-ticket]');
+  if (t){ const p = PEDIDOS.find(x => x.id === t.dataset.ticket); if (p) imprimir(p); return; }
+  const a = e.target.closest('[data-acc]'); if (!a) return;
+  const p = PEDIDOS.find(x => x.id === a.dataset.id); if (!p) return;
+  const edo = a.dataset.acc;
+  if (edo === 'cancelado' && confirmarDoble[p.id] !== true){ confirmarDoble[p.id] = true; a.textContent = '¿Seguro? Toca otra vez'; setTimeout(() => { confirmarDoble[p.id] = false; pintarPedidos(); }, 4000); return; }
+  const extra = edo === 'confirmado' ? {min: minSel[p.id] || +TIENDA.entrega || 40} : {};
+  const tel = String(p.tel || '').replace(/\D/g, '');
+  if (pref('avisoAuto') !== false && tel && edo !== 'cancelado') window.open(ligaWa(Object.assign({}, p, extra), edo), '_blank');
+  a.disabled = true;
+  try { await API.cambiarEstado(p.id, edo, extra); toast('#' + p.folio + ': ' + NOM_EDO[edo]); }
+  catch(err){ toast('No se guardó: ' + (err.code || err.message)); a.disabled = false; }
+};
+function ligaWa(p, edo){
+  const tel = String(p.tel || '').replace(/\D/g, '').slice(-10);
+  const link = PAGINA + '?p=' + p.folio + '&k=' + p.id;
+  const ver = '\n👇 *TOCA AQUÍ PARA VER TU PEDIDO* 👇\n' + link;
+  const rec = p.modo === 'recoger';
+  const txt = {
+    nuevo: 'Hola ' + (p.nombre || '') + ', recibimos tu pedido *#' + p.folio + '* 🙌' + ver,
+    confirmado: '✅ *¡Pedido #' + p.folio + ' confirmado!* Ya lo estamos preparando. ' + (rec ? 'Estará listo en aprox. ' : 'Llega en aprox. ') + (p.min || TIENDA.entrega) + ' min.' + (!rec && p.envio != null ? '\nTotal a pagar: *' + pesos(p.total) + '* (con envío).' : rec ? '\nTotal a pagar: *' + pesos(p.total) + '*.' : '') + ver,
+    camino: '🛵 *¡Tu pedido #' + p.folio + ' va en camino!*' + (p.pago === 'Efectivo' ? '\nTotal a pagar: *' + pesos(p.total) + '*.' : '') + ver,
+    listo: '🏃 *¡Tu pedido #' + p.folio + ' está listo para recoger!*\nTe esperamos en Prol. Corregidora Nte. 180, El Cerrito.' + ver,
+    entregado: '🙏 ¡Gracias por tu pedido, ' + (p.nombre || '') + '! Esperamos que lo disfrutes. Cuando quieras, pide otra vez aquí: ' + PAGINA,
+    cancelado: 'Hola ' + (p.nombre || '') + ', tu pedido #' + p.folio + ' se canceló. Si tienes dudas, escríbenos por aquí.'
+  }[edo] || '';
+  return 'https://wa.me/52' + tel + '?text=' + encodeURIComponent(txt);
+}
+function imprimir(p){
+  const ancho = pref('ticket58') ? 54 : 72;
+  const lin = (p.items || []).map(i => '<tr><td>' + i.q + ' ' + esc(i.n) + (i.nota ? '<br><i>  &gt; ' + esc(i.nota) + '</i>' : '') + '</td><td class="r">' + pesos(i.q * i.p) + '</td></tr>').join('');
+  const html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Ticket #' + esc(p.folio) + '</title><style>@page{margin:0}body{font-family:monospace;width:' + ancho + 'mm;margin:3mm;font-size:13px;color:#000}h1{font-size:17px;text-align:center;margin:0}h2{font-size:22px;text-align:center;margin:4px 0}.c{text-align:center}hr{border:0;border-top:1px dashed #000;margin:6px 0}table{width:100%;border-collapse:collapse}td{vertical-align:top;padding:1px 0}td.r{text-align:right;white-space:nowrap}b{font-weight:bold}</style></head><body>' +
+    '<h1>GRUPO LOS PANCHOS</h1><div class="c">Sucursal ' + SUCURSAL + '</div><h2>#' + esc(p.folio) + '</h2><div class="c"><b>' + (p.modo === 'recoger' ? 'PARA RECOGER' : 'A DOMICILIO') + '</b><br>' + fechaDe(p.ts) + ' ' + horaDe(p.ts) + '</div><hr>' +
+    '<table>' + lin + (p.regalo ? '<tr><td>1 Agua de Jamaica (REGALO)</td><td class="r">$0</td></tr>' : '') + '</table><hr>' +
+    '<table><tr><td>Comida</td><td class="r">' + pesos(p.subtotal) + '</td></tr>' + (p.modo === 'recoger' ? '' : '<tr><td>Envío</td><td class="r">' + (p.envio != null ? pesos(p.envio) : 'por confirmar') + '</td></tr>') + '<tr><td><b>TOTAL</b></td><td class="r"><b>' + pesos(p.total) + '</b></td></tr></table><hr>' +
+    '<div>Pago: ' + esc(p.pago || '') + (p.cambio ? ' (paga con $' + esc(p.cambio) + ')' : '') + '</div>' +
+    '<div>Cliente: ' + esc(p.nombre || '') + '<br>Tel: ' + esc(p.tel || '') + '</div>' +
+    (p.modo === 'recoger' ? '<div>Pasa: ' + esc(p.hora || '') + '</div>' : '<div>' + esc([p.calle, p.colonia].filter(Boolean).join(', ')) + (p.refs ? '<br>Ref: ' + esc(p.refs) : '') + '</div>') +
+    (p.notas ? '<hr><div>Notas: ' + esc(p.notas) + '</div>' : '') + '<hr><div class="c">¡Gracias por pedir directo!<br>grupolospanchos.github.io/pedidos</div>' +
+    '<script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script></body></html>';
+  const w = window.open('', '_blank');
+  if (!w){ toast('Permite las ventanas emergentes para imprimir'); return; }
+  w.document.open(); w.document.write(html); w.document.close();
+}
+
+/* ---------- Pedido manual (WhatsApp / teléfono) ---------- */
+let PM = {lineas: {}, modo: 'domicilio'};
+$('btManual').onclick = () => {
+  PM = {lineas: {}, modo: 'domicilio'};
+  ['pmBuscar','pmNombre','pmTel','pmDir','pmNotas'].forEach(i => $(i).value = '');
+  $('pmEnvio').value = TIENDA.envio.base; $('pmEstado').value = 'confirmado'; $('pmPromos').checked = false; $('pmRes').innerHTML = '';
+  document.querySelectorAll('#pmModo .chip').forEach(c => c.classList.toggle('on', c.dataset.m === 'domicilio'));
+  $('pmDomCaja').classList.remove('oculto');
+  pintarPM(); abrir('hManual');
+};
+$('pmBuscar').oninput = () => {
+  const q = quitarAcentos($('pmBuscar').value.trim().toLowerCase());
+  if (!q){ $('pmRes').innerHTML = ''; return; }
+  const r = itemsMenu().filter(i => !i.o && quitarAcentos((i.n + ' ' + i.c).toLowerCase()).includes(q)).slice(0, 8);
+  $('pmRes').innerHTML = r.map(i => '<button data-add="' + esc(i.k) + '"><span>' + esc(i.n) + (i.a ? ' (agotado)' : '') + '</span><b>' + pesos(i.p) + '</b></button>').join('') || '<p class="ayuda">Sin resultados</p>';
+};
+$('pmRes').onclick = e => { const b = e.target.closest('[data-add]'); if (!b) return; PM.lineas[b.dataset.add] = (PM.lineas[b.dataset.add] || 0) + 1; $('pmBuscar').value = ''; $('pmRes').innerHTML = ''; pintarPM(); $('pmBuscar').focus(); };
+$('pmLineas').onclick = e => { const b = e.target.closest('[data-d]'); if (!b) return; const k = b.dataset.k; PM.lineas[k] = Math.max(0, (PM.lineas[k] || 0) + (+b.dataset.d)); if (!PM.lineas[k]) delete PM.lineas[k]; pintarPM(); };
+$('pmModo').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; PM.modo = b.dataset.m; document.querySelectorAll('#pmModo .chip').forEach(c => c.classList.toggle('on', c === b)); $('pmDomCaja').classList.toggle('oculto', PM.modo !== 'domicilio'); pintarPM(); };
+$('pmEnvio').oninput = pintarPM;
+function totalPM(){ const items = itemsMenu(); let t = 0; for (const k in PM.lineas){ const i = items.find(x => x.k === k); if (i) t += i.p * PM.lineas[k]; } const env = PM.modo === 'domicilio' ? (+$('pmEnvio').value || 0) : 0; return {t, env}; }
+function pintarPM(){
+  const items = itemsMenu();
+  $('pmLineas').innerHTML = Object.keys(PM.lineas).map(k => { const i = items.find(x => x.k === k); if (!i) return ''; return '<div class="lineaM"><button data-k="' + esc(k) + '" data-d="-1">−</button><b>' + PM.lineas[k] + '</b><button data-k="' + esc(k) + '" data-d="1">+</button><span>' + esc(i.n) + '</span><b>' + pesos(i.p * PM.lineas[k]) + '</b></div>'; }).join('');
+  const {t, env} = totalPM();
+  $('pmTotal').textContent = t ? 'Comida ' + pesos(t) + (env ? ' + envío ' + pesos(env) : '') + ' = Total ' + pesos(t + env) : 'Agrega al menos un platillo';
+}
+$('pmGuardar').onclick = async () => {
+  const items = itemsMenu(), lineas = Object.keys(PM.lineas).map(k => { const i = items.find(x => x.k === k); return i ? {n: i.n, q: PM.lineas[k], p: i.p, nota: ''} : null; }).filter(Boolean);
+  if (!lineas.length){ toast('Agrega al menos un platillo'); return; }
+  const {t, env} = totalPM(), estado = $('pmEstado').value, folio = aleatorio(4, 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), k = aleatorio(20);
+  const pedido = {folio, estado, modo: PM.modo, items: lineas, subtotal: t, envio: PM.modo === 'domicilio' ? env : null, km: null, total: t + env,
+    nombre: $('pmNombre').value.trim(), tel: $('pmTel').value.replace(/\D/g, '').slice(-10), calle: PM.modo === 'domicilio' ? $('pmDir').value.trim() : '', colonia: '', refs: '', gps: null,
+    hora: '', pago: $('pmPago').value, cambio: '', notas: $('pmNotas').value.trim(), promos: $('pmPromos').checked, regalo: false, sucursal: SUCURSAL, canal: 'whatsapp', v: 1, min: estado === 'confirmado' ? +TIENDA.entrega || 40 : null};
+  $('pmGuardar').disabled = true;
+  try { await API.pedidoManual(k, pedido, {folio, estado, modo: PM.modo, min: pedido.min}); cerrar('hManual'); toast('Pedido #' + folio + ' registrado'); }
+  catch(e){ toast('No se guardó: ' + (e.code || e.message)); }
+  $('pmGuardar').disabled = false;
+};
+
+/* =========================================================
+   TIENDA
+   ========================================================= */
+let abriendoOpc = null;
+function pintarTienda(){ pintarEstadoTienda(); llenarFormTienda(); }
+function pintarEstadoTienda(){
+  const r = resumenEstado();
+  $('egCaja').classList.toggle('cerrado', !r.abierta);
+  $('egTit').textContent = r.tit; $('egSub').textContent = r.sub;
+  let h = '';
+  if (abriendoOpc === 'cerrar'){
+    h = '<label class="l" for="egMotivo">Motivo (lo ven los clientes, opcional)</label><input class="inp" id="egMotivo" maxlength="60" placeholder="Ej. se nos acabó el gas">' +
+      '<div class="chips" style="margin-top:8px">' + ['Mucha demanda','Se acabó el gas','Día de descanso','Volvemos pronto'].map(t => '<button class="chip" data-mot="' + t + '">' + t + '</button>').join('') + '</div>' +
+      '<p class="ayuda" style="margin:12px 0 0">¿Por cuánto tiempo?</p><div class="opciones">' +
+      [['30m','30 min'],['1h','1 hora'],['2h','2 horas'],['dia','Resto del día'],['siempre','Hasta que yo abra']].map(o => '<button class="bt r" data-cerrar-por="' + o[0] + '">' + o[1] + '</button>').join('') + '</div>' +
+      '<button class="bt full" data-cancelar style="margin-top:8px">Cancelar</button>';
+  } else if (abriendoOpc === 'abrir'){
+    h = '<p class="ayuda" style="margin:12px 0 0">Abrir fuera de horario ¿por cuánto tiempo?</p><div class="opciones">' +
+      [['1h','1 hora'],['2h','2 horas'],['4h','4 horas'],['siempre','Hasta que yo cierre']].map(o => '<button class="bt v" data-abrir-por="' + o[0] + '">' + o[1] + '</button>').join('') + '</div>' +
+      '<button class="bt full" data-cancelar style="margin-top:8px">Cancelar</button>';
+  } else {
+    h = '<div class="opciones">';
+    if (r.abierta) h += '<button class="bt r" data-op="cerrar">🔴 Cerrar ahora</button>';
+    else if (r.manual) h += '<button class="bt v" data-op="reabrir">🟢 Abrir ya</button>';
+    else h += '<button class="bt v" data-op="abrir">🟢 Abrir fuera de horario</button>';
+    if (r.manual) h += '<button class="bt" data-op="auto">↩ Volver al horario automático</button>';
+    h += '</div>';
+  }
+  $('egAcciones').innerHTML = h;
+}
+$('egAcciones').onclick = async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.op === 'cerrar' || b.dataset.op === 'abrir'){ abriendoOpc = b.dataset.op; pintarEstadoTienda(); return; }
+  if (b.hasAttribute('data-cancelar')){ abriendoOpc = null; pintarEstadoTienda(); return; }
+  if (b.dataset.mot){ $('egMotivo').value = b.dataset.mot; return; }
+  let cambio = null;
+  const dur = {'30m': 30*60e3, '1h': 3600e3, '2h': 2*3600e3, '4h': 4*3600e3};
+  if (b.dataset.cerrarPor){ const k = b.dataset.cerrarPor; cambio = {modo: 'cerrado', motivo: ($('egMotivo').value || '').trim(), hasta: k === 'siempre' ? null : k === 'dia' ? siguienteApertura(cierreHoyMs() || Date.now()) : Date.now() + dur[k]}; }
+  if (b.dataset.abrirPor){ const k = b.dataset.abrirPor; cambio = {modo: 'abierto', motivo: '', hasta: k === 'siempre' ? null : Date.now() + dur[k]}; }
+  if (b.dataset.op === 'reabrir') cambio = porHorario().abierto ? {modo: 'auto', hasta: null, motivo: ''} : {modo: 'abierto', hasta: null, motivo: ''};
+  if (b.dataset.op === 'auto') cambio = {modo: 'auto', hasta: null, motivo: ''};
+  if (!cambio) return;
+  b.disabled = true;
+  try { TIENDA = completarTienda(Object.assign({}, TIENDA, cambio)); await API.guardarTienda(TIENDA); abriendoOpc = null; toast(abierto() ? '🟢 La tienda está abierta' : '🔴 La tienda está cerrada'); }
+  catch(err){ toast('No se guardó: ' + (err.code || err.message)); }
+  pintarTop(); pintarEstadoTienda();
+};
+function llenarFormTienda(){
+  const t = TIENDA;
+  $('horario').innerHTML = t.horario.map((h, i) => { const d = (i + 1) % 7; const x = t.horario[d]; return '<div class="dia' + (x.on ? '' : ' off') + '" data-d="' + d + '"><b>' + DIAS_C[d] + '</b><input class="inp" type="time" data-k="a" value="' + x.a + '"><input class="inp" type="time" data-k="c" value="' + x.c + '"><label class="sw" style="justify-self:end"><input type="checkbox" data-k="on"' + (x.on ? ' checked' : '') + '><span></span></label></div>'; }).join('');
+  $('tAviso').value = t.aviso || '';
+  $('tPromoOn').checked = !!t.promo.on; $('tPromoT').value = t.promo.t || ''; $('tPromoS').value = t.promo.s || ''; $('tRegalo').checked = !!t.regalo;
+  $('tBase').value = t.envio.base; $('tKm').value = t.envio.km; $('tPorKm').value = t.envio.porKm; $('tFactor').value = t.envio.factor;
+  $('tMinimo').value = t.minimo || 0; $('tEntrega').value = t.entrega || 40;
+  $('tEfectivo').checked = !!t.pagos.efectivo; $('tTransf').checked = !!t.pagos.transferencia; $('tTarjeta').checked = !!t.pagos.tarjeta;
+}
+$('horario').onchange = e => { const r = e.target.closest('.dia'); if (r && e.target.dataset.k === 'on') r.classList.toggle('off', !e.target.checked); };
+$('btCopiarHorario').onclick = () => { const lun = $('horario').querySelector('[data-d="1"]'); const a = lun.querySelector('[data-k=a]').value, c = lun.querySelector('[data-k=c]').value; $('horario').querySelectorAll('.dia').forEach(r => { r.querySelector('[data-k=a]').value = a; r.querySelector('[data-k=c]').value = c; r.querySelector('[data-k=on]').checked = true; r.classList.remove('off'); }); toast('Listo. Toca "Guardar cambios" para aplicarlo'); };
+$('sugAviso').onclick = e => { const b = e.target.closest('[data-t]'); if (b) $('tAviso').value = b.dataset.t; };
+$('btGuardarTienda').onclick = async () => {
+  const hor = TIENDA.horario.map(x => Object.assign({}, x));
+  $('horario').querySelectorAll('.dia').forEach(r => { const d = +r.dataset.d; hor[d] = {on: r.querySelector('[data-k=on]').checked, a: r.querySelector('[data-k=a]').value || '08:00', c: r.querySelector('[data-k=c]').value || '02:00'}; });
+  const pagos = {efectivo: $('tEfectivo').checked, transferencia: $('tTransf').checked, tarjeta: $('tTarjeta').checked};
+  if (!pagos.efectivo && !pagos.transferencia && !pagos.tarjeta){ toast('Deja al menos una forma de pago'); return; }
+  const num = (id, def) => { const v = parseFloat($(id).value); return isNaN(v) ? def : v; };
+  const nueva = Object.assign({}, TIENDA, {
+    horario: hor, aviso: $('tAviso').value.trim(),
+    promo: {on: $('tPromoOn').checked, t: $('tPromoT').value.trim(), s: $('tPromoS').value.trim()}, regalo: $('tRegalo').checked,
+    envio: {base: num('tBase', 30), km: num('tKm', 5), porKm: num('tPorKm', 5), factor: Math.min(2, Math.max(1, num('tFactor', 1.3)))},
+    minimo: Math.max(0, num('tMinimo', 0)), entrega: Math.max(5, num('tEntrega', 40)), pagos
+  });
+  $('btGuardarTienda').disabled = true;
+  try { await API.guardarTienda(nueva); TIENDA = completarTienda(nueva); toast('✅ Guardado. La página ya muestra los cambios'); pintarTienda(); pintarTop(); }
+  catch(e){ toast('No se guardó: ' + (e.code || e.message)); }
+  $('btGuardarTienda').disabled = false;
+};
+async function pintarEquipo(){
+  try {
+    const l = await API.admins();
+    $('listaEquipo').innerHTML = '<li><span><b>' + esc(YO.email) + '</b><br><small>Dueño (tú)</small></span></li>' + l.map(a => '<li><span><b>' + esc(a.nombre || a.id) + '</b><br><small>' + esc(a.id) + ' · ' + (a.rol === 'admin' ? 'Admin' : 'Cocina') + '</small></span><button class="bt r" data-quitar="' + esc(a.id) + '" style="padding:8px 10px">Quitar</button></li>').join('');
+  } catch(e){ $('listaEquipo').innerHTML = '<li>No se pudo leer el equipo</li>'; }
+}
+$('listaEquipo').onclick = async e => { const b = e.target.closest('[data-quitar]'); if (!b) return; if (b.dataset.ok !== '1'){ b.dataset.ok = '1'; b.textContent = '¿Seguro?'; return; } try { await API.quitarAdmin(b.dataset.quitar); toast('Quitado del equipo'); pintarEquipo(); } catch(err){ toast('No se pudo: ' + (err.code || err.message)); } };
+$('btAgregarEq').onclick = async () => {
+  const email = $('eqEmail').value.trim().toLowerCase();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ toast('Escribe un correo válido'); return; }
+  if (email === YO.email){ toast('Ese es tu correo: tú ya eres el dueño'); return; }
+  try { await API.agregarAdmin(email, $('eqNombre').value.trim() || email, $('eqRol').value); $('eqEmail').value = ''; $('eqNombre').value = ''; toast('Agregado. Ya puede entrar con ese correo'); pintarEquipo(); }
+  catch(e){ toast('No se pudo: ' + (e.code || e.message)); }
+};
+
+/* =========================================================
+   MENÚ
+   ========================================================= */
+let mCat = 'todas', mSoloAgot = false, epItem = null, epFotoNueva = null, epFotoQuitar = false;
+function pintarMenu(){
+  const cats = ['todas'].concat(MENU_BASE.map(c => c.c));
+  $('mCats').innerHTML = cats.map(c => '<button class="chip' + (c === mCat ? ' on' : '') + '" data-c="' + esc(c) + '">' + (c === 'todas' ? 'Todas' : esc((MENU_BASE.find(x => x.c === c) || {}).i + ' ' + c)) + '</button>').join('');
+  const q = quitarAcentos($('mBuscar').value.trim().toLowerCase());
+  let items = itemsMenu();
+  if (mCat !== 'todas') items = items.filter(i => i.c === mCat);
+  if (q) items = items.filter(i => quitarAcentos((i.n + ' ' + i.c).toLowerCase()).includes(q));
+  if (mSoloAgot) items = items.filter(i => i.a || i.o);
+  $('mSoloAgot').classList.toggle('on', mSoloAgot);
+  const esCocina = YO && YO.rol === 'cocina';
+  let html = '', ultCat = '';
+  items.forEach(i => {
+    if (i.c !== ultCat && mCat === 'todas'){ html += '<div class="catT">' + esc(i.i + ' ' + i.c) + '</div>'; ultCat = i.c; }
+    const src = IMG(i.f);
+    html += '<div class="mItem' + (i.a ? ' agot' : '') + (i.o ? ' ocul' : '') + '" data-k="' + esc(i.k) + '">' +
+      (src ? '<img src="' + src + '" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'">' : '<div class="sinfoto">' + esc(i.i) + '</div>') +
+      '<div class="tx"><b>' + esc(i.n) + (i.a ? '<span class="mini ag">AGOTADO</span>' : '') + (i.o ? '<span class="mini oc">OCULTO</span>' : '') + (i.editado ? '<span class="mini ed">EDITADO</span>' : '') + (i.nuevo ? '<span class="mini nv">NUEVO</span>' : '') + '</b><span>' + pesos(i.p) + (i.p0 != null && i.p !== i.p0 ? ' <s>' + pesos(i.p0) + '</s>' : '') + '</span></div>' +
+      '<label class="sw" data-noabrir title="Disponible"><input type="checkbox" data-disp="' + esc(i.k) + '"' + (i.a ? '' : ' checked') + '><span></span></label></div>';
+  });
+  $('listaMenu').innerHTML = html || '<div class="vacio">No hay platillos con ese filtro.</div>';
+  if (!esCocina) cargarFotosFB(items.map(i => i.f)).then(hay => { if (hay && PESTANA === 'Menu') pintarMenu(); });
+}
+$('mCats').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; mCat = b.dataset.c; pintarMenu(); };
+$('mBuscar').oninput = () => pintarMenu();
+$('mSoloAgot').onclick = () => { mSoloAgot = !mSoloAgot; pintarMenu(); };
+function cambiosDe(i){ if (i.base){ MENU_AJ.cambios[i.k] = MENU_AJ.cambios[i.k] || {}; return MENU_AJ.cambios[i.k]; } return (MENU_AJ.nuevos || []).find(x => x.id === i.id); }
+function limpiarCambios(){ for (const k in MENU_AJ.cambios){ const x = MENU_AJ.cambios[k]; Object.keys(x).forEach(z => { if (x[z] === false || x[z] === null || x[z] === undefined) delete x[z]; }); if (!Object.keys(x).length) delete MENU_AJ.cambios[k]; } }
+async function guardarMenu(msg){ limpiarCambios(); await API.guardarMenu({cambios: MENU_AJ.cambios, nuevos: MENU_AJ.nuevos || []}); if (msg) toast(msg); }
+$('listaMenu').onchange = async e => {
+  const k = e.target.dataset.disp; if (!k) return;
+  const i = itemsMenu().find(x => x.k === k); if (!i) return;
+  const c = cambiosDe(i); c.a = !e.target.checked;
+  try { await guardarMenu(e.target.checked ? '✅ ' + i.n + ' disponible otra vez' : '⛔ ' + i.n + ' marcado como agotado'); } catch(err){ toast('No se guardó: ' + (err.code || err.message)); }
+  pintarMenu();
+};
+$('listaMenu').onclick = e => {
+  if (e.target.closest('[data-noabrir]')) return;
+  const r = e.target.closest('.mItem'); if (!r) return;
+  if (YO && YO.rol === 'cocina'){ toast('Desde la cuenta de cocina solo puedes marcar agotados'); return; }
+  abrirEditor(itemsMenu().find(x => x.k === r.dataset.k));
+};
+function pintarFotoEditor(){
+  const h = epFotoNueva || (epFotoQuitar ? '' : IMG(epItem ? epItem.f : ''));
+  $('epFotoCaja').innerHTML = h ? '<img class="fotoGrande" src="' + h + '" alt="">' : '<div class="fotoVacia">Sin foto</div>';
+  $('epFotoOriginal').classList.toggle('oculto', !epItem || !epItem.base || (!epFotoNueva && (epFotoQuitar || epItem.f === epItem.f0)));
+}
+function abrirEditor(i){
+  epItem = i || null; epFotoNueva = null; epFotoQuitar = false; $('epArchivo').value = '';
+  const nuevo = !i;
+  $('epTit').textContent = nuevo ? 'Platillo nuevo' : i.n;
+  $('epNombreCaja').classList.toggle('oculto', !nuevo && i.base);
+  $('epCatCaja').classList.toggle('oculto', !nuevo && i.base);
+  $('epCat').innerHTML = MENU_BASE.map(c => '<option>' + esc(c.c) + '</option>').join('');
+  $('epNombre').value = i ? i.n : ''; if (i) $('epCat').value = i.c; else if (mCat !== 'todas') $('epCat').value = mCat;
+  $('epPrecio').value = i ? i.p : ''; $('epPrecioOrig').textContent = i && i.base ? '(original ' + pesos(i.p0) + ')' : '';
+  $('epDesc').value = i ? i.d : '';
+  $('epAgot').checked = !!(i && i.a); $('epOcul').checked = !!(i && i.o);
+  $('epRestaurar').classList.toggle('oculto', !(i && i.base));
+  $('epBorrar').classList.toggle('oculto', !(i && !i.base)); $('epBorrar').dataset.ok = '';  $('epBorrar').textContent = 'Eliminar platillo';
+  pintarFotoEditor(); abrir('hPlat');
+}
+$('btNuevoPlat').onclick = () => abrirEditor(null);
+$('epArchivo').onchange = async () => {
+  const f = $('epArchivo').files[0]; if (!f) return;
+  toast('Preparando la foto…');
+  try { epFotoNueva = await comprimir(f); epFotoQuitar = false; pintarFotoEditor(); toast('Foto lista: toca Guardar'); }
+  catch(e){ toast('No se pudo leer esa foto'); }
+};
+$('epFotoOriginal').onclick = () => { epFotoNueva = null; epFotoQuitar = true; $('epFotoCaja').innerHTML = epItem && epItem.f0 ? '<img class="fotoGrande" src="' + IMG0(epItem.f0) + '" alt="">' : '<div class="fotoVacia">Sin foto</div>'; $('epFotoOriginal').classList.add('oculto'); };
+function comprimir(archivo){
+  return new Promise((ok, mal) => {
+    const url = URL.createObjectURL(archivo), img = new Image();
+    img.onload = () => {
+      const max = 900, esc2 = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement('canvas'); c.width = Math.round(img.width * esc2); c.height = Math.round(img.height * esc2);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      let q = .78, data = c.toDataURL('image/jpeg', q);
+      while (data.length > 320000 && q > .35){ q -= .08; data = c.toDataURL('image/jpeg', q); }
+      URL.revokeObjectURL(url); ok(data);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); mal(new Error('imagen')); };
+    img.src = url;
+  });
+}
+$('epGuardar').onclick = async () => {
+  const precio = parseFloat($('epPrecio').value);
+  if (isNaN(precio) || precio < 0){ toast('Escribe el precio'); return; }
+  $('epGuardar').disabled = true;
+  try {
+    let fotoRef = null;
+    if (epFotoNueva){ const id = await API.subirFoto(epFotoNueva); FOTOS[id] = epFotoNueva; try { localStorage.setItem('glp_foto_' + id, epFotoNueva); } catch(e){} fotoRef = 'fb:' + id; }
+    const anterior = epItem && epItem.f && epItem.f.startsWith('fb:') && (fotoRef || epFotoQuitar) ? epItem.f.slice(3) : null;
+    if (!epItem){
+      const nombre = $('epNombre').value.trim(); if (!nombre){ toast('Escribe el nombre'); $('epGuardar').disabled = false; return; }
+      MENU_AJ.nuevos = MENU_AJ.nuevos || [];
+      MENU_AJ.nuevos.push({id: aleatorio(8), c: $('epCat').value, n: nombre, p: precio, d: $('epDesc').value.trim(), f: fotoRef || '', a: $('epAgot').checked, o: $('epOcul').checked});
+    } else if (epItem.base){
+      const c = cambiosDe(epItem);
+      if (precio !== epItem.p0) c.p = precio; else delete c.p;
+      const d = $('epDesc').value.trim(); if (d !== epItem.d0) c.d = d; else delete c.d;
+      if (fotoRef) c.f = fotoRef; else if (epFotoQuitar) delete c.f;
+      c.a = $('epAgot').checked; c.o = $('epOcul').checked;
+    } else {
+      const nv = cambiosDe(epItem);
+      Object.assign(nv, {n: $('epNombre').value.trim() || nv.n, c: $('epCat').value, p: precio, d: $('epDesc').value.trim(), a: $('epAgot').checked, o: $('epOcul').checked});
+      if (fotoRef) nv.f = fotoRef; else if (epFotoQuitar) nv.f = '';
+    }
+    await guardarMenu('✅ Guardado. Ya se ve en la página');
+    if (anterior) API.borrarFoto(anterior).catch(() => {});
+    cerrar('hPlat'); pintarMenu();
+  } catch(e){ toast('No se guardó: ' + (e.code || e.message)); }
+  $('epGuardar').disabled = false;
+};
+$('epRestaurar').onclick = async () => {
+  if (!epItem || !epItem.base) return;
+  const ant = MENU_AJ.cambios[epItem.k] && MENU_AJ.cambios[epItem.k].f;
+  delete MENU_AJ.cambios[epItem.k];
+  try { await guardarMenu('↩ ' + epItem.n + ' quedó como el original'); if (ant && ant.startsWith('fb:')) API.borrarFoto(ant.slice(3)).catch(() => {}); cerrar('hPlat'); pintarMenu(); } catch(e){ toast('No se guardó: ' + (e.code || e.message)); }
+};
+$('epBorrar').onclick = async () => {
+  if (!epItem || epItem.base) return;
+  if ($('epBorrar').dataset.ok !== '1'){ $('epBorrar').dataset.ok = '1'; $('epBorrar').textContent = '¿Seguro? Toca otra vez'; return; }
+  const ant = epItem.f && epItem.f.startsWith('fb:') ? epItem.f.slice(3) : null;
+  MENU_AJ.nuevos = (MENU_AJ.nuevos || []).filter(x => x.id !== epItem.id);
+  try { await guardarMenu('Platillo eliminado'); if (ant) API.borrarFoto(ant).catch(() => {}); cerrar('hPlat'); pintarMenu(); } catch(e){ toast('No se pudo: ' + (e.code || e.message)); }
+};
+
+/* =========================================================
+   MÉTRICAS
+   ========================================================= */
+let rango = 'hoy';
+$('rangos').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; rango = b.dataset.r; document.querySelectorAll('#rangos .chip').forEach(x => x.classList.toggle('on', x === b)); cargarMetricas(); };
+function rangoMs(r){
+  const hoy = inicioDia(Date.now());
+  if (r === 'hoy') return [hoy, hoy + DIA, 'hoy'];
+  if (r === 'ayer') return [hoy - DIA, hoy, 'ayer'];
+  if (r === '7') return [hoy - 6 * DIA, hoy + DIA, 'últimos 7 días'];
+  if (r === '30') return [hoy - 29 * DIA, hoy + DIA, 'últimos 30 días'];
+  const d = local(hoy), m0 = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1) + OFF + CORTE;
+  if (r === 'mes') return [m0, hoy + DIA, 'este mes'];
+  const ma = Date.UTC(d.getUTCFullYear(), d.getUTCMonth() - 1, 1) + OFF + CORTE;
+  return [ma, m0, 'el mes pasado'];
+}
+const VALIDOS = ['confirmado','camino','listo','entregado'];
+let HIST = null;   // historial para saber quién es cliente nuevo
+async function historial(){ if (!HIST) HIST = await API.pedidos(Date.now() - 365 * DIA, Date.now() + DIA); return HIST; }
+async function cargarMetricas(){
+  $('metricas').innerHTML = '<div class="vacio">Calculando…</div>';
+  try {
+    const [a, b, et] = rangoMs(rango), largo = b - a;
+    const [act, ant, hist] = await Promise.all([API.pedidos(a, b), API.pedidos(a - largo, a), historial().catch(() => [])]);
+    pintarMetricas(act, ant, hist, a, b, et);
+  } catch(e){ $('metricas').innerHTML = '<div class="vacio">No se pudieron calcular las métricas (' + esc(e.code || e.message) + ').</div>'; }
+}
+function cambio(a, b){ if (!b) return a ? '<em class="up">nuevo</em>' : '<em class="eq">—</em>'; const p = Math.round((a - b) / b * 100); return '<em class="' + (p > 0 ? 'up' : p < 0 ? 'down' : 'eq') + '">' + (p > 0 ? '▲ ' : p < 0 ? '▼ ' : '') + Math.abs(p) + '% vs antes</em>'; }
+function hbar(lista, fmt){ const max = Math.max(1, ...lista.map(x => x[1])); return lista.map(x => '<div class="hbar"><span class="n">' + esc(x[0]) + '</span><span class="b"><i style="width:' + (x[1] / max * 100).toFixed(1) + '%"></i></span><span class="v">' + fmt(x) + '</span></div>').join(''); }
+function split(partes){ const t = partes.reduce((s, x) => s + x[1], 0) || 1; return '<div class="split">' + partes.filter(x => x[1]).map(x => '<div style="width:' + (x[1] / t * 100) + '%;background:' + x[2] + '">' + Math.round(x[1] / t * 100) + '%</div>').join('') + '</div><div class="leyenda">' + partes.map(x => '<span><i style="background:' + x[2] + '"></i>' + esc(x[0]) + ': ' + x[1] + '</span>').join('') + '</div>'; }
+function pintarMetricas(act, ant, hist, a, b, et){
+  const val = act.filter(p => VALIDOS.includes(p.estado)), valA = ant.filter(p => VALIDOS.includes(p.estado));
+  const ventas = val.reduce((s, p) => s + (+p.total || 0), 0), ventasA = valA.reduce((s, p) => s + (+p.total || 0), 0);
+  const ticket = val.length ? ventas / val.length : 0, ticketA = valA.length ? ventasA / valA.length : 0;
+  const tels = new Set(val.map(p => p.tel).filter(Boolean));
+  const primera = {}; (hist || []).forEach(p => { if (!p.tel || !VALIDOS.includes(p.estado)) return; if (!primera[p.tel] || p.ts < primera[p.tel]) primera[p.tel] = p.ts; });
+  const nuevos = [...tels].filter(t => primera[t] && primera[t] >= a).length;
+  const sinConf = act.filter(p => p.estado === 'nuevo').length, canc = act.filter(p => p.estado === 'cancelado').length;
+  const envio = val.reduce((s, p) => s + (+p.envio || 0), 0);
+  if (!act.length){ $('metricas').innerHTML = '<div class="vacio">Todavía no hay pedidos en ' + et + '.<br><small>Las métricas se llenan solas con cada pedido de la página o los que registres de WhatsApp.</small></div>'; return; }
+  let h = '<div class="kpis">' +
+    '<div class="kpi"><small>Ventas</small><b>' + pesos(ventas) + '</b>' + cambio(ventas, ventasA) + '</div>' +
+    '<div class="kpi"><small>Pedidos</small><b>' + val.length + '</b>' + cambio(val.length, valA.length) + '</div>' +
+    '<div class="kpi"><small>Ticket promedio</small><b>' + pesos(ticket) + '</b>' + cambio(ticket, ticketA) + '</div>' +
+    '<div class="kpi"><small>Clientes</small><b>' + tels.size + '</b><em class="eq">' + nuevos + ' nuevos · ' + (tels.size - nuevos) + ' repiten</em></div>' +
+    '<div class="kpi"><small>Envíos cobrados</small><b>' + pesos(envio) + '</b><em class="eq">' + val.filter(p => p.modo !== 'recoger').length + ' a domicilio</em></div>' +
+    '<div class="kpi"><small>Sin confirmar / cancelados</small><b>' + sinConf + ' / ' + canc + '</b><em class="eq">no cuentan en ventas</em></div></div>';
+  // Ventas por día
+  const dias = Math.round((b - a) / DIA);
+  if (dias > 1){
+    const porDia = []; for (let i = 0; i < dias; i++) porDia.push([a + i * DIA, 0]);
+    val.forEach(p => { const i = Math.floor((p.ts - a) / DIA); if (porDia[i]) porDia[i][1] += +p.total || 0; });
+    const max = Math.max(1, ...porDia.map(x => x[1])), cada = Math.ceil(dias / 10);
+    h += '<div class="card"><h3>Ventas por día</h3><div class="barras">' + porDia.map(x => '<div class="' + (x[1] ? '' : 'cero') + '" style="height:' + Math.max(2, x[1] / max * 100) + '%" title="' + fechaDe(x[0]) + ': ' + pesos(x[1]) + '"></div>').join('') + '</div><div class="ejes">' + porDia.map((x, i) => '<span>' + (i % cada === 0 ? local(x[0]).getUTCDate() : '') + '</span>').join('') + '</div><p class="ayuda" style="margin:8px 0 0">Mejor día: ' + (() => { const m = porDia.reduce((p, x) => x[1] > p[1] ? x : p, porDia[0]); return fechaDe(m[0]) + ' con ' + pesos(m[1]); })() + '</p></div>';
+  }
+  // Horas pico
+  const horas = new Array(24).fill(0); val.forEach(p => horas[local(p.ts).getUTCHours()]++);
+  const orden = []; for (let i = 0; i < 24; i++) orden.push((i + 8) % 24);
+  const maxH = Math.max(1, ...horas), pico = orden.reduce((p, x) => horas[x] > horas[p] ? x : p, orden[0]);
+  h += '<div class="card"><h3>¿A qué hora piden?</h3><div class="barras">' + orden.map(x => '<div class="' + (horas[x] ? '' : 'cero') + '" style="height:' + Math.max(2, horas[x] / maxH * 100) + '%" title="' + hora12(x * 60) + ': ' + horas[x] + '"></div>').join('') + '</div><div class="ejes">' + orden.map((x, i) => '<span>' + (i % 4 === 0 ? ((x + 11) % 12 + 1) + (x < 12 ? ' am' : ' pm') : '') + '</span>').join('') + '</div>' + (horas[pico] ? '<p class="ayuda" style="margin:8px 0 0">Hora más fuerte: de ' + hora12(pico * 60) + ' a ' + hora12(pico * 60 + 60) + ' (' + horas[pico] + ' pedidos)</p>' : '') + '</div>';
+  // Top platillos y categorías
+  const plat = {}, cat = {};
+  val.forEach(p => (p.items || []).forEach(i => { plat[i.n] = plat[i.n] || [i.n, 0, 0]; plat[i.n][1] += i.q; plat[i.n][2] += i.q * i.p; const c = catDe(i.n); cat[c] = cat[c] || [c, 0, 0]; cat[c][1] += i.q; cat[c][2] += i.q * i.p; }));
+  const topP = Object.values(plat).sort((x, y) => y[1] - x[1]).slice(0, 10), topC = Object.values(cat).sort((x, y) => y[2] - x[2]);
+  if (topP.length) h += '<div class="card"><h3>🏆 Platillos más pedidos</h3>' + hbar(topP, x => x[1] + ' · ' + pesos(x[2])) + '</div>';
+  if (topC.length) h += '<div class="card"><h3>Ventas por categoría</h3>' + hbar(topC.map(x => [x[0], x[2], x[1]]), x => pesos(x[1])) + '</div>';
+  // Reparto
+  h += '<div class="card"><h3>¿Cómo piden?</h3>' + split([['Domicilio', val.filter(p => p.modo !== 'recoger').length, '#8c1d2c'], ['Recoger', val.filter(p => p.modo === 'recoger').length, '#c9a24a']]) +
+    '<div style="height:10px"></div>' + split([['Efectivo', val.filter(p => p.pago === 'Efectivo').length, '#1f8f4e'], ['Transferencia', val.filter(p => p.pago === 'Transferencia').length, '#2563eb'], ['Tarjeta', val.filter(p => /Tarjeta/.test(p.pago || '')).length, '#b7791f']]) +
+    '<div style="height:10px"></div>' + split([['Página', val.filter(p => p.canal !== 'whatsapp').length, '#6e1421'], ['WhatsApp/teléfono', val.filter(p => p.canal === 'whatsapp').length, '#25d366']]) + '</div>';
+  // Tiempos
+  const prom = arr => arr.length ? Math.round(arr.reduce((s, x) => s + x, 0) / arr.length) : null;
+  const tConf = prom(val.filter(p => p.t_confirmado && p.canal !== 'whatsapp').map(p => (p.t_confirmado - p.ts) / 60000));
+  const tEnt = prom(val.filter(p => p.t_entregado && p.canal !== 'whatsapp').map(p => (p.t_entregado - p.ts) / 60000));
+  if (tConf != null || tEnt != null) h += '<div class="card"><h3>⏱️ Tiempos promedio</h3><p class="lin" style="margin:4px 0">Confirmar el pedido: <b>' + (tConf != null ? tConf + ' min' : '—') + '</b></p><p class="lin" style="margin:4px 0">Del pedido a la entrega: <b>' + (tEnt != null ? tEnt + ' min' : '—') + '</b></p></div>';
+  h += '<button class="bt full" id="btCsvPed">⬇️ Descargar pedidos de ' + et + ' (Excel)</button><p class="ayuda" style="margin:10px 2px;font-size:12.5px;color:var(--gris)">Solo cuentan como venta los pedidos confirmados. Los días van de 5:00 a.m. a 5:00 a.m., así la noche entra en el mismo día.</p>';
+  $('metricas').innerHTML = h;
+  $('btCsvPed').onclick = () => descargarCsv('pedidos-' + rango + '.csv', [['Folio','Fecha','Hora','Estado','Canal','Modo','Cliente','Teléfono','Platillos','Comida','Envío','Total','Pago','Colonia']].concat(act.map(p => [p.folio, fechaDe(p.ts), horaDe(p.ts), NOM_EDO[p.estado], p.canal === 'whatsapp' ? 'WhatsApp' : 'Página', p.modo, p.nombre, p.tel, (p.items || []).map(i => i.q + ' ' + i.n).join(' | '), p.subtotal, p.envio == null ? '' : p.envio, p.total, p.pago, p.colonia || ''])));
+}
+function descargarCsv(nombre, filas){
+  const csv = '﻿' + filas.map(f => f.map(v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8'})); a.download = nombre; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+
+/* =========================================================
+   CLIENTES
+   ========================================================= */
+let CLIENTES = [], cFiltro = 'todos', abiertoCli = null;
+async function cargarClientes(){
+  $('listaCli').innerHTML = '<div class="vacio">Cargando…</div>';
+  try { HIST = null; const h = await historial(); armarClientes(h); pintarClientes(); }
+  catch(e){ $('listaCli').innerHTML = '<div class="vacio">No se pudieron leer los clientes (' + esc(e.code || e.message) + ').</div>'; }
+}
+function armarClientes(h){
+  const m = {};
+  h.forEach(p => {
+    const t = String(p.tel || '').replace(/\D/g, ''); if (!t || !VALIDOS.includes(p.estado)) return;
+    const c = m[t] = m[t] || {tel: t, nombre: '', pedidos: 0, total: 0, primero: p.ts, ultimo: 0, promos: false, colonia: '', lista: []};
+    c.pedidos++; c.total += +p.total || 0; c.primero = Math.min(c.primero, p.ts);
+    if (p.ts >= c.ultimo){ c.ultimo = p.ts; c.nombre = p.nombre || c.nombre; c.promos = !!p.promos; c.colonia = p.colonia || c.colonia; }
+    c.lista.push(p);
+  });
+  CLIENTES = Object.values(m).sort((a, b) => b.ultimo - a.ultimo);
+}
+function clientesFiltrados(){
+  const q = quitarAcentos($('cBuscar').value.trim().toLowerCase()), ahora = Date.now();
+  return CLIENTES.filter(c => {
+    if (cFiltro === 'promos' && !c.promos) return false;
+    if (cFiltro === 'frecuentes' && c.pedidos < 3) return false;
+    if (cFiltro === 'dormidos' && ahora - c.ultimo < 14 * DIA) return false;
+    if (cFiltro === 'nuevos' && ahora - c.primero > 7 * DIA) return false;
+    return !q || quitarAcentos((c.nombre + ' ' + c.tel).toLowerCase()).includes(q);
+  });
+}
+function pintarClientes(){
+  const l = clientesFiltrados();
+  const tot = l.reduce((s, c) => s + c.total, 0);
+  $('cResumen').textContent = l.length + ' clientes · ' + pesos(tot) + ' en compras · ' + l.filter(c => c.promos).length + ' aceptan promos (último año)';
+  if (!l.length){ $('listaCli').innerHTML = '<div class="vacio">' + (CLIENTES.length ? 'Nadie con ese filtro.' : 'Aquí aparecerán tus clientes en cuanto confirmes pedidos.') + '</div>'; return; }
+  $('listaCli').innerHTML = l.map(c => '<div class="cliR"><div class="fila"><b>' + esc(c.nombre || 'Sin nombre') + '</b>' + (c.promos ? '<span class="tag">promos ✅</span>' : '') + (c.pedidos >= 3 ? '<span class="tag" style="background:#fbf3e3;color:var(--ambar)">⭐ frecuente</span>' : '') + '</div>' +
+    '<p>📞 ' + c.tel.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') + (c.colonia ? ' · ' + esc(c.colonia) : '') + '</p>' +
+    '<p>' + c.pedidos + (c.pedidos === 1 ? ' pedido' : ' pedidos') + ' · ' + pesos(c.total) + ' · último ' + hace(c.ultimo) + '</p>' +
+    '<div class="acc"><a class="bt w" href="https://wa.me/52' + c.tel.slice(-10) + '" target="_blank" rel="noopener" style="text-decoration:none">💬 WhatsApp</a><button class="bt" data-hist="' + c.tel + '">' + (abiertoCli === c.tel ? 'Ocultar' : 'Ver pedidos') + '</button></div>' +
+    (abiertoCli === c.tel ? '<div class="hist">' + c.lista.slice().sort((x, y) => y.ts - x.ts).map(p => '<div>' + fechaDe(p.ts) + ' · #' + esc(p.folio) + ' · ' + pesos(p.total) + '<br><small>' + esc((p.items || []).map(i => i.q + ' ' + i.n).join(', ')) + '</small></div>').join('<hr style="border:0;border-top:1px dashed var(--linea)">') + '</div>' : '') + '</div>').join('');
+}
+$('cBuscar').oninput = pintarClientes;
+$('cFiltros').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; cFiltro = b.dataset.c; document.querySelectorAll('#cFiltros .chip').forEach(x => x.classList.toggle('on', x === b)); pintarClientes(); };
+$('listaCli').onclick = e => { const b = e.target.closest('[data-hist]'); if (!b) return; abiertoCli = abiertoCli === b.dataset.hist ? null : b.dataset.hist; pintarClientes(); };
+$('btCopiarTels').onclick = async () => {
+  const l = clientesFiltrados(); if (!l.length){ toast('No hay teléfonos en esta lista'); return; }
+  const txt = l.map(c => (c.nombre ? c.nombre + ' ' : '') + '+52' + c.tel.slice(-10)).join('\n');
+  try { await navigator.clipboard.writeText(txt); toast('📋 ' + l.length + ' teléfonos copiados'); } catch(e){ toast('No se pudo copiar'); }
+};
+$('btCsvClientes').onclick = () => descargarCsv('clientes.csv', [['Nombre','Teléfono','Pedidos','Total comprado','Primer pedido','Último pedido','Acepta promos','Colonia']].concat(clientesFiltrados().map(c => [c.nombre, c.tel, c.pedidos, c.total, fechaDe(c.primero), fechaDe(c.ultimo), c.promos ? 'Sí' : 'No', c.colonia])));
+</script>
+<script type="module" src="fb-admin.js?v=1794362623"></script>
+</body>
+</html>

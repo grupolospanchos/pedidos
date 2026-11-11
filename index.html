@@ -95,6 +95,12 @@
   .fav .pre{font-size:13px;color:var(--gris);margin-top:3px}
 
   /* Repetir */
+  .avisoTop{background:var(--oro2);color:var(--tinta);text-align:center;font-weight:700;font-size:14px;padding:10px 14px;line-height:1.35}
+  .seguir{margin:12px 14px 0;display:none;width:calc(100% - 28px);text-align:left;border:none;background:var(--verde);color:#fff;border-radius:14px;padding:12px 14px;font-weight:800;font-size:15px;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+  .seguir small{display:block;font-weight:600;opacity:.92;font-size:12.5px;margin-top:2px}
+  .item.agot{opacity:.55}
+  .agotado{display:inline-block;background:#eee5d8;color:var(--gris);font-weight:800;font-size:12px;border-radius:999px;padding:7px 11px;white-space:nowrap}
+  .det-pie .ok:disabled{background:#cfc6ba}
   .repetir{margin:12px 14px 0;display:none;width:calc(100% - 28px);text-align:left;border:1.5px solid var(--vino);background:#fbeef0;color:var(--vino);border-radius:14px;padding:12px 14px;font-weight:700;font-size:15px}
   .repetir small{display:block;font-weight:500;color:var(--gris);font-size:13px;margin-top:2px}
 
@@ -211,12 +217,14 @@
   <div class="estado" id="estado"><i></i><span>Abierto</span></div>
   <div><button class="instalar" id="instalar">📲 Instalar en mi celular</button></div>
 </header>
+<div class="avisoTop" id="avisoTop" style="display:none"></div>
 
-<div class="promo">
+<div class="promo" id="promo">
   <div class="ico">🥤</div>
-  <div><b>Tu primer pedido directo lleva agua de Jamaica GRATIS</b><span>Pide directo y paga precio de mostrador, más barato que en las apps.</span></div>
+  <div><b id="promoT">Tu primer pedido directo lleva agua de Jamaica GRATIS</b><span id="promoS">Pide directo y paga precio de mostrador, más barato que en las apps.</span></div>
 </div>
 
+<button class="seguir" id="seguir"></button>
 <button class="repetir" id="repetir"></button>
 
 <div class="favs-wrap">
@@ -240,7 +248,7 @@
 </div>
 <main id="menu"></main>
 <div class="vacio" id="vacio">No encontramos ese platillo.</div>
-<div class="pie">Grupo Los Panchos · WhatsApp 744 817 6464<br>Horario: todos los días de 8:00 a.m. a 2:00 a.m.<br><button class="lnk" data-privacidad>Aviso de privacidad</button></div>
+<div class="pie">Grupo Los Panchos · WhatsApp 744 817 6464<br><span id="pieHorario">Horario: todos los días de 8:00 a.m. a 2:00 a.m.</span><br><button class="lnk" data-privacidad>Aviso de privacidad</button></div>
 
 <div class="barra" id="barra">
   <button id="verPedido"><span><span class="n" id="bn">0</span>Ver mi pedido</span><span id="bt">$0</span></button>
@@ -294,7 +302,7 @@
         <div class="cmsg" id="cMsg"></div>
       </div>
     </div>
-    <div class="tarifa"><b>Envío:</b> hasta 5 km, $30 · cada km adicional, $5.<br><span id="tarifaNota">Te confirmamos el costo exacto con tu ubicación 📍.</span></div>
+    <div class="tarifa"><span id="tarifaTxt"><b>Envío:</b> hasta 5 km, $30 · cada km adicional, $5.</span><br><span id="tarifaNota">Te confirmamos el costo exacto con tu ubicación 📍.</span></div>
   </div>
 
   <div class="bloque">
@@ -312,7 +320,7 @@
   </div>
 
   <div class="bloque">
-    <label class="regalo"><input type="checkbox" id="primero"><span><b>Es mi primer pedido directo</b><br><span style="color:var(--gris)">Te regalamos un agua de Jamaica 🥤</span></span></label>
+    <label class="regalo" id="cajaRegalo"><input type="checkbox" id="primero"><span><b>Es mi primer pedido directo</b><br><span style="color:var(--gris)">Te regalamos un agua de Jamaica 🥤</span></span></label>
     <label class="regalo" style="margin-top:14px"><input type="checkbox" id="promos"><span><b>Quiero recibir promos por WhatsApp</b><br><span style="color:var(--gris)">Te das de baja cuando quieras respondiendo BAJA.</span></span></label>
   </div>
 
@@ -405,13 +413,12 @@
 const WHATSAPP = '527448176464';
 const PAGINA = 'https://grupolospanchos.github.io/pedidos/';
 const SUCURSAL = 'Corregidora';
-const ABRE = 8, CIERRA = 2; // 8:00 a.m. a 2:00 a.m.
 const USAR_GPS = true;   // true solo en la versión publicada fuera de Claude
 let gps = null;             // {lat, lng, prec}
 /* Cocina Corregidora y tarifa de envío */
 const LOCAL = {lat: 20.6024719, lng: -100.3932257};
-const ENVIO_BASE = 30, KM_INCLUIDOS = 5, POR_KM = 5;
-const FACTOR_CALLE = 1.3;   // la distancia en línea recta se multiplica por esto para aproximar el recorrido por calles
+let ENVIO_BASE = 30, KM_INCLUIDOS = 5, POR_KM = 5;
+let FACTOR_CALLE = 1.3;   // la distancia en línea recta se multiplica por esto para aproximar el recorrido por calles
 let envio = null;           // {km, costo, acepto: null|true|false}
 function distanciaKm(a, b){
   const R = 6371, rad = x => x * Math.PI / 180;
@@ -428,7 +435,7 @@ function cotizar(){
   $('cEnvio').textContent = pesos(envio.costo);
   $('cSi').classList.remove('on'); $('cNo').classList.remove('on'); $('cMsg').style.display = 'none';
   $('cotiza').style.display = 'block';
-  $('tarifaNota').textContent = 'Cada km empezado después de los 5 km cuenta como km completo.';
+  $('tarifaNota').textContent = 'Cada km empezado después de los ' + KM_INCLUIDOS + ' km cuenta como km completo.';
   actualizar();
 }
 function decidirEnvio(si){
@@ -470,7 +477,14 @@ const $ = id => document.getElementById(id);
 const pesos = n => '$' + n.toLocaleString('es-MX');
 const carrito = {}; // id -> cantidad
 const datos = {};
-MENU.forEach((cat, ci) => cat.p.forEach((it, ii) => { datos[ci+'-'+ii] = {n: it[0], p: it[1], c: cat.c, f: it[2] || null, d: DESC[it[0]] || ''}; }));
+const BASE = MENU.map(c => ({c: c.c, i: c.i, p: c.p.map(it => it.slice())}));
+const DESC_BASE = Object.assign({}, DESC);
+const idDe = (it, ci, ii) => it.id || (ci + '-' + ii);
+function reconstruirDatos(){
+  for (const k in datos) delete datos[k];
+  MENU.forEach((cat, ci) => cat.p.forEach((it, ii) => { datos[idDe(it, ci, ii)] = {n: it[0], p: it[1], c: cat.c, f: it[2] || null, d: DESC[it[0]] || '', a: !!it.a, o: !!it.o}; }));
+}
+reconstruirDatos();
 const notas = {};    // id -> indicación del cliente para ese platillo
 function modo(){ const r = document.querySelector('input[name=modo]:checked'); return r ? r.value : 'domicilio'; }
 const recoge = () => modo() === 'recoger';
@@ -480,10 +494,10 @@ function llenarHoras(){
   let ahora;
   try { const p = new Intl.DateTimeFormat('en-GB', {hour:'2-digit', minute:'2-digit', hourCycle:'h23', timeZone:'America/Mexico_City'}).format(new Date()).split(':'); ahora = (+p[0]) * 60 + (+p[1]); }
   catch(e){ const d = new Date(); ahora = d.getHours() * 60 + d.getMinutes(); }
-  let ini = abierto() ? ahora + 30 : ABRE * 60 + 30;
-  ini = Math.ceil(ini / 15) * 15;
-  const fin = (CIERRA + 24) * 60;            // 2:00 a.m. del día siguiente
-  const opciones = [abierto() ? 'Lo antes posible' : 'En cuanto abran (8:00 a.m.)'];
+  const ph = porHorario();
+  let ini = Math.ceil((ahora + 30) / 15) * 15;
+  const fin = ph.abierto ? ph.cierra : ahora + 240;   // hora de cierre (puede pasar de medianoche)
+  const opciones = [abierto() ? 'Lo antes posible' : 'En cuanto abran'];
   for (let m = ini, n = 0; n < 16; m += 15, n++){
     const real = m % (24 * 60);
     if (abierto() && m > fin) break;
@@ -493,31 +507,90 @@ function llenarHoras(){
   sel.innerHTML = opciones.map(o => `<option>${o}</option>`).join('');
   if (opciones.includes(antes)) sel.value = antes;
 }
-const IMG = h => h.startsWith('u:') ? 'https://images.unsplash.com/' + h.slice(2) + '?w=700&q=72&auto=format&fit=crop' : 'https://tb-static.uber.com/prod/image-proc/processed_images/' + h + '/d03e52b3c8af19d8fa8222e23efd9cfa.jpeg';
+const IMG0 = h => h.startsWith('u:') ? 'https://images.unsplash.com/' + h.slice(2) + '?w=700&q=72&auto=format&fit=crop' : 'https://tb-static.uber.com/prod/image-proc/processed_images/' + h + '/d03e52b3c8af19d8fa8222e23efd9cfa.jpeg';
+const PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+const FOTOS = {};   // fotos subidas desde el panel: id -> imagen
+function IMG(h){ return h.startsWith('fb:') ? (FOTOS[h.slice(3)] || PIXEL) : IMG0(h); }
 const PORTADAS = {'Gusanos':'Gusano de pastor','Charolas':'Charola de pastor','Chilaquiles':'Chilaquiles de pastor','Tacos':'Taco al pastor','Alambres':'Alambre al pastor','Hamburguesas':'Hamburguesa especial','Gringas':'Gringa de pastor','Quesadillas':'Quesadilla de pastor','Volcanes':'Volcán de pastor','Enchiladas':'Enchiladas sencillas','Tortas':'Torta de pastor','Tortas especiales':'Torta Hawaiana','Chapatas':'Chapata de pollo','Hot dogs':'Hot dog especial','Ensaladas':'Ensalada de pollo','Huevos':'Huevo revuelto a la mexicana','Por kilo':'Kilo de pastor','Bebidas':'Agua de sabor 1 litro'};
 const slug = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
 const FAVORITOS = ['Gusano de pastor','Charola de pastor','Chilaquiles con pollo','Alambre al pastor','Gringa de pastor','Hamburguesa especial'];
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let folio = nuevoFolio();
+let token = nuevoToken();
+function nuevoToken(){ const c = 'abcdefghijkmnpqrstuvwxyz23456789'; let t = ''; try { const a = new Uint8Array(20); crypto.getRandomValues(a); a.forEach(x => t += c[x % c.length]); } catch(e){ for (let i = 0; i < 20; i++) t += c[Math.floor(Math.random()*c.length)]; } return t; }
 function nuevoFolio(){ const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let f = ''; for (let i = 0; i < 4; i++) f += c[Math.floor(Math.random()*c.length)]; return f; }
 function idPorNombre(n){ return Object.keys(datos).find(k => datos[k].n === n); }
 
 /* ---------- Horario ---------- */
-function horaMX(){
-  try{
-    const h = new Intl.DateTimeFormat('es-MX',{hour:'numeric',hourCycle:'h23',timeZone:'America/Mexico_City'}).format(new Date());
-    return parseInt(h,10);
-  }catch(e){ return new Date().getHours(); }
+const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const TIENDA_DEF = {
+  modo: 'auto', hasta: null, motivo: '',
+  horario: [0,1,2,3,4,5,6].map(() => ({on: true, a: '08:00', c: '02:00'})),
+  aviso: '', promo: {on: true, t: 'Tu primer pedido directo lleva agua de Jamaica GRATIS', s: 'Pide directo y paga precio de mostrador, más barato que en las apps.'},
+  regalo: true, minimo: 0, entrega: 40,
+  envio: {base: 30, km: 5, porKm: 5, factor: 1.3},
+  pagos: {efectivo: true, transferencia: true, tarjeta: true}
+};
+let TIENDA = JSON.parse(JSON.stringify(TIENDA_DEF));
+function ahoraMX(ms){
+  const d = new Date(ms || Date.now());
+  try {
+    const p = new Intl.DateTimeFormat('en-US', {weekday:'short', hour:'2-digit', minute:'2-digit', hourCycle:'h23', timeZone:'America/Mexico_City'}).formatToParts(d);
+    const g = t => p.find(x => x.type === t).value;
+    return {dia: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(g('weekday')), min: (+g('hour')) % 24 * 60 + (+g('minute'))};
+  } catch(e){ return {dia: d.getDay(), min: d.getHours() * 60 + d.getMinutes()}; }
 }
-function abierto(){ const h = horaMX(); return h >= ABRE || h < CIERRA; }
+function horaMX(){ return Math.floor(ahoraMX().min / 60); }
+const aMin = s => { const x = String(s || '0:00').split(':'); return (+x[0]) * 60 + (+x[1] || 0); };
+function hora12(m){ m = ((m % 1440) + 1440) % 1440; const h = Math.floor(m / 60), mi = m % 60, h12 = ((h + 11) % 12) + 1; return h12 + ':' + String(mi).padStart(2, '0') + (h < 12 ? ' a.m.' : ' p.m.'); }
+function ventanaDia(d){ const h = TIENDA.horario[d]; if (!h || !h.on) return null; const a = aMin(h.a); let c = aMin(h.c); if (c <= a) c += 1440; return {a, c}; }
+function porHorario(ms){
+  const {dia, min} = ahoraMX(ms);
+  const hoy = ventanaDia(dia); if (hoy && min >= hoy.a && min < hoy.c) return {abierto: true, cierra: hoy.c};
+  const ay = ventanaDia((dia + 6) % 7); if (ay && ay.c > 1440 && min < ay.c - 1440) return {abierto: true, cierra: ay.c - 1440};
+  return {abierto: false};
+}
+const forzado = m => TIENDA.modo === m && (!TIENDA.hasta || Date.now() < TIENDA.hasta);
+function abierto(){ if (forzado('cerrado')) return false; if (forzado('abierto')) return true; return porHorario().abierto; }
+function proximaApertura(ms){
+  const ref = ahoraMX(ms), hoy = ahoraMX().dia;
+  for (let i = 0; i < 8; i++){
+    const d = (ref.dia + i) % 7, v = ventanaDia(d);
+    if (!v || (i === 0 && ref.min >= v.a)) continue;
+    const dif = (d - hoy + 7) % 7;
+    return (dif === 0 ? 'hoy' : dif === 1 ? 'mañana' : 'el ' + DIAS[d]) + ' a las ' + hora12(v.a);
+  }
+  return '';
+}
+function horaDe(ms){ try { return new Intl.DateTimeFormat('es-MX', {hour:'numeric', minute:'2-digit', hour12:true, timeZone:'America/Mexico_City'}).format(new Date(ms)); } catch(e){ return ''; } }
+function textoEstado(){
+  if (abierto()){
+    if (forzado('abierto')) return 'Abierto' + (TIENDA.hasta ? ' · hasta las ' + horaDe(TIENDA.hasta) : '');
+    return 'Abierto · hasta las ' + hora12(porHorario().cierra);
+  }
+  if (forzado('cerrado')){
+    let t = 'Cerrado' + (TIENDA.motivo ? ' · ' + TIENDA.motivo : '');
+    if (TIENDA.hasta) t += porHorario(TIENDA.hasta).abierto ? ' · volvemos a las ' + horaDe(TIENDA.hasta) : (proximaApertura(TIENDA.hasta) ? ' · abrimos ' + proximaApertura(TIENDA.hasta) : '');
+    return t;
+  }
+  const p = proximaApertura(); return 'Cerrado' + (p ? ' · abrimos ' + p : '');
+}
+function textoHorario(){
+  const h = TIENDA.horario, igual = h.every(x => x.on && x.a === h[0].a && x.c === h[0].c);
+  if (igual) return 'Horario: todos los días de ' + hora12(aMin(h[0].a)) + ' a ' + hora12(aMin(h[0].c));
+  const v = ventanaDia(ahoraMX().dia);
+  return v ? 'Horario de hoy: ' + hora12(v.a) + ' a ' + hora12(v.c) : 'Hoy no abrimos';
+}
 function pintarEstado(){
   const e = $('estado');
-  if (abierto()){ e.classList.remove('cerrado'); e.querySelector('span').textContent = 'Abierto · hasta las 2:00 a.m.'; }
-  else { e.classList.add('cerrado'); e.querySelector('span').textContent = 'Cerrado · abrimos a las 8:00 a.m.'; }
+  e.classList.toggle('cerrado', !abierto());
+  e.querySelector('span').textContent = textoEstado();
+  $('pieHorario').textContent = textoHorario();
 }
 
 /* ---------- Menú ---------- */
 function controlHTML(id){
+  if (datos[id] && datos[id].a) return `<span class="agotado">Agotado</span>`;
   const q = carrito[id] || 0;
   if (!q) return `<button class="add" data-mas="${id}">Agregar</button>`;
   return `<div class="step"><button data-menos="${id}" aria-label="Quitar uno">−</button><b>${q}</b><button data-mas="${id}" aria-label="Agregar uno">+</button></div>`;
@@ -527,27 +600,41 @@ function pintarMenu(){
   $('tiles').innerHTML = MENU.map((c,ci) => { const id = PORTADAS[c.c] ? idPorNombre(PORTADAS[c.c]) : null, f = id && datos[id].f; return `
     <div class="tile" data-ir="${ci}">
       <div class="tf">${f ? `<img src="${IMG(f)}" alt="" loading="lazy" onerror="this.remove()">` : `<div class="emo">${c.i}</div>`}</div>
-      <div class="tn"><b>${c.i} ${c.c}</b><span>${c.p.length} ${c.p.length === 1 ? 'platillo' : 'platillos'}</span></div>
+      <div class="tn"><b>${c.i} ${c.c}</b><span>${visibles(c).length} ${visibles(c).length === 1 ? 'platillo' : 'platillos'}</span></div>
     </div>`; }).join('');
   $('menu').innerHTML = MENU.map((c,ci) => `
     <section id="cat${ci}" data-sec="${ci}">
       <h2>${c.i} ${c.c}</h2>
-      ${c.p.map((it,ii) => { const id = ci+'-'+ii; return `
-        <div class="item" data-item="${id}" data-busca="${quitarAcentos((it[0]+' '+c.c).toLowerCase())}">
+      ${c.p.map((it,ii) => { const id = idDe(it, ci, ii); if (it.o) return ''; return `
+        <div class="item${it.a ? ' agot' : ''}" data-item="${id}" data-busca="${quitarAcentos((it[0]+' '+c.c).toLowerCase())}">
           ${it[2] ? `<img class="foto" src="${IMG(it[2])}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : ''}
-          <div class="txt"><div class="nom">${it[0]}</div><div class="pre">${pesos(it[1])}</div>${DESC[it[0]] ? `<div class="des">${esc(DESC[it[0]])}</div>` : ''}</div>
+          <div class="txt"><div class="nom">${esc(it[0])}</div><div class="pre">${pesos(it[1])}</div>${DESC[it[0]] ? `<div class="des">${esc(DESC[it[0]])}</div>` : ''}</div>
           <div class="ctl" id="ctl${id}">${controlHTML(id)}</div>
         </div>`; }).join('')}
     </section>`).join('');
-  $('favs').innerHTML = FAVORITOS.map(idPorNombre).filter(Boolean).map(id => { const d = datos[id]; return `
+  $('favs').innerHTML = FAVORITOS.map(idPorNombre).filter(id => id && !datos[id].a && !datos[id].o).map(id => { const d = datos[id]; return `
     <div class="fav" data-ver="${id}">
       ${d.f ? `<img src="${IMG(d.f)}" alt="" loading="lazy">` : ''}
       <div class="fi"><div class="nom">${d.n}</div><div class="pre">${pesos(d.p)}</div></div>
     </div>`; }).join('');
 }
+function visibles(c){ return c.p.filter(it => !it.o); }
+function repintar(){
+  const y = window.scrollY;
+  pintarMenu();
+  const m = location.hash.match(/^#c-(.+)$/);
+  if (document.body.classList.contains('v-cat') && m){
+    const ci = MENU.findIndex(c => slug(c.c) === m[1]);
+    document.querySelectorAll('main section').forEach(sec => sec.classList.toggle('actual', sec.dataset.sec === String(ci)));
+    document.querySelectorAll('.cats button').forEach(b => b.classList.toggle('on', b.dataset.cat === String(ci)));
+  }
+  if ($('q').value.trim()) filtrar();
+  window.scrollTo(0, y);
+}
 function quitarAcentos(s){ return s.normalize('NFD').replace(/[̀-ͯ]/g,''); }
 
 function cambiar(id, d){
+  if (d > 0 && datos[id] && datos[id].a) return;
   carrito[id] = Math.max(0, (carrito[id]||0) + d);
   if (!carrito[id]) { delete carrito[id]; delete notas[id]; }
   const ctl = $('ctl'+id); if (ctl) ctl.innerHTML = controlHTML(id);
@@ -622,7 +709,7 @@ function mensaje(){
   L.push('');
   L.push('━━━━━━━━━━━━━━');
   L.push('👇 *TOCA AQUÍ PARA VER TU PEDIDO* 👇');
-  L.push(PAGINA + '?p=' + folio);
+  L.push(PAGINA + '?p=' + folio + '&k=' + token);
   return L.join('\n');
 }
 function horaTexto(){
@@ -633,6 +720,7 @@ function armarEnlace(){
   $('enviar').href = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(mensaje());
 }
 function revisar(){
+  if (!abierto()){ $('err').textContent = 'Ahorita estamos cerrados (' + textoEstado().replace(/^Cerrado · /, '') + '). Puedes armar tu pedido y mandarlo cuando abramos.'; $('err').style.display = 'block'; return false; }
   const faltan = [];
   ['nombre','tel','calle','colonia'].forEach(id => $(id).classList.remove('mal'));
   if (!resumen().n) faltan.push('agrega al menos un platillo');
@@ -642,6 +730,7 @@ function revisar(){
     if (!val('calle')) { faltan.push('calle y número'); $('calle').classList.add('mal'); }
     if (!val('colonia')) { faltan.push('colonia'); $('colonia').classList.add('mal'); }
     if (envio && envio.acepto !== true) faltan.push('aceptar el costo de envío');
+    if (TIENDA.minimo > 0 && resumen().t < TIENDA.minimo) faltan.push('el pedido mínimo a domicilio es de ' + pesos(TIENDA.minimo) + ' (o elige “Paso a recoger”)');
   }
   if (faltan.length){ $('err').textContent = 'Falta: ' + faltan.join(', ') + '.'; $('err').style.display = 'block'; return false; }
   $('err').style.display = 'none'; return true;
@@ -704,6 +793,8 @@ let detId = null, detQ = 1;
 function pintarDetalle(){
   const d = datos[detId], ya = !!carrito[detId];
   $('detCant').textContent = detQ;
+  $('detOk').disabled = !!d.a;
+  if (d.a){ $('detOk').textContent = 'Agotado por ahora'; return; }
   $('detOk').textContent = detQ === 0 ? 'Quitar del pedido' : (ya ? 'Actualizar' : 'Agregar') + ' · ' + pesos(detQ * d.p);
 }
 function abrirDetalle(id){
@@ -720,6 +811,7 @@ $('detMas').onclick = () => { detQ++; pintarDetalle(); };
 $('detMenos').onclick = () => { detQ = Math.max(carrito[detId] ? 0 : 1, detQ - 1); pintarDetalle(); };
 $('detOk').onclick = () => {
   const id = detId, nota = $('detNota').value.trim();
+  if (datos[id] && datos[id].a) return;
   if (detQ === 0){ delete carrito[id]; delete notas[id]; }
   else { carrito[id] = detQ; if (nota) notas[id] = nota; else delete notas[id]; }
   const ctl = $('ctl'+id); if (ctl) ctl.innerHTML = controlHTML(id);
@@ -731,7 +823,7 @@ $('detOk').onclick = () => {
 function guardarUltimo(){
   try {
     const items = Object.keys(carrito).map(id => ({n: datos[id].n, q: carrito[id], nota: notas[id] || ''}));
-    localStorage.setItem('glp_ultimo', JSON.stringify({items, t: resumen().t, folio, r: recoge(), env: (!recoge() && envio && envio.acepto) ? envio.costo : null, ts: Date.now()}));
+    localStorage.setItem('glp_ultimo', JSON.stringify({items, t: resumen().t, folio, r: recoge(), env: (!recoge() && envio && envio.acepto) ? envio.costo : null, ts: Date.now(), k: token}));
   } catch(e){}
 }
 function mostrarListo(){
@@ -744,7 +836,7 @@ $('lsOtro').onclick = () => {
   const ids = Object.keys(carrito);
   ids.forEach(id => { delete carrito[id]; delete notas[id]; const c = $('ctl'+id); if (c) c.innerHTML = controlHTML(id); });
   $('notas').value = ''; $('primero').checked = false;
-  folio = nuevoFolio();
+  folio = nuevoFolio(); token = nuevoToken();
   cerrarVelo('veloListo'); $('hoja').classList.remove('on'); document.body.style.overflow = '';
   actualizar(); pintarRepetir(); scrollInicio = 0; irInicio();
 };
@@ -754,7 +846,7 @@ function ultimo(){
   try {
     const u = JSON.parse(localStorage.getItem('glp_ultimo') || 'null');
     if (!u || !u.items) return null;
-    const items = u.items.map(x => ({id: idPorNombre(x.n), q: x.q, nota: x.nota})).filter(x => x.id);
+    const items = u.items.map(x => ({id: idPorNombre(x.n), q: x.q, nota: x.nota})).filter(x => x.id && !datos[x.id].a && !datos[x.id].o);
     return items.length ? items : null;
   } catch(e){ return null; }
 }
@@ -804,7 +896,7 @@ document.querySelectorAll('input[name=pago]').forEach(r => r.addEventListener('c
 }));
 $('hoja').addEventListener('input', () => { guardar(); armarEnlace(); if ($('err').style.display === 'block') revisar(); });
 $('hoja').addEventListener('change', armarEnlace);
-$('enviar').addEventListener('click', e => { if (!revisar()) { e.preventDefault(); $('err').scrollIntoView({behavior:'smooth', block:'center'}); return; } armarEnlace(); guardar(); guardarUltimo(); setTimeout(mostrarListo, 700); });
+$('enviar').addEventListener('click', e => { if (!revisar()) { e.preventDefault(); $('err').scrollIntoView({behavior:'smooth', block:'center'}); return; } armarEnlace(); guardar(); guardarUltimo(); registrarPedido(); seguir(token); setTimeout(mostrarListo, 700); });
 $('copiar').addEventListener('click', async () => {
   if (!revisar()) return;
   try { await navigator.clipboard.writeText(mensaje()); aviso('Pedido copiado. Pégalo en WhatsApp al 744 817 6464'); }
@@ -857,29 +949,42 @@ $('volver').onclick = () => { if (vinoDeInicio) history.back(); else irInicio();
    ?p=FOLIO  → lo manda el cliente en su mensaje (pedido enviado)
    ?ok       → respuesta rápida de la cocina: confirmado / preparando
    ?camino   → ya salió el repartidor      ?listo → listo para recoger */
+function ultimoGuardado(){ try { return JSON.parse(localStorage.getItem('glp_ultimo') || 'null'); } catch(e){ return null; } }
 function verEstado(){
   const q = new URLSearchParams(location.search);
   const clave = ['camino','listo','ok','p'].find(k => q.has(k));
   if (!clave) return;
-  const nivel = {p:1, ok:2, camino:3, listo:3}[clave];
   let f = (q.get(clave) || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
-  let u = null;
-  try { u = JSON.parse(localStorage.getItem('glp_ultimo') || 'null'); } catch(e){}
+  const k = (q.get('k') || '').replace(/[^a-z0-9]/g, '').slice(0, 40);
+  let u = ultimoGuardado();
   if (u && (!u.folio || (f ? u.folio !== f : !(u.ts && Date.now() - u.ts < 6*3600e3)))) u = null;
   if (!f && u) f = u.folio;
-  const rec = clave === 'listo' ? true : clave === 'camino' ? false : (u ? !!u.r : null);
+  pintarPantallaEstado(clave, f, u, null);
+  history.replaceState(null, '', location.pathname + location.hash);
+  abrirVelo('veloEstado');
+  const llave = k || (u && u.k);
+  if (llave) seguir(llave);
+}
+function pintarPantallaEstado(clave, f, u, vivo){
+  const nivel = {p:1, ok:2, camino:3, listo:3, entregado:4, cancelado:0}[clave];
+  const rec = clave === 'listo' ? true : clave === 'camino' ? false : (vivo && vivo.modo ? vivo.modo === 'recoger' : (u ? !!u.r : null));
+  const min = vivo && vivo.min ? vivo.min : null;
   const tercero = rec === true ? 'Listo para recoger' : rec === false ? 'En camino' : 'En camino o listo';
-  const tit = {1:'Pedido enviado', 2:'¡Pedido confirmado!', 3: rec ? '¡Listo para recoger!' : '¡Tu pedido va en camino!'}[nivel];
-  const ico = {1:'✓', 2:'🔥', 3: rec ? '🏃' : '🛵'}[nivel];
+  const tit = {0:'Pedido cancelado', 1:'Pedido enviado', 2:'¡Pedido confirmado!', 3: rec ? '¡Listo para recoger!' : '¡Tu pedido va en camino!', 4:'¡Pedido entregado!'}[nivel];
+  const ico = {0:'✕', 1:'✓', 2:'🔥', 3: rec ? '🏃' : '🛵', 4:'😋'}[nivel];
   const txt = {
-    1: 'Tu pedido se envió por WhatsApp. En unos minutos te confirmamos por ahí' + (rec ? ' a qué hora pasar.' : ' el tiempo de entrega.'),
-    2: 'Ya lo estamos preparando. Te avisamos por WhatsApp cuando ' + (rec === true ? 'esté listo para recoger.' : rec === false ? 'salga a tu domicilio.' : 'esté listo.'),
+    0: 'Este pedido se canceló. Si tienes dudas, escríbenos por WhatsApp.',
+    1: 'Tu pedido se envió por WhatsApp. En unos minutos te confirmamos' + (rec ? ' a qué hora pasar.' : ' el tiempo de entrega.') + (vivo ? ' Esta pantalla se actualiza sola.' : ''),
+    2: 'Ya lo estamos preparando.' + (min ? (rec ? ' Estará listo en aprox. <b>' + min + ' min</b>.' : ' Llega en aprox. <b>' + min + ' min</b>.') : '') + (vivo ? ' Esta pantalla se actualiza sola.' : ' Te avisamos por WhatsApp cuando ' + (rec === true ? 'esté listo para recoger.' : rec === false ? 'salga a tu domicilio.' : 'esté listo.')),
+    4: '¡Gracias por pedir directo con nosotros! Buen provecho.',
     3: rec ? 'Pasa por él a Prol. Corregidora Nte. 180, El Cerrito. <a href="https://www.google.com/maps/dir/?api=1&destination=20.6024719,-100.3932257" target="_blank" rel="noopener">📍 Cómo llegar</a>' : 'El repartidor ya salió hacia tu domicilio.'
   }[nivel];
   $('esIco').textContent = ico;
   $('esTit').textContent = tit;
   $('esFolio').textContent = f ? 'Pedido #' + f : '';
   $('esFolio').style.display = f ? '' : 'none';
+  $('esPasos').style.display = nivel ? '' : 'none';
+  $('esIco').style.background = nivel ? '' : '#fde8e8';
   $('esPasos').innerHTML = ['Enviado', 'Preparando', tercero].map((n, i) =>
     '<div class="' + (i + 1 < nivel ? 'hecho' : i + 1 === nivel ? 'hecho ahora' : '') + '"><i>' + (i + 1 <= nivel ? '✓' : i + 1) + '</i>' + n + '</div>').join('');
   $('esTxt').innerHTML = txt;
@@ -889,16 +994,151 @@ function verEstado(){
     $('esRes').style.display = '';
   } else $('esRes').style.display = 'none';
   $('esWa').href = 'https://wa.me/' + WHATSAPP + (f ? '?text=' + encodeURIComponent('Hola, sobre mi pedido #' + f + ': ') : '');
-  history.replaceState(null, '', location.pathname + location.hash);
-  abrirVelo('veloEstado');
 }
+
+/* ---------- Seguimiento en vivo (con la base de datos) ---------- */
+let DB = window.GLP_DB || null;
+function conDB(fn){ if (DB) { try { fn(DB); } catch(e){} return; } window.addEventListener('glp-db', () => { DB = window.GLP_DB; try { fn(DB); } catch(e){} }, {once: true}); }
+const CLAVE_DE = {nuevo:'p', confirmado:'ok', camino:'camino', listo:'listo', entregado:'entregado', cancelado:'cancelado'};
+const NOMBRE_EDO = {nuevo:'Enviado · esperando confirmación', confirmado:'Preparando', camino:'En camino', listo:'Listo para recoger', entregado:'Entregado', cancelado:'Cancelado'};
+let VIVO = null, quitarOyente = null;
+function seguir(k){
+  if (!k) return;
+  conDB(db => {
+    if (quitarOyente) quitarOyente();
+    quitarOyente = db.escucharEstado(k, s => {
+      if (!s) return;
+      const antes = VIVO && VIVO.k === k ? VIVO.estado : null;
+      VIVO = Object.assign({k}, s);
+      pintarSeguir();
+      if ($('veloEstado').classList.contains('on')) pintarVivo();
+      else if ($('veloListo').classList.contains('on') && s.estado !== 'nuevo'){ cerrarVelo('veloListo'); pintarVivo(); abrirVelo('veloEstado'); }
+      else if (antes && antes !== s.estado){ aviso('Tu pedido #' + s.folio + ': ' + NOMBRE_EDO[s.estado], 5000); }
+      if (antes && antes !== s.estado && navigator.vibrate) try { navigator.vibrate([120, 80, 120]); } catch(e){}
+    });
+  });
+}
+function pintarVivo(){
+  if (!VIVO) return;
+  let u = ultimoGuardado(); if (u && u.k !== VIVO.k) u = null;
+  pintarPantallaEstado(CLAVE_DE[VIVO.estado] || 'p', VIVO.folio, u, VIVO);
+}
+function pintarSeguir(){
+  const b = $('seguir');
+  if (!VIVO || ['entregado','cancelado'].includes(VIVO.estado) || (VIVO.ts && Date.now() - VIVO.ts > 12*3600e3)){ b.style.display = 'none'; return; }
+  const ico = {nuevo:'📨', confirmado:'🔥', camino:'🛵', listo:'🏃'}[VIVO.estado] || '📨';
+  b.innerHTML = ico + ' Tu pedido #' + esc(VIVO.folio) + ': ' + NOMBRE_EDO[VIVO.estado] + '<small>Toca para ver cómo va</small>';
+  b.style.display = 'block';
+}
+$('seguir').onclick = () => { pintarVivo(); abrirVelo('veloEstado'); };
+
+/* ---------- Guardar el pedido en la base (para el panel y las métricas) ---------- */
+function docPedido(){
+  const {t} = resumen(), r = recoge();
+  const env = (!r && envio && envio.acepto) ? envio.costo : null;
+  return {
+    folio, estado: 'nuevo', modo: modo(),
+    items: Object.keys(carrito).map(id => ({n: datos[id].n, q: carrito[id], p: datos[id].p, nota: notas[id] || ''})),
+    subtotal: t, envio: env, km: (!r && envio) ? envio.km : null, total: t + (env || 0),
+    nombre: val('nombre').slice(0, 80), tel: val('tel').replace(/\D/g, '').slice(-10),
+    calle: r ? '' : val('calle').slice(0, 200), colonia: r ? '' : val('colonia').slice(0, 120), refs: r ? '' : val('refs').slice(0, 200),
+    gps: (!r && gps) ? {lat: +gps.lat.toFixed(6), lng: +gps.lng.toFixed(6)} : null,
+    hora: r ? $('hora').value : '', pago: pagoElegido(),
+    cambio: pagoElegido() === 'Efectivo' ? val('cambio').replace(/[^0-9.]/g, '').slice(0, 10) : '',
+    notas: val('notas').slice(0, 300), promos: $('promos').checked, regalo: $('primero').checked,
+    sucursal: SUCURSAL, canal: 'web', v: 1
+  };
+}
+function registrarPedido(){
+  const p = docPedido();
+  try { localStorage.setItem('glp_pend', JSON.stringify({k: token, p, e: {folio, estado: 'nuevo', modo: p.modo}})); } catch(e){}
+  enviarPendiente();
+}
+function enviarPendiente(){
+  let pend = null; try { pend = JSON.parse(localStorage.getItem('glp_pend') || 'null'); } catch(e){}
+  if (!pend) return;
+  const quitar = () => { try { const x = JSON.parse(localStorage.getItem('glp_pend') || 'null'); if (x && x.k === pend.k) localStorage.removeItem('glp_pend'); } catch(e){} };
+  conDB(db => db.crearPedido(pend.k, pend.p, pend.e).then(quitar, err => { if (/permission|exists/i.test(String(err && (err.code || err.message)))) quitar(); }));
+}
+
+/* ---------- Ajustes del panel: horario, avisos, menú, envío, pagos ---------- */
+function aplicarTienda(t){
+  TIENDA = Object.assign(JSON.parse(JSON.stringify(TIENDA_DEF)), t || {});
+  if (!Array.isArray(TIENDA.horario) || TIENDA.horario.length !== 7) TIENDA.horario = JSON.parse(JSON.stringify(TIENDA_DEF.horario));
+  const e = Object.assign({}, TIENDA_DEF.envio, TIENDA.envio || {});
+  ENVIO_BASE = +e.base || 0; KM_INCLUIDOS = +e.km || 0; POR_KM = +e.porKm || 0; FACTOR_CALLE = +e.factor || 1.3;
+  $('tarifaTxt').innerHTML = '<b>Envío:</b> hasta ' + KM_INCLUIDOS + ' km, ' + pesos(ENVIO_BASE) + ' · cada km adicional, ' + pesos(POR_KM) + '.' + (TIENDA.minimo > 0 ? '<br><b>Pedido mínimo a domicilio:</b> ' + pesos(TIENDA.minimo) + '.' : '');
+  const av = $('avisoTop'); av.textContent = TIENDA.aviso || ''; av.style.display = TIENDA.aviso ? 'block' : 'none';
+  const pr = Object.assign({}, TIENDA_DEF.promo, TIENDA.promo || {});
+  $('promo').style.display = pr.on ? '' : 'none'; $('promoT').textContent = pr.t || ''; $('promoS').textContent = pr.s || '';
+  $('cajaRegalo').style.display = TIENDA.regalo ? '' : 'none'; if (!TIENDA.regalo) $('primero').checked = false;
+  const pg = Object.assign({}, TIENDA_DEF.pagos, TIENDA.pagos || {});
+  const clave = {'Efectivo':'efectivo', 'Transferencia':'transferencia', 'Tarjeta (link de pago)':'tarjeta'};
+  const radios = [...document.querySelectorAll('input[name=pago]')];
+  if (!radios.some(r => pg[clave[r.value]])) pg.efectivo = true;
+  radios.forEach(r => { const on = !!pg[clave[r.value]]; r.closest('label').style.display = on ? '' : 'none'; if (!on && r.checked) r.checked = false; });
+  if (!radios.some(r => r.checked)){ const v = radios.find(r => pg[clave[r.value]]); v.checked = true; v.dispatchEvent(new Event('change')); }
+  if (gps && envio) cotizar();
+  pintarEstado(); actualizar();
+}
+function aplicarMenu(m){
+  MENU.forEach((c, ci) => { c.p = BASE[ci].p.map(it => it.slice()); });
+  for (const k in DESC) delete DESC[k]; Object.assign(DESC, DESC_BASE);
+  const cam = (m && m.cambios) || {};
+  MENU.forEach(c => c.p.forEach(it => {
+    const x = cam[slug(it[0])]; if (!x) return;
+    if (x.p != null && x.p !== '' && !isNaN(+x.p)) it[1] = +x.p;
+    if (x.d != null) DESC[it[0]] = x.d;
+    if (x.f != null) it[2] = x.f;
+    if (x.a) it.a = true; if (x.o) it.o = true;
+  }));
+  ((m && m.nuevos) || []).forEach(nv => {
+    const c = MENU.find(c => c.c === nv.c); if (!c || !nv.n || !nv.id) return;
+    const it = [nv.n, +nv.p || 0, nv.f || '']; it.id = 'n' + nv.id;
+    if (nv.a) it.a = true; if (nv.o) it.o = true; if (nv.d) DESC[nv.n] = nv.d;
+    c.p.push(it);
+  });
+  reconstruirDatos();
+  const fuera = [];
+  for (const id in carrito){ const d = datos[id]; if (!d || d.a || d.o){ fuera.push(d ? d.n : 'un platillo'); delete carrito[id]; delete notas[id]; } }
+  repintar(); actualizar(); pintarRepetir();
+  if (fuera.length) aviso('Se agotó y lo quitamos de tu pedido: ' + fuera.join(', '), 5000);
+  cargarFotos();
+}
+async function cargarFotos(){
+  const ids = new Set(); Object.values(datos).forEach(d => { if (d.f && d.f.startsWith('fb:')) ids.add(d.f.slice(3)); });
+  let nuevas = false;
+  for (const id of ids){
+    if (FOTOS[id]) continue;
+    let u = null; try { u = localStorage.getItem('glp_foto_' + id); } catch(e){}
+    if (!u && DB){ try { u = await DB.foto(id); if (u) try { localStorage.setItem('glp_foto_' + id, u); } catch(e){} } catch(e){} }
+    if (u){ FOTOS[id] = u; nuevas = true; }
+  }
+  if (nuevas) repintar();
+}
+let AJ_JSON = '';
+function aplicarAjustes(a, guardarCopia){
+  const j = JSON.stringify(a || {});
+  if (j === AJ_JSON) return;
+  AJ_JSON = j;
+  if (guardarCopia) try { localStorage.setItem('glp_ajustes', j); } catch(e){}
+  aplicarTienda(a && a.tienda); aplicarMenu(a && a.menu);
+}
+function refrescarAjustes(){ conDB(db => db.ajustes().then(a => aplicarAjustes(a, true)).catch(() => {})); }
 $('esMenu').onclick = () => cerrarVelo('veloEstado');
 
 pintarMenu();
 desdeHash();
 pintarEstado(); setInterval(pintarEstado, 60000);
 cargar(); aplicarModo(); pintarRepetir();
+try { const c = localStorage.getItem('glp_ajustes'); if (c) aplicarAjustes(JSON.parse(c), false); } catch(e){}
 verEstado();
+refrescarAjustes(); enviarPendiente();
+setInterval(refrescarAjustes, 120000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden){ refrescarAjustes(); pintarEstado(); } });
+(function(){ const u = ultimoGuardado(); if (u && u.k && u.ts && Date.now() - u.ts < 12*3600e3 && !VIVO) seguir(u.k); })();
 </script>
+<script src="fb-config.js?v=1794362623"></script>
+<script>if (window.GLP_FB && window.GLP_FB.firebase){ var s = document.createElement('script'); s.type = 'module'; s.src = 'fb-cliente.js?v=1794362623'; document.body.appendChild(s); }</script>
 </body>
 </html>
