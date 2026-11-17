@@ -326,7 +326,7 @@
       <h3>💳 Formas de pago que aceptas</h3>
       <div class="togRow"><span>💵 Efectivo</span><label class="sw"><input type="checkbox" id="tEfectivo"><span></span></label></div>
       <div class="togRow"><span>🏦 Transferencia</span><label class="sw"><input type="checkbox" id="tTransf"><span></span></label></div>
-      <div class="togRow"><span>💳 Tarjeta (link de pago)</span><label class="sw"><input type="checkbox" id="tTarjeta"><span></span></label></div>
+      <div class="togRow"><span>💳 Mercado Pago (enlace)</span><label class="sw"><input type="checkbox" id="tTarjeta"><span></span></label></div>
     </div>
 
     <div class="guardarBar"><button class="bt p full" id="btGuardarTienda" style="box-shadow:0 6px 18px rgba(110,20,33,.3)">Guardar cambios de la tienda</button></div>
@@ -412,7 +412,7 @@
     </div>
     <div id="epNombreCaja"><label class="l" for="epNombre">Nombre</label><input class="inp" id="epNombre" maxlength="70"></div>
     <div id="epCatCaja"><label class="l" for="epCat">Categoría</label><select class="inp" id="epCat"></select></div>
-    <label class="l" for="epPrecio">Precio ($) <span id="epPrecioOrig" style="font-weight:600"></span></label>
+    <label class="l" for="epPrecio">Precio en el local ($) <span id="epPrecioOrig" style="font-weight:600"></span></label>
     <input class="inp" id="epPrecio" type="number" inputmode="numeric" min="0">
     <label class="l" for="epDesc">Descripción</label>
     <textarea class="inp" id="epDesc" rows="4" maxlength="400"></textarea>
@@ -448,7 +448,7 @@
       <label class="l" for="pmEnvio">Envío ($)</label><input class="inp" id="pmEnvio" type="number" inputmode="numeric" min="0">
     </div>
     <div class="grid2">
-      <div><label class="l" for="pmPago">Pago</label><select class="inp" id="pmPago"><option>Efectivo</option><option>Transferencia</option><option>Tarjeta (link de pago)</option></select></div>
+      <div><label class="l" for="pmPago">Pago</label><select class="inp" id="pmPago"><option>Efectivo</option><option>Transferencia</option><option>Mercado Pago</option></select></div>
       <div><label class="l" for="pmEstado">Estado</label><select class="inp" id="pmEstado"><option value="confirmado">Preparando</option><option value="entregado">Ya entregado</option></select></div>
     </div>
     <label class="l" for="pmNotas">Notas</label><input class="inp" id="pmNotas">
@@ -460,8 +460,9 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="menu-base.js?v=1794362623"></script>
-<script src="fb-config.js?v=1794362623"></script>
+<script src="cuentas.js?v=1794946133"></script>
+<script src="menu-base.js?v=1794946133"></script>
+<script src="fb-config.js?v=1794946133"></script>
 <script>
 /* =========================================================
    Panel de administrador · Grupo Los Panchos
@@ -504,9 +505,9 @@ const hora12 = m => { m = ((m % 1440) + 1440) % 1440; const h = Math.floor(m / 6
 const TIENDA_DEF = {
   modo: 'auto', hasta: null, motivo: '',
   horario: [0,1,2,3,4,5,6].map(() => ({on: true, a: '08:00', c: '02:00'})),
-  aviso: '', promo: {on: true, t: 'Tu primer pedido directo lleva agua de Jamaica GRATIS', s: 'Pide directo y paga precio de mostrador, más barato que en las apps.'},
+  aviso: '', promo: {on: true, t: 'Tu primer pedido directo lleva agua de Jamaica GRATIS', s: 'Pide directo: más barato que en las apps y te lo llevamos hasta tu puerta.'},
   regalo: true, minimo: 0, entrega: 40,
-  envio: {base: 30, km: 5, porKm: 5, factor: 1.3},
+  envio: {base: CUENTAS.TABULADOR.base, km: CUENTAS.TABULADOR.kmIncluidos, porKm: CUENTAS.TABULADOR.porKm, factor: CUENTAS.TABULADOR.factorCalles},
   pagos: {efectivo: true, transferencia: true, tarjeta: true}
 };
 let TIENDA = JSON.parse(JSON.stringify(TIENDA_DEF));
@@ -727,11 +728,12 @@ function tarjeta(p){
     acc = '<div class="acc"><button class="bt v" data-acc="entregado" data-id="' + p.id + '">✔ Entregado</button></div>';
   }
   acc += '<div class="acc">' + (tel ? '<button class="bt w" data-wa="' + p.id + '">💬 Avisar al cliente</button>' : '') + '<button class="bt" data-ticket="' + p.id + '">🖨️ Ticket</button></div>';
+  if (p.local != null && !['cancelado'].includes(p.estado)) acc += '<div class="acc">' + (rec ? '' : '<button class="bt" data-msj="grupo" data-id="' + p.id + '">🛵 Grupo</button><button class="bt" data-msj="privado" data-id="' + p.id + '">🔒 Privado</button>') + '<button class="bt" data-msj="interno" data-id="' + p.id + '">📋 Interno</button></div>';
   return '<div class="ped e-' + p.estado + '">' +
     '<div class="ph"><b>#' + esc(p.folio) + '</b><span class="tag ' + p.estado + '">' + NOM_EDO[p.estado] + '</span><span class="tag">' + (rec ? '🏃 Recoger' : '🛵 Domicilio') + '</span>' + (p.canal === 'whatsapp' ? '<span class="tag wa">WhatsApp</span>' : '') + '<span class="hace' + (tarde ? ' tarde' : '') + '">' + horaDe(p.ts) + ' · ' + hace(p.ts) + '</span></div>' +
     '<div class="cli">👤 <b>' + esc(p.nombre || 'Sin nombre') + '</b>' + (tel ? ' · <a href="tel:' + tel + '">📞 ' + tel.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') + '</a>' : '') + (p.promos ? ' · <span class="tag" style="font-size:11px">promos ✅</span>' : '') + '</div>' +
     '<ul>' + lin + (p.regalo ? '<li><b>1×</b><span>Agua de Jamaica <small>REGALO 1er pedido</small></span><i>$0</i></li>' : '') + '</ul>' +
-    '<div class="tot">Comida ' + pesos(p.subtotal) + (rec ? '' : ' · Envío ' + (p.envio != null ? pesos(p.envio) + (p.km ? ' (' + p.km + ' km)' : '') : '<b>por confirmar</b>')) + ' · <b>Total ' + pesos(p.total) + '</b></div>' +
+    '<div class="tot">Comida ' + pesos(p.subtotal) + (rec ? '' : ' · Envío ' + (p.envio != null ? (p.envioReal != null ? '<s>' + pesos(p.envioReal) + '</s> ' : '') + (p.envio === 0 ? 'GRATIS' : pesos(p.envio)) + (p.km ? ' (' + p.km + ' km)' : '') : '<b>por confirmar</b>')) + ' · <b>Total ' + pesos(p.total) + '</b></div>' +
     '<div class="lin">' + ({Efectivo:'💵', Transferencia:'🏦'}[p.pago] || '💳') + ' ' + esc(p.pago || '') + camb + '</div>' +
     dir + (p.notas ? '<div class="lin">📝 ' + esc(p.notas) + '</div>' : '') +
     (p.min && p.estado !== 'nuevo' ? '<div class="lin" style="color:var(--gris)">⏱️ Le dijimos ' + p.min + ' min' + (p.t_confirmado ? ' (confirmado ' + horaDe(p.t_confirmado) + ')' : '') + '</div>' : '') +
@@ -741,6 +743,8 @@ const confirmarDoble = {};
 $('listaPed').onclick = async e => {
   const m = e.target.closest('[data-min]');
   if (m){ minSel[m.dataset.id] = +m.dataset.min; pintarPedidos(); return; }
+  const mj = e.target.closest('[data-msj]');
+  if (mj){ const p = PEDIDOS.find(x => x.id === mj.dataset.id); if (p){ const x = datosCuentas(p), t = {grupo: CUENTAS.mensajeGrupo, privado: CUENTAS.mensajePrivado, interno: CUENTAS.mensajeInterno}[mj.dataset.msj](x); if (!t){ toast('Falta el envío real de este pedido'); return; } window.open((mj.dataset.msj === 'interno' ? 'https://wa.me/' + CUENTAS.WHATSAPP_INTERNO : 'https://wa.me/') + '?text=' + encodeURIComponent(t), '_blank'); } return; }
   const w = e.target.closest('[data-wa]');
   if (w){ const p = PEDIDOS.find(x => x.id === w.dataset.wa); if (p) window.open(ligaWa(p, p.estado), '_blank'); return; }
   const t = e.target.closest('[data-ticket]');
@@ -756,6 +760,11 @@ $('listaPed').onclick = async e => {
   try { await API.cambiarEstado(p.id, edo, extra); toast('#' + p.folio + ': ' + NOM_EDO[edo]); }
   catch(err){ toast('No se guardó: ' + (err.code || err.message)); a.disabled = false; }
 };
+function datosCuentas(p){
+  return {folio: p.folio, items: p.items || [], L: p.local, P: p.subtotal, real: p.envioReal, km: p.km, modo: p.modo, pago: p.pago,
+    pagado: p.pago === 'Transferencia' || p.pago === 'Mercado Pago', nombre: p.nombre, tel: p.tel, calle: p.calle, colonia: p.colonia,
+    refs: p.refs, gps: p.gps, hora: p.hora, notas: p.notas, cambio: p.cambio, regalo: p.regalo};
+}
 function ligaWa(p, edo){
   const tel = String(p.tel || '').replace(/\D/g, '').slice(-10);
   const link = PAGINA + '?p=' + p.folio + '&k=' + p.id;
@@ -763,9 +772,9 @@ function ligaWa(p, edo){
   const rec = p.modo === 'recoger';
   const txt = {
     nuevo: 'Hola ' + (p.nombre || '') + ', recibimos tu pedido *#' + p.folio + '* 🙌' + ver,
-    confirmado: '✅ *¡Pedido #' + p.folio + ' confirmado!* Ya lo estamos preparando. ' + (rec ? 'Estará listo en aprox. ' : 'Llega en aprox. ') + (p.min || TIENDA.entrega) + ' min.' + (!rec && p.envio != null ? '\nTotal a pagar: *' + pesos(p.total) + '* (con envío).' : rec ? '\nTotal a pagar: *' + pesos(p.total) + '*.' : '') + ver,
+    confirmado: '✅ *¡Pedido #' + p.folio + ' confirmado!* Ya lo estamos preparando. ' + (rec ? 'Estará listo en aprox. ' : 'Llega en aprox. ') + (p.min || TIENDA.entrega) + ' min.' + (rec ? '\n📍 Nuestra cocina: ' + CUENTAS.COCINA.mapa : '') + (!rec && p.envio != null ? '\nTotal a pagar: *' + pesos(p.total) + '* (con envío).' : rec ? '\nTotal a pagar: *' + pesos(p.total) + '*.' : '') + ver,
     camino: '🛵 *¡Tu pedido #' + p.folio + ' va en camino!*' + (p.pago === 'Efectivo' ? '\nTotal a pagar: *' + pesos(p.total) + '*.' : '') + ver,
-    listo: '🏃 *¡Tu pedido #' + p.folio + ' está listo para recoger!*\nTe esperamos en Prol. Corregidora Nte. 180, El Cerrito.' + ver,
+    listo: '🏃 *¡Tu pedido #' + p.folio + ' está listo para recoger!*\n📍 Te esperamos aquí: ' + CUENTAS.COCINA.mapa + ver,
     entregado: '🙏 ¡Gracias por tu pedido, ' + (p.nombre || '') + '! Esperamos que lo disfrutes. Cuando quieras, pide otra vez aquí: ' + PAGINA,
     cancelado: 'Hola ' + (p.nombre || '') + ', tu pedido #' + p.folio + ' se canceló. Si tienes dudas, escríbenos por aquí.'
   }[edo] || '';
@@ -939,7 +948,7 @@ function pintarMenu(){
     const src = IMG(i.f);
     html += '<div class="mItem' + (i.a ? ' agot' : '') + (i.o ? ' ocul' : '') + '" data-k="' + esc(i.k) + '">' +
       (src ? '<img src="' + src + '" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'">' : '<div class="sinfoto">' + esc(i.i) + '</div>') +
-      '<div class="tx"><b>' + esc(i.n) + (i.a ? '<span class="mini ag">AGOTADO</span>' : '') + (i.o ? '<span class="mini oc">OCULTO</span>' : '') + (i.editado ? '<span class="mini ed">EDITADO</span>' : '') + (i.nuevo ? '<span class="mini nv">NUEVO</span>' : '') + '</b><span>' + pesos(i.p) + (i.p0 != null && i.p !== i.p0 ? ' <s>' + pesos(i.p0) + '</s>' : '') + '</span></div>' +
+      '<div class="tx"><b>' + esc(i.n) + (i.a ? '<span class="mini ag">AGOTADO</span>' : '') + (i.o ? '<span class="mini oc">OCULTO</span>' : '') + (i.editado ? '<span class="mini ed">EDITADO</span>' : '') + (i.nuevo ? '<span class="mini nv">NUEVO</span>' : '') + '</b><span>Local ' + pesos(i.p) + (i.p0 != null && i.p !== i.p0 ? ' <s>' + pesos(i.p0) + '</s>' : '') + ' · Página ' + pesos(CUENTAS.precioPagina(i.p)) + '</span></div>' +
       '<label class="sw" data-noabrir title="Disponible"><input type="checkbox" data-disp="' + esc(i.k) + '"' + (i.a ? '' : ' checked') + '><span></span></label></div>';
   });
   $('listaMenu').innerHTML = html || '<div class="vacio">No hay platillos con ese filtro.</div>';
@@ -1096,6 +1105,7 @@ function pintarMetricas(act, ant, hist, a, b, et){
     '<div class="kpi"><small>Ticket promedio</small><b>' + pesos(ticket) + '</b>' + cambio(ticket, ticketA) + '</div>' +
     '<div class="kpi"><small>Clientes</small><b>' + tels.size + '</b><em class="eq">' + nuevos + ' nuevos · ' + (tels.size - nuevos) + ' repiten</em></div>' +
     '<div class="kpi"><small>Envíos cobrados</small><b>' + pesos(envio) + '</b><em class="eq">' + val.filter(p => p.modo !== 'recoger').length + ' a domicilio</em></div>' +
+    (() => { let ap = 0, n = 0; val.forEach(p => { if (p.local == null) return; const c = CUENTAS.cuentas(datosCuentas(p)); if (c.aporte != null){ ap += c.aporte; n++; } }); return n ? '<div class="kpi"><small>Envío: lo que pusiste</small><b>' + (ap > 0 ? pesos(ap) : ap < 0 ? 'Te sobró ' + pesos(-ap) : '$0') + '</b><em class="eq">' + n + ' pedidos con la regla del 17 nov</em></div>' : ''; })() +
     '<div class="kpi"><small>Sin confirmar / cancelados</small><b>' + sinConf + ' / ' + canc + '</b><em class="eq">no cuentan en ventas</em></div></div>';
   // Ventas por día
   const dias = Math.round((b - a) / DIA);
@@ -1185,6 +1195,6 @@ $('btCopiarTels').onclick = async () => {
 };
 $('btCsvClientes').onclick = () => descargarCsv('clientes.csv', [['Nombre','Teléfono','Pedidos','Total comprado','Primer pedido','Último pedido','Acepta promos','Colonia']].concat(clientesFiltrados().map(c => [c.nombre, c.tel, c.pedidos, c.total, fechaDe(c.primero), fechaDe(c.ultimo), c.promos ? 'Sí' : 'No', c.colonia])));
 </script>
-<script type="module" src="fb-admin.js?v=1794362623"></script>
+<script type="module" src="fb-admin.js?v=1794946133"></script>
 </body>
 </html>

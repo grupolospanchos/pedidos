@@ -26,7 +26,7 @@ service cloud.firestore {
     match /pedidos/{id} {
       allow create: if esAdmin() || (
         id.size() >= 16 && id.size() <= 40
-        && request.resource.data.keys().hasOnly(['folio','ts','estado','modo','items','subtotal','envio','km','total',
+        && request.resource.data.keys().hasOnly(['folio','ts','estado','modo','items','subtotal','local','envio','envioReal','km','total',
              'nombre','tel','calle','colonia','refs','gps','hora','pago','cambio','notas','promos','regalo','sucursal','canal','v'])
         && request.resource.data.estado == 'nuevo'
         && request.resource.data.ts == request.time

@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Grupo Los Panchos – Pide directo</title>
-<meta name="description" content="Tacos, gusanos, chilaquiles, charolas, tortas y más en Querétaro. Pide directo por WhatsApp y paga precio de mostrador.">
+<meta name="description" content="Tacos, gusanos, chilaquiles, charolas, tortas y más en Querétaro. Pide directo por WhatsApp, más barato que en las apps.">
 <meta name="theme-color" content="#6e1421">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Grupo Los Panchos – Pide directo">
-<meta property="og:description" content="Tacos, gusanos, chilaquiles, charolas y más. Pide directo por WhatsApp y paga precio de mostrador.">
+<meta property="og:description" content="Tacos, gusanos, chilaquiles, charolas y más. Pide directo por WhatsApp, más barato que en las apps.">
 <meta property="og:image" content="https://grupolospanchos.github.io/pedidos/og.jpg">
 <meta property="og:url" content="https://grupolospanchos.github.io/pedidos/">
 <meta name="twitter:card" content="summary_large_image">
@@ -190,6 +190,12 @@
   .cotiza{border:2px solid var(--oro);background:#fffaf0;border-radius:12px;padding:12px;margin:2px 0 10px}
   .cotiza .cf{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px;padding:3px 0}
   .cotiza .cf b{white-space:nowrap}
+  .cCocina{font-weight:800;color:var(--vino);font-size:14.5px;line-height:1.35;padding-bottom:8px;margin-bottom:6px;border-bottom:1px dashed var(--oro)}
+  .pagos label.off{opacity:.4}
+  .tachado{color:var(--gris);font-weight:600;margin-right:6px;text-decoration:line-through}
+  .gratis{color:var(--verde)}
+  .avisoGratis{margin-top:10px;background:#eaf7ef;color:#17703d;border-radius:10px;padding:10px 12px;font-weight:800;font-size:14.5px;text-align:center}
+  .cGratis{margin-top:6px;color:#17703d;font-weight:800;font-size:14.5px;display:none}
   .cotiza .cf.g{font-size:18px;font-family:Archivo,sans-serif;font-weight:800;color:var(--vino)}
   .cbtns{display:grid;grid-template-columns:1.4fr 1fr;gap:8px;margin-top:10px}
   .cbtns button{border-radius:10px;padding:12px 8px;font-weight:700;font-size:15px;border:1.5px solid var(--linea);background:#fff;color:var(--tinta)}
@@ -221,7 +227,7 @@
 
 <div class="promo" id="promo">
   <div class="ico">🥤</div>
-  <div><b id="promoT">Tu primer pedido directo lleva agua de Jamaica GRATIS</b><span id="promoS">Pide directo y paga precio de mostrador, más barato que en las apps.</span></div>
+  <div><b id="promoT">Tu primer pedido directo lleva agua de Jamaica GRATIS</b><span id="promoS">Pide directo: más barato que en las apps y te lo llevamos hasta tu puerta.</span></div>
 </div>
 
 <button class="seguir" id="seguir"></button>
@@ -270,6 +276,7 @@
       <label><input type="radio" name="modo" value="domicilio" checked>🛵<br>A domicilio</label>
       <label><input type="radio" name="modo" value="recoger">🏃<br>Paso a recoger</label>
     </div>
+    <p class="tarifa" id="notaDomicilio" style="display:none;margin-top:10px"></p>
     <label class="campo" for="nombre" style="margin-top:12px">Nombre</label>
     <input class="inp" id="nombre" autocomplete="name" placeholder="¿A nombre de quién?">
     <label class="campo" for="tel">Teléfono (10 dígitos)</label>
@@ -278,7 +285,7 @@
 
   <div class="bloque" id="bloqueRecoger" style="display:none">
     <h4>Pasa por él a nuestro local</h4>
-    <div class="tarifa" style="margin-top:0"><b>Grupo Los Panchos Corregidora</b><br>Prol. Corregidora Nte. 180, El Cerrito, Querétaro<br><a href="https://www.google.com/maps/dir/?api=1&destination=20.6024719,-100.3932257" target="_blank" rel="noopener" style="color:var(--vino);font-weight:700">📍 Cómo llegar</a></div>
+    <div class="tarifa" style="margin-top:0">📍 Al confirmar tu pedido te mandamos por WhatsApp la ubicación exacta de nuestra cocina.</div>
     <label class="campo" for="hora" style="margin-top:12px">¿A qué hora pasas?</label>
     <select class="inp" id="hora"></select>
     <p class="tarifa" style="margin-top:10px">Te avisamos por WhatsApp cuando tu pedido esté listo. Sin costo de envío.</p>
@@ -296,13 +303,15 @@
       <button type="button" class="gps" id="gpsBtn">📍 Mandar mi ubicación exacta</button>
       <div class="gpsEdo" id="gpsEdo">Toca el botón estando en tu casa y acepta el permiso de ubicación. Te decimos el costo de envío al momento.</div>
       <div class="cotiza" id="cotiza" style="display:none">
-        <div class="cf"><span>Distancia aprox. desde nuestra cocina</span><b id="cDist"></b></div>
+        <div class="cCocina">🔥 Cocinamos en el Centro de Querétaro y te lo llevamos hasta tu puerta</div>
+        <div class="cf"><span id="cDist"></span></div>
         <div class="cf g"><span>Tu envío</span><b id="cEnvio"></b></div>
+        <div class="cGratis" id="cGratis"></div>
         <div class="cbtns"><button type="button" class="si" id="cSi">✅ Acepto el envío</button><button type="button" class="no" id="cNo">No, gracias</button></div>
         <div class="cmsg" id="cMsg"></div>
       </div>
     </div>
-    <div class="tarifa"><span id="tarifaTxt"><b>Envío:</b> hasta 5 km, $30 · cada km adicional, $5.</span><br><span id="tarifaNota">Te confirmamos el costo exacto con tu ubicación 📍.</span></div>
+    <div class="tarifa"><span id="tarifaTxt"><b>Envío:</b> pagas solo la mitad del costo real, y en pedidos grandes te sale GRATIS.</span><br><span id="tarifaNota">Con tu ubicación 📍 te decimos tu envío al momento.</span></div>
   </div>
 
   <div class="bloque">
@@ -310,13 +319,14 @@
     <div class="pagos">
       <label><input type="radio" name="pago" value="Efectivo" checked>💵<br>Efectivo</label>
       <label><input type="radio" name="pago" value="Transferencia">🏦<br>Transferencia</label>
-      <label><input type="radio" name="pago" value="Tarjeta (link de pago)">💳<br>Tarjeta</label>
+      <label><input type="radio" name="pago" value="Mercado Pago">💳<br>Mercado Pago</label>
     </div>
     <div id="cajaEfectivo">
       <label class="campo" for="cambio" style="margin-top:12px">¿Con cuánto pagas? (para llevarte cambio)</label>
       <input class="inp" id="cambio" type="text" inputmode="numeric" placeholder="Ej. 500">
     </div>
-    <p id="txtTarjeta" class="tarifa" style="display:none;margin-top:12px">Te mandamos un link de pago por WhatsApp para pagar con tarjeta.</p>
+    <p id="txtTransf" class="tarifa" style="display:none;margin-top:12px">Te mandamos los datos por WhatsApp. Empezamos a preparar tu pedido en cuanto confirmemos tu transferencia.</p>
+    <p id="txtTarjeta" class="tarifa" style="display:none;margin-top:12px">Te mandamos el enlace de Mercado Pago por WhatsApp para pagar con tarjeta o saldo. Empezamos a preparar tu pedido en cuanto se acredite.</p>
   </div>
 
   <div class="bloque">
@@ -328,6 +338,7 @@
     <div class="tot"><span>Comida</span><span id="sub">$0</span></div>
     <div class="tot"><span>Envío</span><span id="envioTot">desde $30</span></div>
     <div class="tot g"><span>Total</span><span id="tot">$0 + envío</span></div>
+    <div class="avisoGratis" id="avisoGratis" style="display:none"></div>
   </div>
 
   <p class="err" id="err"></p>
@@ -410,6 +421,192 @@
 </div>
 
 <script>
+/* =========================================================
+   CUENTAS DEL CANAL PROPIO · Grupo Los Panchos
+   Regla decidida por Ricardo el 17 nov 2026.
+   ÚNICO lugar para cambiar precios, envío, horario de envío y mensajes.
+   Lo usan: la página de pedidos, la ficha de cocina y el panel.
+   ========================================================= */
+(function(){
+  /* ── TABULADOR DE ENVÍO ──────────────────────────────────
+     Cuando llegue el tabulador del grupo de repartidores, se cambia
+     SOLO aquí (función envioReal). Hoy: $30 hasta 5 km + $5 por km extra. */
+  const TABULADOR = {
+    base: 30,           // pesos hasta los km incluidos
+    kmIncluidos: 5,
+    porKm: 5,           // cada km empezado después de los incluidos cuenta completo
+    factorCalles: 1.3   // línea recta × 1.3 ≈ lo que recorre el repartidor por calles
+  };
+  const MARGEN_PAGINA = 0.10;                                // precio de página = local + 10%
+  const HORARIO_DOMICILIO = {desde: '11:00', hasta: '23:00'}; // horario del grupo de repartidores
+  const AVISO_GRATIS_MAX = 200;                              // "Agrega $X más…" solo si faltan $200 o menos
+  const COCINA = {nombre: 'Los Panchos', lat: 20.6024719, lng: -100.3932257};
+  COCINA.mapa = 'https://maps.google.com/?q=' + COCINA.lat + ',' + COCINA.lng;
+  const WHATSAPP_INTERNO = '527448176464';
+
+  const r2 = x => Math.round(x * 100) / 100;                 // evita errores de decimales (150 × 1.1 = 165.00000003)
+  const pesos = n => '$' + Math.round(+n || 0).toLocaleString('es-MX');
+  const kmTxt = km => (Math.round(km * 10) / 10).toLocaleString('es-MX') + ' km';
+
+  /* Precio que ve el cliente: local + 10%, redondeado al peso de arriba ($15 → $17) */
+  function precioPagina(local){ return Math.ceil(r2((+local || 0) * (1 + MARGEN_PAGINA))); }
+
+  /* Distancia por calles a partir de la línea recta */
+  function kmCalle(kmRecta, tab){ return Math.round(kmRecta * (tab || TABULADOR).factorCalles * 10) / 10; }
+
+  /* Envío real que cobra el repartidor (tabulador) */
+  function envioReal(km, tab){
+    const t = tab || TABULADOR;
+    return t.base + Math.max(0, Math.ceil(r2(km - t.kmIncluidos))) * t.porKm;
+  }
+
+  /* Lo que paga el cliente de envío: la mitad en múltiplos de $5 (hacia arriba),
+     o GRATIS si el 10% extra de su pedido cubre el envío completo */
+  function envioCliente(real, extra){
+    if (real == null) return null;
+    if (extra >= real) return 0;
+    return Math.ceil(r2(real / 2 / 5)) * 5;
+  }
+
+  /* Cuánto más (a precios de página) le falta para que el envío salga gratis */
+  function faltaParaGratis(real, extra){
+    if (real == null || extra >= real) return 0;
+    return Math.ceil(r2((real - extra) * (1 + MARGEN_PAGINA) / MARGEN_PAGINA));
+  }
+
+  /* Cuentas de un pedido.
+     L = comida a precio de local, P = comida a precio de página,
+     real = envío real (null si aún no se sabe), modo = 'domicilio'|'recoger',
+     pagado = true si ya pagó por transferencia o Mercado Pago */
+  function cuentas(o){
+    const L = +o.L || 0, P = +o.P || 0, extra = P - L;
+    if (o.modo === 'recoger') return {extra, real: 0, cliente: 0, gratis: false, total: P, recibe: P, aporte: L - P, falta: 0};
+    if (o.real == null) return {extra, real: null, cliente: null, gratis: false, total: null, falta: null};
+    const c = envioCliente(o.real, extra), total = P + c;
+    const r = {extra, real: o.real, cliente: c, gratis: c === 0, total, falta: faltaParaGratis(o.real, extra)};
+    r.recibe = total - o.real;            // lo que le queda al negocio
+    r.aporte = L - r.recibe;              // > 0: lo que puso Ricardo · < 0: lo que sobró
+    if (o.pagado) r.darle = o.real;       // ya pagado: en el local se le da el envío completo al repartidor
+    else { r.pagaLocal = total - o.real; r.cobra = total; }
+    return r;
+  }
+
+  const SEP = '━━━━━━━━━━━━━━';
+
+  /* Mensaje para el GRUPO de repartidores: sin pedido, sin teléfono, sin descuentos */
+  function mensajeGrupo(x){
+    const c = cuentas(x);
+    if (x.modo === 'recoger' || c.real == null) return '';
+    const L = [];
+    L.push('🛵 *PEDIDO PARA REPARTIR #' + x.folio + '*');
+    L.push('');
+    L.push('📍 *Recoges en:* ' + COCINA.nombre);
+    L.push(COCINA.mapa);
+    L.push('🏠 *Entregas en:* ' + (x.colonia ? 'Col. ' + x.colonia.replace(/^col(\.|onia)?\s+/i, '') : 'colonia por confirmar'));
+    if (x.km != null) L.push('📏 *Distancia:* ' + kmTxt(x.km));
+    L.push('');
+    L.push('💰 *Tu ganancia: ' + pesos(c.real) + '*');
+    if (x.pagado){
+      L.push('');
+      L.push('✅ *YA PAGADO.* No cobras nada al cliente.');
+      L.push('🤝 En el local te damos *' + pesos(c.darle) + '*');
+    } else {
+      L.push('');
+      L.push('💵 Pagas en el local: *' + pesos(c.pagaLocal) + '*');
+      L.push('💵 Cobras al cliente: *' + pesos(c.cobra) + '*');
+      const paga = parseFloat(String(x.cambio || '').replace(/[^0-9.]/g, ''));
+      if (paga > c.cobra) L.push('🪙 El cliente paga con ' + pesos(paga) + ': lleva *' + pesos(paga - c.cobra) + '* de cambio');
+    }
+    L.push('');
+    L.push('Contesta *"Yo"* si lo llevas.');
+    return L.join('\n');
+  }
+
+  /* Mensaje PRIVADO para el repartidor que lo tome */
+  function mensajePrivado(x){
+    if (x.modo === 'recoger') return '';
+    const L = [];
+    L.push('🔒 *Datos de entrega #' + x.folio + '*');
+    L.push('');
+    L.push('👤 *Recibe:* ' + (x.nombre || 'por confirmar'));
+    if (x.tel) L.push('📞 *Teléfono:* ' + String(x.tel).replace(/\D/g, '').replace(/^(\d{3})(\d{3})(\d{4})$/, '$1 $2 $3'));
+    L.push('🏠 *Dirección:* ' + [x.calle, x.colonia ? 'Col. ' + x.colonia.replace(/^col(\.|onia)?\s+/i, '') : ''].filter(Boolean).join(', '));
+    if (x.refs) L.push('📝 *Referencias:* ' + x.refs);
+    if (x.gps){
+      L.push('📍 Ubicación exacta: https://maps.google.com/?q=' + x.gps.lat + ',' + x.gps.lng);
+      L.push('🛵 Ruta desde ' + COCINA.nombre + ': https://www.google.com/maps/dir/?api=1&origin=' + COCINA.lat + ',' + COCINA.lng + '&destination=' + x.gps.lat + ',' + x.gps.lng + '&travelmode=driving');
+    } else if (x.calle){
+      L.push('🗺️ Mapa: https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent([x.calle, x.colonia, 'Querétaro, Qro.'].filter(Boolean).join(', ')));
+    }
+    return L.join('\n');
+  }
+
+  /* Mensaje INTERNO para Ricardo y la cocina: pedido completo y cuentas */
+  function mensajeInterno(x){
+    const c = cuentas(x), rec = x.modo === 'recoger';
+    const L = [];
+    L.push('📋 *INTERNO #' + x.folio + '* · ' + (rec ? 'Paso a recoger' : 'A domicilio') + ' · ' + (x.pago || '') + (x.pagado ? ' (ya pagado)' : ''));
+    L.push('');
+    (x.items || []).forEach(i => {
+      L.push(i.q + ' × ' + i.n + ' — ' + pesos(i.q * i.p) + (i.p0 != null ? ' (local ' + pesos(i.q * i.p0) + ')' : ''));
+      if (i.nota) L.push('   ↳ ' + i.nota);
+    });
+    if (x.regalo) L.push('1 × Agua de Jamaica — REGALO 1er pedido');
+    if (x.notas) L.push('Indicaciones: ' + x.notas);
+    L.push('');
+    L.push('Comida: ' + pesos(x.P) + ' (local ' + pesos(x.L) + ')');
+    if (rec){
+      L.push('Sin envío (pasa a recoger' + (x.hora ? ': ' + x.hora : '') + ')');
+      L.push('*Cliente paga: ' + pesos(c.total) + '*');
+    } else if (c.real == null){
+      L.push('Envío: *por confirmar* (falta la ubicación del cliente)');
+      L.push('*Cliente paga: ' + pesos(x.P) + ' + envío*');
+    } else {
+      L.push('Envío real: ' + pesos(c.real) + (x.km != null ? ' (' + kmTxt(x.km) + ')' : ''));
+      L.push('Envío que vio el cliente: ~' + pesos(c.real) + '~ ' + (c.gratis ? 'GRATIS' : pesos(c.cliente)));
+      L.push('*Cliente paga: ' + pesos(c.total) + '*');
+      L.push('');
+      if (x.pagado) L.push('👉 *Darle al repartidor: ' + pesos(c.darle) + '*');
+      else L.push('👉 *Cobrarle al repartidor: ' + pesos(c.pagaLocal) + '*');
+    }
+    if (c.aporte != null){
+      if (c.aporte > 0) L.push('🔴 *Pusiste: ' + pesos(c.aporte) + '*');
+      else if (c.aporte < 0) L.push('🟢 *Te sobró: ' + pesos(-c.aporte) + '*');
+      else L.push('⚪ *Pusiste: $0*');
+    }
+    L.push('');
+    L.push('👤 ' + (x.nombre || 'Sin nombre') + (x.tel ? ' · ' + x.tel : ''));
+    if (!rec) L.push('🏠 ' + [x.calle, x.colonia].filter(Boolean).join(', ') + (x.refs ? ' · Ref: ' + x.refs : ''));
+    if (x.cambio && !x.pagado) L.push('💵 Paga con $' + x.cambio);
+    return L.join('\n');
+  }
+
+  /* Clave corta que viaja en el mensaje del cliente para que la ficha de cocina
+     recupere las cuentas exactas (no es secreta, solo no se lee a simple vista) */
+  const ALF = '0123456789abcdefghijklmnopqrstuvwxyz', MEZ = 'k3x9qa7mz1w5tbe0v2n8yrcghjupf6dlo4si';
+  function codificar(o){
+    const v = [1, o.L, o.P, o.real == null ? '' : o.real, o.km == null ? '' : Math.round(o.km * 10), o.modo === 'recoger' ? 1 : 0];
+    const s = v.map(n => n === '' ? '' : (+n).toString(36)).join('-');
+    let h = 0; for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) % 1296;
+    return (s + '-' + h.toString(36)).replace(/[0-9a-z]/g, ch => MEZ[ALF.indexOf(ch)]).toUpperCase();
+  }
+  function decodificar(txt){
+    const s = String(txt || '').trim().toLowerCase().replace(/[0-9a-z]/g, ch => ALF[MEZ.indexOf(ch)]);
+    const p = s.split('-'); if (p.length !== 7) return null;
+    const cuerpo = p.slice(0, 6).join('-');
+    let h = 0; for (const ch of cuerpo) h = (h * 31 + ch.charCodeAt(0)) % 1296;
+    if (h.toString(36) !== p[6] || parseInt(p[0], 36) !== 1) return null;
+    const n = x => x === '' ? null : parseInt(x, 36);
+    return {L: n(p[1]), P: n(p[2]), real: n(p[3]), km: p[4] === '' ? null : n(p[4]) / 10, modo: n(p[5]) === 1 ? 'recoger' : 'domicilio'};
+  }
+
+  window.CUENTAS = {TABULADOR, MARGEN_PAGINA, HORARIO_DOMICILIO, AVISO_GRATIS_MAX, COCINA, WHATSAPP_INTERNO,
+    precioPagina, kmCalle, envioReal, envioCliente, faltaParaGratis, cuentas,
+    mensajeGrupo, mensajePrivado, mensajeInterno, codificar, decodificar, pesos};
+})();
+
+</script>
+<script>
 const WHATSAPP = '527448176464';
 const PAGINA = 'https://grupolospanchos.github.io/pedidos/';
 const SUCURSAL = 'Corregidora';
@@ -417,8 +614,7 @@ const USAR_GPS = true;   // true solo en la versión publicada fuera de Claude
 let gps = null;             // {lat, lng, prec}
 /* Cocina Corregidora y tarifa de envío */
 const LOCAL = {lat: 20.6024719, lng: -100.3932257};
-let ENVIO_BASE = 30, KM_INCLUIDOS = 5, POR_KM = 5;
-let FACTOR_CALLE = 1.3;   // la distancia en línea recta se multiplica por esto para aproximar el recorrido por calles
+const TAB = CUENTAS.TABULADOR;   // tabulador de envío: se cambia en cuentas.js (o desde el panel)   // la distancia en línea recta se multiplica por esto para aproximar el recorrido por calles
 let envio = null;           // {km, costo, acepto: null|true|false}
 function distanciaKm(a, b){
   const R = 6371, rad = x => x * Math.PI / 180;
@@ -428,19 +624,17 @@ function distanciaKm(a, b){
 }
 function cotizar(){
   if (!gps || LOCAL.lat === null) return;
-  const km = Math.round(distanciaKm(LOCAL, gps) * FACTOR_CALLE * 10) / 10;
-  const extra = Math.max(0, Math.ceil(km - KM_INCLUIDOS));
-  envio = {km, costo: ENVIO_BASE + extra * POR_KM, acepto: null};
-  $('cDist').textContent = km.toLocaleString('es-MX') + ' km';
-  $('cEnvio').textContent = pesos(envio.costo);
+  const km = CUENTAS.kmCalle(distanciaKm(LOCAL, gps));
+  envio = {km, real: CUENTAS.envioReal(km), acepto: null, monto: null};
   $('cSi').classList.remove('on'); $('cNo').classList.remove('on'); $('cMsg').style.display = 'none';
   $('cotiza').style.display = 'block';
-  $('tarifaNota').textContent = 'Cada km empezado después de los ' + KM_INCLUIDOS + ' km cuenta como km completo.';
+  $('tarifaNota').textContent = 'El precio tachado es lo que cuesta el envío; tú pagas solo una parte.';
   actualizar();
 }
 function decidirEnvio(si){
   if (!envio) return;
   envio.acepto = si;
+  envio.monto = si ? cuentaActual().cliente : null;
   $('cSi').classList.toggle('on', si); $('cNo').classList.toggle('on', !si);
   const m = $('cMsg'); m.style.display = 'block';
   if (si){ m.style.color = 'var(--verde)'; m.textContent = 'Listo. Tu total ya incluye el envío.'; }
@@ -482,7 +676,7 @@ const DESC_BASE = Object.assign({}, DESC);
 const idDe = (it, ci, ii) => it.id || (ci + '-' + ii);
 function reconstruirDatos(){
   for (const k in datos) delete datos[k];
-  MENU.forEach((cat, ci) => cat.p.forEach((it, ii) => { datos[idDe(it, ci, ii)] = {n: it[0], p: it[1], c: cat.c, f: it[2] || null, d: DESC[it[0]] || '', a: !!it.a, o: !!it.o}; }));
+  MENU.forEach((cat, ci) => cat.p.forEach((it, ii) => { datos[idDe(it, ci, ii)] = {n: it[0], p0: it[1], p: CUENTAS.precioPagina(it[1]), c: cat.c, f: it[2] || null, d: DESC[it[0]] || '', a: !!it.a, o: !!it.o}; }));
 }
 reconstruirDatos();
 const notas = {};    // id -> indicación del cliente para ese platillo
@@ -526,9 +720,9 @@ const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábad
 const TIENDA_DEF = {
   modo: 'auto', hasta: null, motivo: '',
   horario: [0,1,2,3,4,5,6].map(() => ({on: true, a: '08:00', c: '02:00'})),
-  aviso: '', promo: {on: true, t: 'Tu primer pedido directo lleva agua de Jamaica GRATIS', s: 'Pide directo y paga precio de mostrador, más barato que en las apps.'},
+  aviso: '', promo: {on: true, t: 'Tu primer pedido directo lleva agua de Jamaica GRATIS', s: 'Pide directo: más barato que en las apps y te lo llevamos hasta tu puerta.'},
   regalo: true, minimo: 0, entrega: 40,
-  envio: {base: 30, km: 5, porKm: 5, factor: 1.3},
+  envio: {base: CUENTAS.TABULADOR.base, km: CUENTAS.TABULADOR.kmIncluidos, porKm: CUENTAS.TABULADOR.porKm, factor: CUENTAS.TABULADOR.factorCalles},
   pagos: {efectivo: true, transferencia: true, tarjeta: true}
 };
 let TIENDA = JSON.parse(JSON.stringify(TIENDA_DEF));
@@ -608,7 +802,7 @@ function pintarMenu(){
       ${c.p.map((it,ii) => { const id = idDe(it, ci, ii); if (it.o) return ''; return `
         <div class="item${it.a ? ' agot' : ''}" data-item="${id}" data-busca="${quitarAcentos((it[0]+' '+c.c).toLowerCase())}">
           ${it[2] ? `<img class="foto" src="${IMG(it[2])}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : ''}
-          <div class="txt"><div class="nom">${esc(it[0])}</div><div class="pre">${pesos(it[1])}</div>${DESC[it[0]] ? `<div class="des">${esc(DESC[it[0]])}</div>` : ''}</div>
+          <div class="txt"><div class="nom">${esc(it[0])}</div><div class="pre">${pesos(CUENTAS.precioPagina(it[1]))}</div>${DESC[it[0]] ? `<div class="des">${esc(DESC[it[0]])}</div>` : ''}</div>
           <div class="ctl" id="ctl${id}">${controlHTML(id)}</div>
         </div>`; }).join('')}
     </section>`).join('');
@@ -641,18 +835,50 @@ function cambiar(id, d){
   actualizar();
 }
 function resumen(){
-  let n = 0, t = 0;
-  for (const id in carrito){ n += carrito[id]; t += carrito[id]*datos[id].p; }
-  return {n, t};
+  let n = 0, t = 0, l = 0;
+  for (const id in carrito){ n += carrito[id]; t += carrito[id]*datos[id].p; l += carrito[id]*datos[id].p0; }
+  return {n, t, l};      // t = comida a precio de página · l = comida a precio de local
+}
+function cuentaActual(){
+  const {t, l} = resumen();
+  return CUENTAS.cuentas({L: l, P: t, real: (!recoge() && envio) ? envio.real : null, modo: modo()});
+}
+function envioOk(){
+  if (recoge() || !envio) return true;
+  const c = cuentaActual();
+  if (c.gratis) return true;
+  return envio.acepto === true && envio.monto >= c.cliente;
+}
+function pintarEnvio(){
+  if (!envio) return;
+  const c = cuentaActual();
+  $('cDist').innerHTML = 'Estás a <b>' + envio.km.toLocaleString('es-MX') + ' km</b> de nuestra cocina';
+  $('cEnvio').innerHTML = '<span class="tachado">' + pesos(c.real) + '</span>' + (c.gratis ? '<span class="gratis">GRATIS</span>' : pesos(c.cliente));
+  $('cGratis').style.display = c.gratis ? 'block' : 'none';
+  $('cGratis').textContent = '🎉 Tu envío sale GRATIS por el tamaño de tu pedido.';
+  document.querySelector('#cotiza .cbtns').style.display = c.gratis ? 'none' : 'flex';
+  if (c.gratis){ $('cMsg').style.display = 'none'; return; }
+  if (envio.acepto === true && envio.monto < c.cliente){
+    envio.acepto = null; $('cSi').classList.remove('on');
+    const m = $('cMsg'); m.style.display = 'block'; m.style.color = 'var(--rojo)';
+    m.textContent = 'Tu envío cambió a ' + pesos(c.cliente) + ' porque cambió tu pedido. Tócale "Acepto el envío" otra vez.';
+  }
 }
 function actualizar(){
   const {n, t} = resumen();
   $('barra').style.display = n ? 'block' : 'none';
   $('bn').textContent = n; $('bt').textContent = pesos(t);
   $('sub').textContent = pesos(t);
+  const ag = $('avisoGratis'); ag.style.display = 'none';
   if (recoge()){ $('envioTot').textContent = 'Sin costo (recoges)'; $('tot').textContent = pesos(t); }
-  else if (envio && envio.acepto !== false){ $('envioTot').textContent = pesos(envio.costo); $('tot').textContent = pesos(t + envio.costo); }
-  else { $('envioTot').textContent = 'desde $30'; $('tot').textContent = pesos(t) + ' + envío'; }
+  else if (envio){
+    pintarEnvio();
+    const c = cuentaActual();
+    $('envioTot').innerHTML = '<span class="tachado">' + pesos(c.real) + '</span>' + (c.gratis ? '<span class="gratis">GRATIS</span>' : pesos(c.cliente));
+    $('tot').textContent = pesos(c.total);
+    if (c.falta > 0 && c.falta <= CUENTAS.AVISO_GRATIS_MAX && t > 0){ ag.textContent = '🎁 Agrega ' + pesos(c.falta) + ' más y tu envío sale GRATIS'; ag.style.display = 'block'; }
+  }
+  else { $('envioTot').textContent = 'con tu ubicación 📍'; $('tot').textContent = pesos(t) + ' + envío'; }
   if ($('hoja').classList.contains('on')) pintarLineas();
   armarEnlace();
 }
@@ -671,7 +897,7 @@ function pintarLineas(){
 const val = id => $(id).value.trim();
 function pagoElegido(){ return document.querySelector('input[name=pago]:checked').value; }
 function mensaje(){
-  const {t} = resumen();
+  const {t, l} = resumen();
   const L = [];
   L.push((recoge() ? '*PEDIDO PARA RECOGER #' : '*PEDIDO NUEVO #') + folio + ' – ' + SUCURSAL + '*');
   L.push('Hora: ' + horaTexto());
@@ -681,11 +907,12 @@ function mensaje(){
   L.push('');
   L.push('Comida: ' + pesos(t));
   if (recoge()){
-    L.push('*Total a cobrar: ' + pesos(t) + '* (pasa a recoger, sin envío)');
-  } else if (envio && envio.acepto){
-    L.push('Envío: ' + pesos(envio.costo) + ' (' + envio.km.toLocaleString('es-MX') + ' km aprox.) — *aceptado por el cliente*');
-    L.push('*Total a cobrar: ' + pesos(t + envio.costo) + '*');
-  } else L.push('Envío: por confirmar (hasta 5 km $30, +$5 por km)');
+    L.push('*Total a pagar: ' + pesos(t) + '* (paso a recoger, sin envío)');
+  } else if (envio){
+    const c = cuentaActual();
+    L.push('Envío: ~' + pesos(c.real) + '~ ' + (c.gratis ? '*GRATIS* 🎉' : '*' + pesos(c.cliente) + '*') + ' (estoy a ' + envio.km.toLocaleString('es-MX') + ' km de su cocina)');
+    L.push('*Total a pagar: ' + pesos(c.total) + '*');
+  } else L.push('Envío: por confirmar con mi ubicación');
   if (val('notas')) { L.push(''); L.push('Indicaciones: ' + val('notas')); }
   L.push('');
   L.push('Nombre: ' + val('nombre'));
@@ -697,8 +924,7 @@ function mensaje(){
   L.push('Colonia: ' + val('colonia'));
   if (val('refs')) L.push('Referencias: ' + val('refs'));
   if (gps) L.push('📍 Ubicación exacta (GPS): https://maps.google.com/?q=' + gps.lat.toFixed(6) + ',' + gps.lng.toFixed(6));
-  if (gps && LOCAL.lat !== null) L.push('🛵 Ruta desde la cocina: https://www.google.com/maps/dir/?api=1&origin=' + LOCAL.lat + ',' + LOCAL.lng + '&destination=' + gps.lat.toFixed(6) + ',' + gps.lng.toFixed(6) + '&travelmode=driving');
-  else if (val('calle') && val('colonia')) L.push('Mapa: https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(val('calle') + ', ' + val('colonia') + ', Querétaro, Qro.'));
+  if (!gps && val('calle') && val('colonia')) L.push('Mapa: https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(val('calle') + ', ' + val('colonia') + ', Querétaro, Qro.'));
   }
   L.push('Promos por WhatsApp: ' + ($('promos').checked ? 'Sí ✅' : 'No'));
   let pago = 'Pago: ' + pagoElegido();
@@ -706,6 +932,7 @@ function mensaje(){
   L.push(pago);
   L.push('');
   if (!gps && !recoge()) L.push('📍 Ahorita les mando mi ubicación por aquí.');
+  L.push('🔢 Ref: ' + CUENTAS.codificar({L: l, P: t, real: (!recoge() && envio) ? envio.real : null, km: (!recoge() && envio) ? envio.km : null, modo: modo()}));
   L.push('');
   L.push('━━━━━━━━━━━━━━');
   L.push('👇 *TOCA AQUÍ PARA VER TU PEDIDO* 👇');
@@ -729,7 +956,8 @@ function revisar(){
   if (!recoge()){
     if (!val('calle')) { faltan.push('calle y número'); $('calle').classList.add('mal'); }
     if (!val('colonia')) { faltan.push('colonia'); $('colonia').classList.add('mal'); }
-    if (envio && envio.acepto !== true) faltan.push('aceptar el costo de envío');
+    if (!domicilioDisponible()) faltan.push('el envío a domicilio es de ' + hora12(aMin(CUENTAS.HORARIO_DOMICILIO.desde)) + ' a ' + hora12(aMin(CUENTAS.HORARIO_DOMICILIO.hasta)) + ' (ahorita elige “Paso a recoger”)');
+    if (!envioOk()) faltan.push('aceptar el costo de envío');
     if (TIENDA.minimo > 0 && resumen().t < TIENDA.minimo) faltan.push('el pedido mínimo a domicilio es de ' + pesos(TIENDA.minimo) + ' (o elige “Paso a recoger”)');
   }
   if (faltan.length){ $('err').textContent = 'Falta: ' + faltan.join(', ') + '.'; $('err').style.display = 'block'; return false; }
@@ -823,7 +1051,7 @@ $('detOk').onclick = () => {
 function guardarUltimo(){
   try {
     const items = Object.keys(carrito).map(id => ({n: datos[id].n, q: carrito[id], nota: notas[id] || ''}));
-    localStorage.setItem('glp_ultimo', JSON.stringify({items, t: resumen().t, folio, r: recoge(), env: (!recoge() && envio && envio.acepto) ? envio.costo : null, ts: Date.now(), k: token}));
+    localStorage.setItem('glp_ultimo', JSON.stringify({items, t: resumen().t, folio, r: recoge(), env: (!recoge() && envio) ? cuentaActual().cliente : null, ts: Date.now(), k: token}));
   } catch(e){}
 }
 function mostrarListo(){
@@ -876,6 +1104,19 @@ $('instalar').onclick = async () => {
 if (USAR_GPS && 'serviceWorker' in navigator){ try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch(e){} }
 $('verPedido').onclick = () => { if (recoge()) llenarHoras(); pintarLineas(); $('hoja').classList.add('on'); $('hoja').scrollTop = 0; document.body.style.overflow = 'hidden'; };
 $('cerrar').onclick = () => { $('hoja').classList.remove('on'); document.body.style.overflow = ''; };
+function domicilioDisponible(){
+  const m = ahoraMX().min, h = CUENTAS.HORARIO_DOMICILIO;
+  return m >= aMin(h.desde) && m < aMin(h.hasta);
+}
+let modoForzado = false;
+function revisarDomicilio(){
+  const ok = domicilioDisponible(), h = CUENTAS.HORARIO_DOMICILIO;
+  const rd = document.querySelector('input[name=modo][value=domicilio]');
+  rd.disabled = !ok; rd.closest('label').classList.toggle('off', !ok);
+  $('notaDomicilio').textContent = '🛵 El envío a domicilio es de ' + hora12(aMin(h.desde)) + ' a ' + hora12(aMin(h.hasta)) + ' Ahorita solo puedes pasar a recoger (mismos precios, sin envío).';
+  $('notaDomicilio').style.display = ok ? 'none' : 'block';
+  if (!ok && !recoge()){ modoForzado = true; document.querySelector('input[name=modo][value=recoger]').checked = true; aplicarModo(); modoForzado = false; }
+}
 function aplicarModo(){
   const r = recoge();
   $('bloqueRecoger').style.display = r ? 'block' : 'none';
@@ -883,7 +1124,7 @@ function aplicarModo(){
   $('pasosUbic').style.display = (r || gps) ? 'none' : 'block';
   $('cambio').previousElementSibling.textContent = r ? '¿Con cuánto pagas? (para tenerte el cambio)' : '¿Con cuánto pagas? (para llevarte cambio)';
   if (r) llenarHoras();
-  try { localStorage.setItem('glp_modo', modo()); } catch(e){}
+  if (!modoForzado) try { localStorage.setItem('glp_modo', modo()); } catch(e){}
   if ($('err').style.display === 'block') revisar();
   actualizar();
 }
@@ -891,7 +1132,8 @@ document.querySelectorAll('input[name=modo]').forEach(x => x.addEventListener('c
 try { const m = localStorage.getItem('glp_modo'); if (m === 'recoger') document.querySelector('input[name=modo][value=recoger]').checked = true; } catch(e){}
 document.querySelectorAll('input[name=pago]').forEach(r => r.addEventListener('change', () => {
   $('cajaEfectivo').style.display = pagoElegido() === 'Efectivo' ? 'block' : 'none';
-  $('txtTarjeta').style.display = pagoElegido().startsWith('Tarjeta') ? 'block' : 'none';
+  $('txtTarjeta').style.display = pagoElegido() === 'Mercado Pago' ? 'block' : 'none';
+  $('txtTransf').style.display = pagoElegido() === 'Transferencia' ? 'block' : 'none';
   armarEnlace();
 }));
 $('hoja').addEventListener('input', () => { guardar(); armarEnlace(); if ($('err').style.display === 'block') revisar(); });
@@ -977,7 +1219,7 @@ function pintarPantallaEstado(clave, f, u, vivo){
     1: 'Tu pedido se envió por WhatsApp. En unos minutos te confirmamos' + (rec ? ' a qué hora pasar.' : ' el tiempo de entrega.') + (vivo ? ' Esta pantalla se actualiza sola.' : ''),
     2: 'Ya lo estamos preparando.' + (min ? (rec ? ' Estará listo en aprox. <b>' + min + ' min</b>.' : ' Llega en aprox. <b>' + min + ' min</b>.') : '') + (vivo ? ' Esta pantalla se actualiza sola.' : ' Te avisamos por WhatsApp cuando ' + (rec === true ? 'esté listo para recoger.' : rec === false ? 'salga a tu domicilio.' : 'esté listo.')),
     4: '¡Gracias por pedir directo con nosotros! Buen provecho.',
-    3: rec ? 'Pasa por él a Prol. Corregidora Nte. 180, El Cerrito. <a href="https://www.google.com/maps/dir/?api=1&destination=20.6024719,-100.3932257" target="_blank" rel="noopener">📍 Cómo llegar</a>' : 'El repartidor ya salió hacia tu domicilio.'
+    3: rec ? 'Ya puedes pasar por él. La ubicación de nuestra cocina te la mandamos por WhatsApp.' : 'El repartidor ya salió hacia tu domicilio.'
   }[nivel];
   $('esIco').textContent = ico;
   $('esTit').textContent = tit;
@@ -1034,12 +1276,12 @@ $('seguir').onclick = () => { pintarVivo(); abrirVelo('veloEstado'); };
 
 /* ---------- Guardar el pedido en la base (para el panel y las métricas) ---------- */
 function docPedido(){
-  const {t} = resumen(), r = recoge();
-  const env = (!r && envio && envio.acepto) ? envio.costo : null;
+  const {t, l} = resumen(), r = recoge(), c = cuentaActual();
+  const env = (!r && envio) ? envio.real : null;
   return {
     folio, estado: 'nuevo', modo: modo(),
-    items: Object.keys(carrito).map(id => ({n: datos[id].n, q: carrito[id], p: datos[id].p, nota: notas[id] || ''})),
-    subtotal: t, envio: env, km: (!r && envio) ? envio.km : null, total: t + (env || 0),
+    items: Object.keys(carrito).map(id => ({n: datos[id].n, q: carrito[id], p: datos[id].p, p0: datos[id].p0, nota: notas[id] || ''})),
+    subtotal: t, local: l, envioReal: env, envio: c.cliente, km: (!r && envio) ? envio.km : null, total: c.total != null ? c.total : t,
     nombre: val('nombre').slice(0, 80), tel: val('tel').replace(/\D/g, '').slice(-10),
     calle: r ? '' : val('calle').slice(0, 200), colonia: r ? '' : val('colonia').slice(0, 120), refs: r ? '' : val('refs').slice(0, 200),
     gps: (!r && gps) ? {lat: +gps.lat.toFixed(6), lng: +gps.lng.toFixed(6)} : null,
@@ -1066,19 +1308,19 @@ function aplicarTienda(t){
   TIENDA = Object.assign(JSON.parse(JSON.stringify(TIENDA_DEF)), t || {});
   if (!Array.isArray(TIENDA.horario) || TIENDA.horario.length !== 7) TIENDA.horario = JSON.parse(JSON.stringify(TIENDA_DEF.horario));
   const e = Object.assign({}, TIENDA_DEF.envio, TIENDA.envio || {});
-  ENVIO_BASE = +e.base || 0; KM_INCLUIDOS = +e.km || 0; POR_KM = +e.porKm || 0; FACTOR_CALLE = +e.factor || 1.3;
-  $('tarifaTxt').innerHTML = '<b>Envío:</b> hasta ' + KM_INCLUIDOS + ' km, ' + pesos(ENVIO_BASE) + ' · cada km adicional, ' + pesos(POR_KM) + '.' + (TIENDA.minimo > 0 ? '<br><b>Pedido mínimo a domicilio:</b> ' + pesos(TIENDA.minimo) + '.' : '');
+  Object.assign(TAB, {base: +e.base || 0, kmIncluidos: +e.km || 0, porKm: +e.porKm || 0, factorCalles: +e.factor || 1.3});
+  $('tarifaTxt').innerHTML = '<b>Envío:</b> pagas solo la mitad del costo real, y en pedidos grandes te sale GRATIS.' + (TIENDA.minimo > 0 ? '<br><b>Pedido mínimo a domicilio:</b> ' + pesos(TIENDA.minimo) + '.' : '');
+  if (envio && gps){ envio.real = CUENTAS.envioReal(envio.km); }
   const av = $('avisoTop'); av.textContent = TIENDA.aviso || ''; av.style.display = TIENDA.aviso ? 'block' : 'none';
   const pr = Object.assign({}, TIENDA_DEF.promo, TIENDA.promo || {});
   $('promo').style.display = pr.on ? '' : 'none'; $('promoT').textContent = pr.t || ''; $('promoS').textContent = pr.s || '';
   $('cajaRegalo').style.display = TIENDA.regalo ? '' : 'none'; if (!TIENDA.regalo) $('primero').checked = false;
   const pg = Object.assign({}, TIENDA_DEF.pagos, TIENDA.pagos || {});
-  const clave = {'Efectivo':'efectivo', 'Transferencia':'transferencia', 'Tarjeta (link de pago)':'tarjeta'};
+  const clave = {'Efectivo':'efectivo', 'Transferencia':'transferencia', 'Mercado Pago':'tarjeta'};
   const radios = [...document.querySelectorAll('input[name=pago]')];
   if (!radios.some(r => pg[clave[r.value]])) pg.efectivo = true;
   radios.forEach(r => { const on = !!pg[clave[r.value]]; r.closest('label').style.display = on ? '' : 'none'; if (!on && r.checked) r.checked = false; });
   if (!radios.some(r => r.checked)){ const v = radios.find(r => pg[clave[r.value]]); v.checked = true; v.dispatchEvent(new Event('change')); }
-  if (gps && envio) cotizar();
   pintarEstado(); actualizar();
 }
 function aplicarMenu(m){
@@ -1130,7 +1372,8 @@ $('esMenu').onclick = () => cerrarVelo('veloEstado');
 pintarMenu();
 desdeHash();
 pintarEstado(); setInterval(pintarEstado, 60000);
-cargar(); aplicarModo(); pintarRepetir();
+cargar(); aplicarModo(); revisarDomicilio(); pintarRepetir();
+setInterval(revisarDomicilio, 60000);
 try { const c = localStorage.getItem('glp_ajustes'); if (c) aplicarAjustes(JSON.parse(c), false); } catch(e){}
 verEstado();
 refrescarAjustes(); enviarPendiente();
@@ -1138,7 +1381,7 @@ setInterval(refrescarAjustes, 120000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden){ refrescarAjustes(); pintarEstado(); } });
 (function(){ const u = ultimoGuardado(); if (u && u.k && u.ts && Date.now() - u.ts < 12*3600e3 && !VIVO) seguir(u.k); })();
 </script>
-<script src="fb-config.js?v=1794362623"></script>
-<script>if (window.GLP_FB && window.GLP_FB.firebase){ var s = document.createElement('script'); s.type = 'module'; s.src = 'fb-cliente.js?v=1794362623'; document.body.appendChild(s); }</script>
+<script src="fb-config.js?v=1794946133"></script>
+<script>if (window.GLP_FB && window.GLP_FB.firebase){ var s = document.createElement('script'); s.type = 'module'; s.src = 'fb-cliente.js?v=1794946133'; document.body.appendChild(s); }</script>
 </body>
 </html>

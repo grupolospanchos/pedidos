@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#6e1421">
+<title>Ficha del pedido · Los Panchos</title>
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--vino:#6e1421;--vino2:#8c1d2c;--oro:#c9a24a;--crema:#fbf6ee;--tinta:#1f1a17;--gris:#6f6760;--linea:#eadfce;--verde:#1f8f4e;--rojo:#c0392b}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--crema);color:var(--tinta);-webkit-tap-highlight-color:transparent}
+  .top{background:linear-gradient(160deg,var(--vino),#4a0d16);color:#fff;padding:14px 16px;padding-top:max(14px,env(safe-area-inset-top))}
+  .top h1{font-family:Archivo,sans-serif;font-size:19px;margin:0}
+  .top p{margin:3px 0 0;font-size:12.5px;opacity:.85}
+  .vista{max-width:680px;margin:0 auto;padding:12px}
+  .card{background:#fff;border:1px solid var(--linea);border-radius:16px;padding:14px;margin-bottom:12px}
+  .card h3{margin:0 0 8px;font-size:16px}
+  .bt{border:none;border-radius:12px;padding:12px 14px;font-weight:800;font-size:14.5px;background:#f3ece1;color:var(--tinta);font-family:inherit;cursor:pointer}
+  .bt.p{background:var(--vino);color:#fff}
+  .bt.w{background:#25d366;color:#fff}
+  .fila{display:flex;gap:8px;flex-wrap:wrap}
+  .fila .bt{flex:1}
+  textarea,input{width:100%;font-family:inherit;font-size:16px;border:1.5px solid var(--linea);border-radius:12px;padding:10px 12px;background:#fff;color:var(--tinta)}
+  textarea{min-height:110px}
+  label.l{display:block;font-size:13px;font-weight:700;color:var(--gris);margin:8px 0 4px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .togRow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;font-weight:600;font-size:14.5px}
+  .sw{position:relative;width:48px;height:28px;flex:none}
+  .sw input{opacity:0;width:0;height:0;position:absolute}
+  .sw span{position:absolute;inset:0;background:#d9cfc2;border-radius:999px;transition:.2s}
+  .sw span::before{content:'';position:absolute;width:22px;height:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+  .sw input:checked + span{background:var(--verde)}
+  .sw input:checked + span::before{transform:translateX(20px)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .chip{background:#f3ece1;border-radius:999px;padding:6px 11px;font-weight:700;font-size:13px}
+  .chip.r{background:#fde8e8;color:var(--rojo)} .chip.v{background:#eaf7ef;color:var(--verde)}
+  pre{white-space:pre-wrap;word-break:break-word;background:#faf6ef;border-radius:12px;padding:12px;font-family:inherit;font-size:14px;line-height:1.45;margin:0 0 10px}
+  .na{color:var(--gris);font-size:14px;margin:0}
+  .err{color:var(--rojo);font-weight:700;font-size:14px;margin-top:8px;display:none}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--tinta);color:#fff;padding:11px 16px;border-radius:12px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.on{opacity:1}
+  .oculto{display:none!important}
+</style>
+</head>
+<body>
+<header class="top"><h1>🧾 Ficha del pedido</h1><p>Solo cocina · Los Panchos · nada de esto lo ve el cliente</p></header>
+<div class="vista">
+  <div class="card">
+    <h3>1. Copia el mensaje del cliente en WhatsApp y pégalo aquí</h3>
+    <div class="fila" style="margin-bottom:8px"><button class="bt p" id="btPegar">📋 Pegar mensaje</button><button class="bt" id="btLimpiar">Limpiar</button></div>
+    <textarea id="txt" placeholder="Mantén presionado el mensaje del cliente → Copiar → pégalo aquí"></textarea>
+    <div class="err" id="err"></div>
+  </div>
+
+  <div id="res" class="oculto">
+    <div class="card">
+      <h3 id="rTit"></h3>
+      <div class="chips" id="rChips"></div>
+      <div id="rEnvio">
+        <div class="grid2" style="margin-top:6px">
+          <div><label class="l" for="iKm">Distancia (km)</label><input id="iKm" type="number" inputmode="decimal" step="0.1" min="0"></div>
+          <div><label class="l" for="iReal">Envío real ($)</label><input id="iReal" type="number" inputmode="numeric" min="0"></div>
+        </div>
+        <label class="l" for="iCol">Colonia de entrega</label><input id="iCol">
+      </div>
+      <div class="togRow"><span>Ya pagó (transferencia o Mercado Pago confirmado)</span><label class="sw"><input type="checkbox" id="iPagado"><span></span></label></div>
+    </div>
+
+    <div class="card" id="cGrupo">
+      <h3>🛵 2. Para el grupo de repartidores</h3>
+      <div id="gCuerpo"></div>
+    </div>
+    <div class="card" id="cPriv">
+      <h3>🔒 3. Privado para el que lo tome</h3>
+      <div id="pCuerpo"></div>
+    </div>
+    <div class="card">
+      <h3>📋 4. Interno (tu WhatsApp y cocina)</h3>
+      <div id="iCuerpo"></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="cuentas.js?v=1794946133"></script>
+<script src="menu-base.js?v=1794946133"></script>
+<script>
+const $ = id => document.getElementById(id);
+const C = window.CUENTAS, pesos = C.pesos;
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const LOCALES = {}; (window.MENU_BASE || []).forEach(c => c.p.forEach(it => { LOCALES[it[0]] = it[1]; }));
+function toast(t){ const e = $('toast'); e.textContent = t; e.classList.add('on'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('on'), 2200); }
+const num = x => parseFloat(String(x || '').replace(/[^0-9.]/g, ''));
+
+let X = null;          // datos del pedido leídos del mensaje
+let realEditado = false;
+
+function leer(texto){
+  const t = String(texto || '').replace(/\r/g, '');
+  const limpio = t.replace(/[*_]/g, '');
+  const lineas = limpio.split('\n');
+  const campo = re => { const m = limpio.match(re); return m ? m[1].trim() : ''; };
+  const folio = (limpio.match(/#([A-Z0-9]{4})\b/) || [])[1];
+  if (!folio) return null;
+  const x = {folio, modo: /PARA RECOGER/i.test(limpio) ? 'recoger' : 'domicilio', items: [], regalo: /Agua de Jamaica.*REGALO/i.test(limpio)};
+  let ult = null;
+  lineas.forEach(l => {
+    const m = l.match(/^\s*(\d+)\s*×\s*(.+?)\s*—\s*\$([\d,]+)/);
+    if (m && !/REGALO/i.test(l)){ const q = +m[1], n = m[2].trim(), tot = num(m[3]); ult = {q, n, p: Math.round(tot / q), p0: LOCALES[n] != null ? LOCALES[n] : null, nota: ''}; x.items.push(ult); return; }
+    const nt = l.match(/^\s*↳\s*(.+)$/); if (nt && ult) ult.nota = nt[1].trim();
+  });
+  x.hora = campo(/Pasa a recoger:\s*(.+)$/m) || '';
+  x.nombre = campo(/^Nombre:\s*(.+)$/m); x.tel = campo(/^Tel:\s*(.+)$/m);
+  x.calle = campo(/^Dirección:\s*(.+)$/m); x.colonia = campo(/^Colonia:\s*(.+)$/m); x.refs = campo(/^Referencias:\s*(.+)$/m);
+  x.notas = campo(/^Indicaciones:\s*(.+)$/m);
+  const g = limpio.match(/Ubicación exacta \(GPS\):\s*https?:\/\/maps\.google\.com\/\?q=(-?[\d.]+),(-?[\d.]+)/);
+  x.gps = g ? {lat: +g[1], lng: +g[2]} : null;
+  const pg = limpio.match(/^Pago:\s*([^(\n]+?)\s*(?:\(paga con \$([\d.,]+)\))?\s*$/m);
+  x.pago = pg ? pg[1].trim() : ''; x.cambio = pg && pg[2] ? pg[2].replace(/,/g, '') : '';
+  const km = limpio.match(/estoy a ([\d.,]+) km/i); x.km = km ? num(km[1].replace(',', '.')) : null;
+  const er = limpio.match(/Envío:\s*~\s*\$([\d,]+)\s*~/); x.real = er ? num(er[1]) : null;
+  x.P = x.items.reduce((s, i) => s + i.q * i.p, 0);
+  x.L = x.items.every(i => i.p0 != null) ? x.items.reduce((s, i) => s + i.q * i.p0, 0) : null;
+  const ref = C.decodificar(campo(/Ref:\s*([0-9A-Z-]+)/));
+  if (ref){ x.L = ref.L; x.P = ref.P; x.modo = ref.modo; if (ref.real != null) x.real = ref.real; if (ref.km != null) x.km = ref.km; x.ref = true; }
+  return x;
+}
+
+function pintar(){
+  if (!X){ $('res').classList.add('oculto'); return; }
+  $('res').classList.remove('oculto');
+  const rec = X.modo === 'recoger';
+  X.pagado = $('iPagado').checked;
+  X.colonia = $('iCol').value.trim();
+  const km = num($('iKm').value); X.km = isNaN(km) ? null : km;
+  const real = num($('iReal').value); X.real = isNaN(real) ? null : real;
+  $('rTit').textContent = '#' + X.folio + ' · ' + (rec ? 'Paso a recoger' : 'A domicilio') + ' · ' + (X.pago || 'pago ?');
+  $('rEnvio').classList.toggle('oculto', rec);
+  const ch = [];
+  if (X.L == null){ ch.push('<span class="chip r">No encontré el precio de local de algún platillo</span>'); }
+  else {
+    const c = C.cuentas(X);
+    ch.push('<span class="chip">Comida ' + pesos(X.P) + ' · local ' + pesos(X.L) + '</span>');
+    if (rec || c.real != null){
+      ch.push('<span class="chip">Cliente paga ' + pesos(c.total) + '</span>');
+      if (!rec) ch.push('<span class="chip">' + (X.pagado ? 'Darle al repartidor ' + pesos(c.darle) : 'Repartidor paga en el local ' + pesos(c.pagaLocal)) + '</span>');
+      ch.push(c.aporte > 0 ? '<span class="chip r">Pones ' + pesos(c.aporte) + '</span>' : c.aporte < 0 ? '<span class="chip v">Te sobran ' + pesos(-c.aporte) + '</span>' : '<span class="chip">Pones $0</span>');
+    } else ch.push('<span class="chip r">Falta el envío real: escribe los km o el envío</span>');
+  }
+  if (!X.ref) ch.push('<span class="chip r">El mensaje no trae la clave Ref: revisa los números</span>');
+  $('rChips').innerHTML = ch.join('');
+  const listo = X.L != null && (rec || X.real != null);
+  bloque('gCuerpo', rec ? null : (listo ? C.mensajeGrupo(X) : ''), 'https://wa.me/?text=', rec ? 'No aplica: el cliente pasa a recoger.' : 'Escribe la distancia o el envío real para armar este mensaje.');
+  bloque('pCuerpo', rec ? null : C.mensajePrivado(X), 'https://wa.me/?text=', 'No aplica: el cliente pasa a recoger.');
+  bloque('iCuerpo', X.L != null ? C.mensajeInterno(X) : '', 'https://wa.me/' + C.WHATSAPP_INTERNO + '?text=', 'Falta el precio de local de algún platillo.');
+}
+function bloque(id, texto, wa, sinTexto){
+  const el = $(id);
+  if (!texto){ el.innerHTML = '<p class="na">' + esc(sinTexto) + '</p>'; return; }
+  el.innerHTML = '<pre>' + esc(texto) + '</pre><div class="fila"><button class="bt" data-copiar>📋 Copiar</button><a class="bt w" style="text-align:center;text-decoration:none" target="_blank" rel="noopener" href="' + wa + encodeURIComponent(texto) + '">💬 Enviar por WhatsApp</a></div>';
+  el.querySelector('[data-copiar]').onclick = async () => { try { await navigator.clipboard.writeText(texto); toast('Copiado'); } catch(e){ toast('No se pudo copiar'); } };
+}
+function procesar(){
+  const txt = $('txt').value.trim();
+  $('err').style.display = 'none';
+  if (!txt){ X = null; pintar(); return; }
+  X = leer(txt);
+  if (!X){ $('err').textContent = 'No reconocí el mensaje. Copia el mensaje completo del pedido (el que empieza con *PEDIDO).'; $('err').style.display = 'block'; pintar(); return; }
+  realEditado = false;
+  $('iKm').value = X.km != null ? X.km : '';
+  $('iReal').value = X.real != null ? X.real : '';
+  $('iCol').value = X.colonia || '';
+  $('iPagado').checked = X.pago === 'Transferencia' || X.pago === 'Mercado Pago';
+  pintar();
+}
+$('txt').addEventListener('input', procesar);
+$('btPegar').onclick = async () => { try { $('txt').value = await navigator.clipboard.readText(); procesar(); } catch(e){ toast('Pégalo a mano en el cuadro'); $('txt').focus(); } };
+$('btLimpiar').onclick = () => { $('txt').value = ''; procesar(); };
+$('iKm').addEventListener('input', () => { const k = num($('iKm').value); if (!realEditado && !isNaN(k)) $('iReal').value = C.envioReal(k); pintar(); });
+$('iReal').addEventListener('input', () => { realEditado = true; pintar(); });
+$('iCol').addEventListener('input', pintar);
+$('iPagado').addEventListener('change', pintar);
+</script>
+</body>
+</html>
