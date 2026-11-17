@@ -7,9 +7,9 @@
 (function(){
   /* ── TABULADOR DE ENVÍO ──────────────────────────────────
      Cuando llegue el tabulador del grupo de repartidores, se cambia
-     SOLO aquí (función envioReal). Hoy: $30 hasta 5 km + $5 por km extra. */
+     SOLO aquí (función envioReal). Tabulador del grupo (17 nov): $50 hasta 5 km + $5 por km extra. */
   const TABULADOR = {
-    base: 30,           // pesos hasta los km incluidos
+    base: 50,           // pesos hasta los km incluidos
     kmIncluidos: 5,
     porKm: 5,           // cada km empezado después de los incluidos cuenta completo
     factorCalles: 1.3   // línea recta × 1.3 ≈ lo que recorre el repartidor por calles
