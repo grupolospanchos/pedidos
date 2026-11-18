@@ -31,6 +31,22 @@
   /* Distancia por calles a partir de la línea recta (RESPALDO si la ruta real falla) */
   function kmCalle(kmRecta, tab){ return Math.round(kmRecta * (tab || TABULADOR).factorCalles * 10) / 10; }
 
+  /* ── NÚMERO DE PEDIDO POR DÍA (17 nov, decisión de Ricardo) ──
+     El turno va de 8:00 a.m. a 8:00 a.m. del día siguiente (hora de Querétaro):
+     un pedido a las 1:30 a.m. cuenta para el turno del día anterior.
+     El primer pedido del turno es 001, luego 002, 003… */
+  const INICIO_TURNO = 8;
+  function diaTurno(ms){
+    const d = new Date((ms == null ? Date.now() : ms) - INICIO_TURNO * 3600e3);
+    try {
+      const p = new Intl.DateTimeFormat('en-CA', {timeZone: 'America/Mexico_City', year: 'numeric', month: '2-digit', day: '2-digit'}).formatToParts(d);
+      const v = t => (p.find(x => x.type === t) || {}).value;
+      return v('year') + '-' + v('month') + '-' + v('day');
+    } catch(e){ return d.toISOString().slice(0, 10); }
+  }
+  const folioDe = n => String(n).padStart(3, '0');
+  const NOMBRE = s => String(s || '').trim().toUpperCase();
+
   /* ── RUTA REAL (17 nov, decisión de Ricardo) ─────────────
      Km en coche por calles desde la cocina, con el servidor gratuito de OSRM
      (sin cuenta ni llave; datos de OpenStreetMap). Si no contesta en
@@ -100,7 +116,7 @@
     const L = [];
     L.push('🛵 *PEDIDO PARA REPARTIR #' + x.folio + '*');
     L.push('');
-    L.push('📍 *Recoges en:* ' + COCINA.nombre);
+    L.push('📍 *RECOGES EN: ' + COCINA.nombre.toUpperCase() + '*');
     L.push(COCINA.mapa);
     L.push('🏠 *Entregas en:* ' + (x.colonia ? 'Col. ' + x.colonia.replace(/^col(\.|onia)?\s+/i, '') : 'colonia por confirmar'));
     if (x.km != null) L.push('📏 *Distancia:* ' + kmTxt(x.km));
@@ -128,7 +144,7 @@
     const L = [];
     L.push('🔒 *Datos de entrega #' + x.folio + '*');
     L.push('');
-    L.push('👤 *Recibe:* ' + (x.nombre || 'por confirmar'));
+    L.push('👤 *Recibe: ' + (NOMBRE(x.nombre) || 'POR CONFIRMAR') + '*');
     if (x.tel) L.push('📞 *Teléfono:* ' + String(x.tel).replace(/\D/g, '').replace(/^(\d{3})(\d{3})(\d{4})$/, '$1 $2 $3'));
     L.push('🏠 *Dirección:* ' + [x.calle, x.colonia ? 'Col. ' + x.colonia.replace(/^col(\.|onia)?\s+/i, '') : ''].filter(Boolean).join(', '));
     if (x.refs) L.push('📝 *Referencias:* ' + x.refs);
@@ -175,7 +191,7 @@
       else L.push('⚪ *Pusiste: $0*');
     }
     L.push('');
-    L.push('👤 ' + (x.nombre || 'Sin nombre') + (x.tel ? ' · ' + x.tel : ''));
+    L.push('👤 *' + (NOMBRE(x.nombre) || 'SIN NOMBRE') + '*' + (x.tel ? ' · ' + x.tel : ''));
     if (!rec) L.push('🏠 ' + [x.calle, x.colonia].filter(Boolean).join(', ') + (x.refs ? ' · Ref: ' + x.refs : ''));
     if (x.cambio && !x.pagado) L.push('💵 Paga con $' + x.cambio);
     return L.join('\n');
@@ -201,6 +217,6 @@
   }
 
   window.CUENTAS = {TABULADOR, MARGEN_PAGINA, HORARIO_DOMICILIO, AVISO_GRATIS_MAX, COCINA, WHATSAPP_INTERNO,
-    precioPagina, kmCalle, RUTAS, kmPorRuta, envioReal, envioCliente, faltaParaGratis, cuentas,
+    precioPagina, kmCalle, RUTAS, kmPorRuta, INICIO_TURNO, diaTurno, folioDe, NOMBRE, envioReal, envioCliente, faltaParaGratis, cuentas,
     mensajeGrupo, mensajePrivado, mensajeInterno, codificar, decodificar, pesos};
 })();

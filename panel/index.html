@@ -461,9 +461,9 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="../cuentas.js?v=1794973953"></script>
-<script src="../menu-base.js?v=1794973953"></script>
-<script src="../fb-config.js?v=1794973953"></script>
+<script src="../cuentas.js?v=1794978640"></script>
+<script src="../menu-base.js?v=1794978640"></script>
+<script src="../fb-config.js?v=1794978640"></script>
 <script>
 /* =========================================================
    Panel de administrador · Grupo Los Panchos
@@ -497,6 +497,8 @@ const DIAS_C = ['dom','lun','mar','mié','jue','vie','sáb'];
 const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 const local = ms => new Date(ms - OFF);
 function horaDe(ms){ const d = local(ms), h = d.getUTCHours(), m = d.getUTCMinutes(); return ((h + 11) % 12 + 1) + ':' + String(m).padStart(2,'0') + (h < 12 ? ' a.m.' : ' p.m.'); }
+const MESES_C = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+function diaCorto(d){ const x = String(d).split('-'); return x.length === 3 ? (+x[2]) + ' ' + MESES_C[+x[1] - 1] : d; }
 function fechaDe(ms){ const d = local(ms); return DIAS_C[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + MESES[d.getUTCMonth()]; }
 function hace(ms){ const m = Math.max(0, Math.round((Date.now() - ms) / 60000)); if (m < 1) return 'ahorita'; if (m < 60) return 'hace ' + m + ' min'; const h = Math.floor(m / 60); if (h < 24) return 'hace ' + h + ' h ' + (m % 60 ? (m % 60) + ' min' : ''); const d = Math.floor(h / 24); return 'hace ' + d + (d === 1 ? ' día' : ' días'); }
 const aMin = s => { const x = String(s || '0:00').split(':'); return (+x[0]) * 60 + (+x[1] || 0); };
@@ -731,8 +733,8 @@ function tarjeta(p){
   acc += '<div class="acc">' + (tel ? '<button class="bt w" data-wa="' + p.id + '">💬 Avisar al cliente</button>' : '') + '<button class="bt" data-ticket="' + p.id + '">🖨️ Ticket</button></div>';
   if (p.local != null && !['cancelado'].includes(p.estado)) acc += '<div class="acc">' + (rec ? '' : '<button class="bt" data-msj="grupo" data-id="' + p.id + '">🛵 Grupo</button><button class="bt" data-msj="privado" data-id="' + p.id + '">🔒 Privado</button>') + '<button class="bt" data-msj="interno" data-id="' + p.id + '">📋 Interno</button></div>';
   return '<div class="ped e-' + p.estado + '">' +
-    '<div class="ph"><b>#' + esc(p.folio) + '</b><span class="tag ' + p.estado + '">' + NOM_EDO[p.estado] + '</span><span class="tag">' + (rec ? '🏃 Recoger' : '🛵 Domicilio') + '</span>' + (p.canal === 'whatsapp' ? '<span class="tag wa">WhatsApp</span>' : '') + '<span class="hace' + (tarde ? ' tarde' : '') + '">' + horaDe(p.ts) + ' · ' + hace(p.ts) + '</span></div>' +
-    '<div class="cli">👤 <b>' + esc(p.nombre || 'Sin nombre') + '</b>' + (tel ? ' · <a href="tel:' + tel + '">📞 ' + tel.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') + '</a>' : '') + (p.promos ? ' · <span class="tag" style="font-size:11px">promos ✅</span>' : '') + '</div>' +
+    '<div class="ph"><b>#' + esc(p.folio) + '</b>' + (p.dia && p.dia !== CUENTAS.diaTurno() ? '<small style="color:#a33;font-weight:700"> · ' + esc(diaCorto(p.dia)) + '</small>' : '') + '<span class="tag ' + p.estado + '">' + NOM_EDO[p.estado] + '</span><span class="tag">' + (rec ? '🏃 Recoger' : '🛵 Domicilio') + '</span>' + (p.canal === 'whatsapp' ? '<span class="tag wa">WhatsApp</span>' : '') + '<span class="hace' + (tarde ? ' tarde' : '') + '">' + horaDe(p.ts) + ' · ' + hace(p.ts) + '</span></div>' +
+    '<div class="cli">👤 <b>' + esc(CUENTAS.NOMBRE(p.nombre) || 'SIN NOMBRE') + '</b>' + (tel ? ' · <a href="tel:' + tel + '">📞 ' + tel.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') + '</a>' : '') + (p.promos ? ' · <span class="tag" style="font-size:11px">promos ✅</span>' : '') + '</div>' +
     '<ul>' + lin + (p.regalo ? '<li><b>1×</b><span>Agua de Jamaica <small>REGALO 1er pedido</small></span><i>$0</i></li>' : '') + '</ul>' +
     '<div class="tot">Comida ' + pesos(p.subtotal) + (rec ? '' : ' · Envío ' + (p.envio != null ? (p.envioReal != null ? '<s>' + pesos(p.envioReal) + '</s> ' : '') + (p.envio === 0 ? 'GRATIS' : pesos(p.envio)) + (p.km ? ' (' + p.km + ' km)' : '') : '<b>por confirmar</b>')) + ' · <b>Total ' + pesos(p.total) + '</b></div>' +
     '<div class="lin">' + ({Efectivo:'💵', Transferencia:'🏦'}[p.pago] || '💳') + ' ' + esc(p.pago || '') + camb + '</div>' +
@@ -789,7 +791,7 @@ function imprimir(p){
     '<table>' + lin + (p.regalo ? '<tr><td>1 Agua de Jamaica (REGALO)</td><td class="r">$0</td></tr>' : '') + '</table><hr>' +
     '<table><tr><td>Comida</td><td class="r">' + pesos(p.subtotal) + '</td></tr>' + (p.modo === 'recoger' ? '' : '<tr><td>Envío</td><td class="r">' + (p.envio != null ? pesos(p.envio) : 'por confirmar') + '</td></tr>') + '<tr><td><b>TOTAL</b></td><td class="r"><b>' + pesos(p.total) + '</b></td></tr></table><hr>' +
     '<div>Pago: ' + esc(p.pago || '') + (p.cambio ? ' (paga con $' + esc(p.cambio) + ')' : '') + '</div>' +
-    '<div>Cliente: ' + esc(p.nombre || '') + '<br>Tel: ' + esc(p.tel || '') + '</div>' +
+    '<div>Cliente: <b style="font-size:16px">' + esc(CUENTAS.NOMBRE(p.nombre)) + '</b><br>Tel: ' + esc(p.tel || '') + '</div>' +
     (p.modo === 'recoger' ? '<div>Pasa: ' + esc(p.hora || '') + '</div>' : '<div>' + esc([p.calle, p.colonia].filter(Boolean).join(', ')) + (p.refs ? '<br>Ref: ' + esc(p.refs) : '') + '</div>') +
     (p.notas ? '<hr><div>Notas: ' + esc(p.notas) + '</div>' : '') + '<hr><div class="c">¡Gracias por pedir directo!<br>grupolospanchos.github.io/pedidos</div>' +
     '<script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script></body></html>';
@@ -828,12 +830,18 @@ function pintarPM(){
 $('pmGuardar').onclick = async () => {
   const items = itemsMenu(), lineas = Object.keys(PM.lineas).map(k => { const i = items.find(x => x.k === k); return i ? {n: i.n, q: PM.lineas[k], p: i.p, nota: ''} : null; }).filter(Boolean);
   if (!lineas.length){ toast('Agrega al menos un platillo'); return; }
-  const {t, env} = totalPM(), estado = $('pmEstado').value, folio = aleatorio(4, 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), k = aleatorio(20);
+  const {t, env} = totalPM(), estado = $('pmEstado').value, k = aleatorio(20), dia = CUENTAS.diaTurno();
+  let folio = '';
   const pedido = {folio, estado, modo: PM.modo, items: lineas, subtotal: t, envio: PM.modo === 'domicilio' ? env : null, km: null, total: t + env,
     nombre: $('pmNombre').value.trim(), tel: $('pmTel').value.replace(/\D/g, '').slice(-10), calle: PM.modo === 'domicilio' ? $('pmDir').value.trim() : '', colonia: '', refs: '', gps: null,
     hora: '', pago: $('pmPago').value, cambio: '', notas: $('pmNotas').value.trim(), promos: $('pmPromos').checked, regalo: false, sucursal: SUCURSAL, canal: 'whatsapp', v: 1, min: estado === 'confirmado' ? +TIENDA.entrega || 40 : null};
   $('pmGuardar').disabled = true;
-  try { await API.pedidoManual(k, pedido, {folio, estado, modo: PM.modo, min: pedido.min}); cerrar('hManual'); toast('Pedido #' + folio + ' registrado'); }
+  try {
+    // Número del día (001, 002…), el mismo contador que usa la página de pedidos
+    if (API.pedidoManualNumerado) folio = await API.pedidoManualNumerado(k, pedido, {folio, estado, modo: PM.modo, min: pedido.min}, dia);
+    else { folio = aleatorio(4, 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'); pedido.folio = folio; await API.pedidoManual(k, pedido, {folio, estado, modo: PM.modo, min: pedido.min}); }
+    cerrar('hManual'); toast('Pedido #' + folio + ' registrado');
+  }
   catch(e){ toast('No se guardó: ' + (e.code || e.message)); }
   $('pmGuardar').disabled = false;
 };
@@ -1225,7 +1233,7 @@ $('btCsvClientes').onclick = () => descargarCsv('clientes.csv', [['Nombre','Tel�
   $('barInstX').onclick = () => { $('barInst').style.display = 'none'; try { localStorage.setItem('glp_panel_noinst', '1'); } catch(x){} };
   if ('serviceWorker' in navigator && /\/panel\/(index\.html)?$/.test(location.pathname)){ try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch(x){} }
   /* Aviso de versión nueva (no recarga solo para no perder lo que estés editando) */
-  const VERSION_PANEL = '1794973953';
+  const VERSION_PANEL = '1794978640';
   async function revisar(){
     if (VERSION_PANEL.indexOf('__') === 0 || location.protocol === 'file:') return;
     try {
@@ -1237,6 +1245,6 @@ $('btCsvClientes').onclick = () => descargarCsv('clientes.csv', [['Nombre','Tel�
   document.addEventListener('visibilitychange', () => { if (!document.hidden) revisar(); });
 })();
 </script>
-<script type="module" src="../fb-admin.js?v=1794973953"></script>
+<script type="module" src="../fb-admin.js?v=1794978640"></script>
 </body>
 </html>

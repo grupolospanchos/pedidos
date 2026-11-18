@@ -86,8 +86,8 @@
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="cuentas.js?v=1794973953"></script>
-<script src="menu-base.js?v=1794973953"></script>
+<script src="cuentas.js?v=1794978640"></script>
+<script src="menu-base.js?v=1794978640"></script>
 <script>
 const $ = id => document.getElementById(id);
 const C = window.CUENTAS, pesos = C.pesos;
@@ -104,7 +104,7 @@ function leer(texto){
   const limpio = t.replace(/[*_]/g, '');
   const lineas = limpio.split('\n');
   const campo = re => { const m = limpio.match(re); return m ? m[1].trim() : ''; };
-  const folio = (limpio.match(/#([A-Z0-9]{4})\b/) || [])[1];
+  const folio = (limpio.match(/#([A-Z0-9]{3,4})\b/) || [])[1];   // 001, 002… (número del día) o código de respaldo
   if (!folio) return null;
   const x = {folio, modo: /PARA RECOGER/i.test(limpio) ? 'recoger' : 'domicilio', items: [], regalo: /Agua de Jamaica.*REGALO/i.test(limpio)};
   let ult = null;
@@ -182,7 +182,7 @@ $('btPegar').onclick = async () => { try { $('txt').value = await navigator.clip
 $('btLimpiar').onclick = () => { $('txt').value = ''; procesar(); revisarVersion(); };
 
 /* Actualización automática (17 nov): si hay versión nueva publicada y la ficha está vacía, se recarga sola */
-const VERSION = '1794973953';
+const VERSION = '1794978640';
 async function revisarVersion(){
   if (VERSION.indexOf('__') === 0 || location.protocol === 'file:') return;
   try {
