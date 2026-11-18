@@ -1428,7 +1428,7 @@ $('esMenu').onclick = () => cerrarVelo('veloEstado');
    Cada versión publicada trae un número. La página compara el suyo con version.txt
    al abrir, al regresar a la pantalla, al recuperar señal, cada 5 min y al abrir "Ver mi pedido".
    Si hay una nueva, se recarga sola y conserva el pedido del cliente. */
-const VERSION = '1794965400';
+const VERSION = '1794973953';
 let versionNueva = null;
 function mostrarAvisoRed(t){ const a = $('avisoRed'); a.textContent = t; a.style.display = 'block'; }
 function ocultarAvisoRed(){ $('avisoRed').style.display = 'none'; }
@@ -1499,7 +1499,7 @@ setInterval(refrescarAjustes, 120000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden){ refrescarAjustes(); pintarEstado(); revisarVersion(); } });
 (function(){ const u = ultimoGuardado(); if (u && u.k && u.ts && Date.now() - u.ts < 12*3600e3 && !VIVO) seguir(u.k); })();
 </script>
-<script src="fb-config.js?v=1794965400"></script>
-<script>if (window.GLP_FB && window.GLP_FB.firebase){ var s = document.createElement('script'); s.type = 'module'; s.src = 'fb-cliente.js?v=1794965400'; document.body.appendChild(s); }</script>
+<script src="fb-config.js?v=1794973953"></script>
+<script>if (window.GLP_FB && window.GLP_FB.firebase){ var s = document.createElement('script'); s.type = 'module'; s.src = 'fb-cliente.js?v=1794973953'; document.body.appendChild(s); }</script>
 </body>
 </html>

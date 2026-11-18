@@ -86,8 +86,8 @@
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="cuentas.js?v=1794965400"></script>
-<script src="menu-base.js?v=1794965400"></script>
+<script src="cuentas.js?v=1794973953"></script>
+<script src="menu-base.js?v=1794973953"></script>
 <script>
 const $ = id => document.getElementById(id);
 const C = window.CUENTAS, pesos = C.pesos;
@@ -182,7 +182,7 @@ $('btPegar').onclick = async () => { try { $('txt').value = await navigator.clip
 $('btLimpiar').onclick = () => { $('txt').value = ''; procesar(); revisarVersion(); };
 
 /* Actualización automática (17 nov): si hay versión nueva publicada y la ficha está vacía, se recarga sola */
-const VERSION = '1794965400';
+const VERSION = '1794973953';
 async function revisarVersion(){
   if (VERSION.indexOf('__') === 0 || location.protocol === 'file:') return;
   try {
