@@ -460,9 +460,9 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="cuentas.js?v=1794946315"></script>
-<script src="menu-base.js?v=1794946315"></script>
-<script src="fb-config.js?v=1794946315"></script>
+<script src="cuentas.js?v=1794965400"></script>
+<script src="menu-base.js?v=1794965400"></script>
+<script src="fb-config.js?v=1794965400"></script>
 <script>
 /* =========================================================
    Panel de administrador · Grupo Los Panchos
@@ -1195,6 +1195,6 @@ $('btCopiarTels').onclick = async () => {
 };
 $('btCsvClientes').onclick = () => descargarCsv('clientes.csv', [['Nombre','Teléfono','Pedidos','Total comprado','Primer pedido','Último pedido','Acepta promos','Colonia']].concat(clientesFiltrados().map(c => [c.nombre, c.tel, c.pedidos, c.total, fechaDe(c.primero), fechaDe(c.ultimo), c.promos ? 'Sí' : 'No', c.colonia])));
 </script>
-<script type="module" src="fb-admin.js?v=1794946315"></script>
+<script type="module" src="fb-admin.js?v=1794965400"></script>
 </body>
 </html>

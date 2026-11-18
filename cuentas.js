@@ -28,8 +28,31 @@
   /* Precio que ve el cliente: local + 10%, redondeado al peso de arriba ($15 → $17) */
   function precioPagina(local){ return Math.ceil(r2((+local || 0) * (1 + MARGEN_PAGINA))); }
 
-  /* Distancia por calles a partir de la línea recta */
+  /* Distancia por calles a partir de la línea recta (RESPALDO si la ruta real falla) */
   function kmCalle(kmRecta, tab){ return Math.round(kmRecta * (tab || TABULADOR).factorCalles * 10) / 10; }
+
+  /* ── RUTA REAL (17 nov, decisión de Ricardo) ─────────────
+     Km en coche por calles desde la cocina, con el servidor gratuito de OSRM
+     (sin cuenta ni llave; datos de OpenStreetMap). Si no contesta en
+     RUTAS.espera milisegundos o falla, se regresa null y se usa kmCalle. */
+  const RUTAS = {
+    url: 'https://router.project-osrm.org/route/v1/driving/',
+    espera: 4000,
+    credito: 'Ruta calculada con OSRM · © OpenStreetMap'
+  };
+  async function kmPorRuta(a, b){
+    const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    const t = setTimeout(() => { if (ctrl) ctrl.abort(); }, RUTAS.espera);
+    try {
+      const u = RUTAS.url + (+a.lng) + ',' + (+a.lat) + ';' + (+b.lng) + ',' + (+b.lat) + '?overview=false';
+      const r = await fetch(u, ctrl ? {signal: ctrl.signal} : {});
+      if (!r.ok) return null;
+      const j = await r.json();
+      const d = j && j.code === 'Ok' && j.routes && j.routes[0] ? +j.routes[0].distance : NaN;
+      return (isFinite(d) && d > 0) ? Math.round(d / 100) / 10 : null;
+    } catch(e){ return null; }
+    finally { clearTimeout(t); }
+  }
 
   /* Envío real que cobra el repartidor (tabulador) */
   function envioReal(km, tab){
@@ -178,6 +201,6 @@
   }
 
   window.CUENTAS = {TABULADOR, MARGEN_PAGINA, HORARIO_DOMICILIO, AVISO_GRATIS_MAX, COCINA, WHATSAPP_INTERNO,
-    precioPagina, kmCalle, envioReal, envioCliente, faltaParaGratis, cuentas,
+    precioPagina, kmCalle, RUTAS, kmPorRuta, envioReal, envioCliente, faltaParaGratis, cuentas,
     mensajeGrupo, mensajePrivado, mensajeInterno, codificar, decodificar, pesos};
 })();

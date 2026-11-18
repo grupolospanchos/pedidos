@@ -86,8 +86,8 @@
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="cuentas.js?v=1794946315"></script>
-<script src="menu-base.js?v=1794946315"></script>
+<script src="cuentas.js?v=1794965400"></script>
+<script src="menu-base.js?v=1794965400"></script>
 <script>
 const $ = id => document.getElementById(id);
 const C = window.CUENTAS, pesos = C.pesos;
@@ -179,7 +179,22 @@ function procesar(){
 }
 $('txt').addEventListener('input', procesar);
 $('btPegar').onclick = async () => { try { $('txt').value = await navigator.clipboard.readText(); procesar(); } catch(e){ toast('Pégalo a mano en el cuadro'); $('txt').focus(); } };
-$('btLimpiar').onclick = () => { $('txt').value = ''; procesar(); };
+$('btLimpiar').onclick = () => { $('txt').value = ''; procesar(); revisarVersion(); };
+
+/* Actualización automática (17 nov): si hay versión nueva publicada y la ficha está vacía, se recarga sola */
+const VERSION = '1794965400';
+async function revisarVersion(){
+  if (VERSION.indexOf('__') === 0 || location.protocol === 'file:') return;
+  try {
+    const v = (await (await fetch('version.txt?t=' + Date.now(), {cache: 'no-store'})).text()).trim();
+    if (!/^\d+$/.test(v) || v === VERSION) return;
+    if ($('txt').value.trim()){ toast('Hay una versión nueva de la ficha: toca Limpiar al terminar y se actualiza'); return; }
+    try { if (sessionStorage.getItem('glp_fv') === v) return; sessionStorage.setItem('glp_fv', v); } catch(e){}
+    location.replace(location.pathname + '?v=' + v);
+  } catch(e){}
+}
+setTimeout(revisarVersion, 1500);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) revisarVersion(); });
 $('iKm').addEventListener('input', () => { const k = num($('iKm').value); if (!realEditado && !isNaN(k)) $('iReal').value = C.envioReal(k); pintar(); });
 $('iReal').addEventListener('input', () => { realEditado = true; pintar(); });
 $('iCol').addEventListener('input', pintar);
