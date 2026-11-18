@@ -86,8 +86,8 @@
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="cuentas.js?v=1794978640"></script>
-<script src="menu-base.js?v=1794978640"></script>
+<script src="cuentas.js?v=1794980509"></script>
+<script src="menu-base.js?v=1794980509"></script>
 <script>
 const $ = id => document.getElementById(id);
 const C = window.CUENTAS, pesos = C.pesos;
@@ -117,6 +117,7 @@ function leer(texto){
   x.nombre = campo(/^Nombre:\s*(.+)$/m); x.tel = campo(/^Tel:\s*(.+)$/m);
   x.calle = campo(/^Dirección:\s*(.+)$/m); x.colonia = campo(/^Colonia:\s*(.+)$/m); x.refs = campo(/^Referencias:\s*(.+)$/m);
   x.notas = campo(/^Indicaciones:\s*(.+)$/m);
+  x.premio = num((limpio.match(/Premio por lealtad[^\n]*?−\s*\$([\d,]+)/) || [])[1] || '0');
   const g = limpio.match(/Ubicación exacta \(GPS\):\s*https?:\/\/maps\.google\.com\/\?q=(-?[\d.]+),(-?[\d.]+)/);
   x.gps = g ? {lat: +g[1], lng: +g[2]} : null;
   const pg = limpio.match(/^Pago:\s*([^(\n]+?)\s*(?:\(paga con \$([\d.,]+)\))?\s*$/m);
@@ -147,7 +148,7 @@ function pintar(){
     ch.push('<span class="chip">Comida ' + pesos(X.P) + ' · local ' + pesos(X.L) + '</span>');
     if (rec || c.real != null){
       ch.push('<span class="chip">Cliente paga ' + pesos(c.total) + '</span>');
-      if (!rec) ch.push('<span class="chip">' + (X.pagado ? 'Darle al repartidor ' + pesos(c.darle) : 'Repartidor paga en el local ' + pesos(c.pagaLocal)) + '</span>');
+      if (!rec) ch.push('<span class="chip">' + (X.pagado || c.darle ? 'Darle al repartidor ' + pesos(c.darle) : 'Repartidor paga en el local ' + pesos(c.pagaLocal)) + '</span>');
       ch.push(c.aporte > 0 ? '<span class="chip r">Pones ' + pesos(c.aporte) + '</span>' : c.aporte < 0 ? '<span class="chip v">Te sobran ' + pesos(-c.aporte) + '</span>' : '<span class="chip">Pones $0</span>');
     } else ch.push('<span class="chip r">Falta el envío real: escribe los km o el envío</span>');
   }
@@ -182,7 +183,7 @@ $('btPegar').onclick = async () => { try { $('txt').value = await navigator.clip
 $('btLimpiar').onclick = () => { $('txt').value = ''; procesar(); revisarVersion(); };
 
 /* Actualización automática (17 nov): si hay versión nueva publicada y la ficha está vacía, se recarga sola */
-const VERSION = '1794978640';
+const VERSION = '1794980509';
 async function revisarVersion(){
   if (VERSION.indexOf('__') === 0 || location.protocol === 'file:') return;
   try {

@@ -16,7 +16,7 @@
   };
   const MARGEN_PAGINA = 0.10;                                // precio de página = local + 10%
   const HORARIO_DOMICILIO = {desde: '11:00', hasta: '23:00'}; // horario del grupo de repartidores
-  const AVISO_GRATIS_MAX = 200;                              // "Agrega $X más…" solo si faltan $200 o menos
+  const AVISO_GRATIS_MAX = 300;                              // "Agrega $X más…" solo si faltan $300 o menos (Ricardo, 17 nov)
   const COCINA = {nombre: 'Los Panchos', lat: 20.6024719, lng: -100.3932257};
   COCINA.mapa = 'https://maps.google.com/?q=' + COCINA.lat + ',' + COCINA.lng;
   const WHATSAPP_INTERNO = '527448176464';
@@ -46,6 +46,23 @@
   }
   const folioDe = n => String(n).padStart(3, '0');
   const NOMBRE = s => String(s || '').trim().toUpperCase();
+
+  /* ── PUNTOS DE LEALTAD (17 nov, decisión de Ricardo) ──────
+     Cada pedido ENTREGADO = 1 punto (por teléfono). Al juntar 5, el 6º pedido sale GRATIS
+     hasta el promedio de la comida de esos 5 pedidos. Después vuelve a empezar en 0. */
+  const LEALTAD = {meta: 5};   // 6º pedido: comida gratis hasta el promedio de los 5 + envío gratis
+  async function idLealtad(tel){
+    const t = String(tel || '').replace(/\D/g, '').slice(-10);
+    if (t.length !== 10) return null;
+    try {
+      const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('glp-lealtad:' + t));
+      return Array.from(new Uint8Array(b)).slice(0, 12).map(x => x.toString(16).padStart(2, '0')).join('');
+    } catch(e){ return null; }
+  }
+  function premioLealtad(doc, P){
+    if (!doc || (+doc.pts || 0) < LEALTAD.meta) return 0;
+    return Math.max(0, Math.min(Math.round(+doc.prom || 0), +P || 0));
+  }
 
   /* ── RUTA REAL (17 nov, decisión de Ricardo) ─────────────
      Km en coche por calles desde la cocina, con el servidor gratuito de OSRM
@@ -96,14 +113,18 @@
      pagado = true si ya pagó por transferencia o Mercado Pago */
   function cuentas(o){
     const L = +o.L || 0, P = +o.P || 0, extra = P - L;
-    if (o.modo === 'recoger') return {extra, real: 0, cliente: 0, gratis: false, total: P, recibe: P, aporte: L - P, falta: 0};
-    if (o.real == null) return {extra, real: null, cliente: null, gratis: false, total: null, falta: null};
-    const c = envioCliente(o.real, extra), total = P + c;
-    const r = {extra, real: o.real, cliente: c, gratis: c === 0, total, falta: faltaParaGratis(o.real, extra)};
+    const premio = Math.max(0, Math.min(+o.premio || 0, P)), Pc = P - premio;   // premio de lealtad: descuento en la comida
+    if (o.modo === 'recoger') return {extra, premio, real: 0, cliente: 0, gratis: false, total: Pc, recibe: Pc, aporte: L - Pc, falta: 0};
+    if (o.real == null) return {extra, premio, real: null, cliente: null, gratis: false, total: null, falta: null};
+    const c = premio > 0 ? 0 : envioCliente(o.real, extra), total = Pc + c;   // 6º pedido (premio): envío también GRATIS (Ricardo, 17 nov)
+    const r = {extra, premio, real: o.real, cliente: c, gratis: c === 0, total, falta: premio > 0 ? 0 : faltaParaGratis(o.real, extra)};
     r.recibe = total - o.real;            // lo que le queda al negocio
     r.aporte = L - r.recibe;              // > 0: lo que puso Ricardo · < 0: lo que sobró
     if (o.pagado) r.darle = o.real;       // ya pagado: en el local se le da el envío completo al repartidor
-    else { r.pagaLocal = total - o.real; r.cobra = total; }
+    else {
+      r.pagaLocal = total - o.real; r.cobra = total;
+      if (r.pagaLocal < 0){ r.darle = -r.pagaLocal; r.pagaLocal = 0; }   // con premio grande: en el local se le completa su ganancia
+    }
     return r;
   }
 
@@ -128,7 +149,8 @@
       L.push('🤝 En el local te damos *' + pesos(c.darle) + '*');
     } else {
       L.push('');
-      L.push('💵 Pagas en el local: *' + pesos(c.pagaLocal) + '*');
+      if (c.darle) L.push('🤝 En el local te damos *' + pesos(c.darle) + '*');
+      else L.push('💵 Pagas en el local: *' + pesos(c.pagaLocal) + '*');
       L.push('💵 Cobras al cliente: *' + pesos(c.cobra) + '*');
       const paga = parseFloat(String(x.cambio || '').replace(/[^0-9.]/g, ''));
       if (paga > c.cobra) L.push('🪙 El cliente paga con ' + pesos(paga) + ': lleva *' + pesos(paga - c.cobra) + '* de cambio');
@@ -171,6 +193,7 @@
     if (x.notas) L.push('Indicaciones: ' + x.notas);
     L.push('');
     L.push('Comida: ' + pesos(x.P) + ' (local ' + pesos(x.L) + ')');
+    if (c.premio > 0) L.push('🎁 *Premio lealtad (6º pedido): −' + pesos(c.premio) + '*');
     if (rec){
       L.push('Sin envío (pasa a recoger' + (x.hora ? ': ' + x.hora : '') + ')');
       L.push('*Cliente paga: ' + pesos(c.total) + '*');
@@ -182,7 +205,7 @@
       L.push('Envío que vio el cliente: ~' + pesos(c.real) + '~ ' + (c.gratis ? 'GRATIS' : pesos(c.cliente)));
       L.push('*Cliente paga: ' + pesos(c.total) + '*');
       L.push('');
-      if (x.pagado) L.push('👉 *Darle al repartidor: ' + pesos(c.darle) + '*');
+      if (x.pagado || c.darle) L.push('👉 *Darle al repartidor: ' + pesos(c.darle) + '*');
       else L.push('👉 *Cobrarle al repartidor: ' + pesos(c.pagaLocal) + '*');
     }
     if (c.aporte != null){
@@ -217,6 +240,6 @@
   }
 
   window.CUENTAS = {TABULADOR, MARGEN_PAGINA, HORARIO_DOMICILIO, AVISO_GRATIS_MAX, COCINA, WHATSAPP_INTERNO,
-    precioPagina, kmCalle, RUTAS, kmPorRuta, INICIO_TURNO, diaTurno, folioDe, NOMBRE, envioReal, envioCliente, faltaParaGratis, cuentas,
+    precioPagina, kmCalle, RUTAS, kmPorRuta, INICIO_TURNO, diaTurno, folioDe, NOMBRE, LEALTAD, idLealtad, premioLealtad, envioReal, envioCliente, faltaParaGratis, cuentas,
     mensajeGrupo, mensajePrivado, mensajeInterno, codificar, decodificar, pesos};
 })();

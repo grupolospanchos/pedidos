@@ -194,6 +194,13 @@
   .pagos label.off{opacity:.4}
   .tachado{color:var(--gris);font-weight:600;margin-right:6px;text-decoration:line-through}
   .gratis{color:var(--verde)}
+  .leal{margin:12px 14px 0;background:#fff8e6;border:1.5px solid #f0d27a;border-radius:14px;padding:11px 13px;font-size:14px;line-height:1.35;color:#5a4300}
+  .leal b{color:#3d2d00}
+  .leal .pts{font-size:19px;letter-spacing:3px;margin:2px 0 3px;color:#c9a24a}
+  .leal.listo{background:#eaf7ef;border-color:#9ad3ae;color:#17703d}
+  .leal.listo b{color:#0f5a2e}
+  .bloque .leal{margin:0 0 12px}
+  .tot.premio{color:#17703d;font-weight:800}
   .avisoGratis{margin-top:10px;background:#eaf7ef;color:#17703d;border-radius:10px;padding:10px 12px;font-weight:800;font-size:14.5px;text-align:center}
   .cGratis{margin-top:6px;color:#17703d;font-weight:800;font-size:14.5px;display:none}
   .cotiza .cl{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14.5px;padding:2px 0}
@@ -237,6 +244,7 @@
   <div><b id="promoT">Tu primer pedido directo lleva agua de Jamaica GRATIS</b><span id="promoS">Pide directo: más barato que en las apps y te lo llevamos hasta tu puerta.</span></div>
 </div>
 
+<div class="leal" id="lealHome" style="display:none"></div>
 <button class="seguir" id="seguir"></button>
 <button class="repetir" id="repetir"></button>
 
@@ -347,7 +355,9 @@
   </div>
 
   <div class="bloque">
+    <div class="leal" id="lealHoja"></div>
     <div class="tot"><span>Comida</span><span id="sub">$0</span></div>
+    <div class="tot premio" id="filaPremio" style="display:none"><span>🎁 Premio por lealtad</span><span id="premioTot"></span></div>
     <div class="tot"><span>Envío</span><span id="envioTot">desde $30</span></div>
     <div class="tot g"><span>Total</span><span id="tot">$0 + envío</span></div>
     <div class="avisoGratis" id="avisoGratis" style="display:none"></div>
@@ -451,7 +461,7 @@
   };
   const MARGEN_PAGINA = 0.10;                                // precio de página = local + 10%
   const HORARIO_DOMICILIO = {desde: '11:00', hasta: '23:00'}; // horario del grupo de repartidores
-  const AVISO_GRATIS_MAX = 200;                              // "Agrega $X más…" solo si faltan $200 o menos
+  const AVISO_GRATIS_MAX = 300;                              // "Agrega $X más…" solo si faltan $300 o menos (Ricardo, 17 nov)
   const COCINA = {nombre: 'Los Panchos', lat: 20.6024719, lng: -100.3932257};
   COCINA.mapa = 'https://maps.google.com/?q=' + COCINA.lat + ',' + COCINA.lng;
   const WHATSAPP_INTERNO = '527448176464';
@@ -481,6 +491,23 @@
   }
   const folioDe = n => String(n).padStart(3, '0');
   const NOMBRE = s => String(s || '').trim().toUpperCase();
+
+  /* ── PUNTOS DE LEALTAD (17 nov, decisión de Ricardo) ──────
+     Cada pedido ENTREGADO = 1 punto (por teléfono). Al juntar 5, el 6º pedido sale GRATIS
+     hasta el promedio de la comida de esos 5 pedidos. Después vuelve a empezar en 0. */
+  const LEALTAD = {meta: 5};   // 6º pedido: comida gratis hasta el promedio de los 5 + envío gratis
+  async function idLealtad(tel){
+    const t = String(tel || '').replace(/\D/g, '').slice(-10);
+    if (t.length !== 10) return null;
+    try {
+      const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('glp-lealtad:' + t));
+      return Array.from(new Uint8Array(b)).slice(0, 12).map(x => x.toString(16).padStart(2, '0')).join('');
+    } catch(e){ return null; }
+  }
+  function premioLealtad(doc, P){
+    if (!doc || (+doc.pts || 0) < LEALTAD.meta) return 0;
+    return Math.max(0, Math.min(Math.round(+doc.prom || 0), +P || 0));
+  }
 
   /* ── RUTA REAL (17 nov, decisión de Ricardo) ─────────────
      Km en coche por calles desde la cocina, con el servidor gratuito de OSRM
@@ -531,14 +558,18 @@
      pagado = true si ya pagó por transferencia o Mercado Pago */
   function cuentas(o){
     const L = +o.L || 0, P = +o.P || 0, extra = P - L;
-    if (o.modo === 'recoger') return {extra, real: 0, cliente: 0, gratis: false, total: P, recibe: P, aporte: L - P, falta: 0};
-    if (o.real == null) return {extra, real: null, cliente: null, gratis: false, total: null, falta: null};
-    const c = envioCliente(o.real, extra), total = P + c;
-    const r = {extra, real: o.real, cliente: c, gratis: c === 0, total, falta: faltaParaGratis(o.real, extra)};
+    const premio = Math.max(0, Math.min(+o.premio || 0, P)), Pc = P - premio;   // premio de lealtad: descuento en la comida
+    if (o.modo === 'recoger') return {extra, premio, real: 0, cliente: 0, gratis: false, total: Pc, recibe: Pc, aporte: L - Pc, falta: 0};
+    if (o.real == null) return {extra, premio, real: null, cliente: null, gratis: false, total: null, falta: null};
+    const c = premio > 0 ? 0 : envioCliente(o.real, extra), total = Pc + c;   // 6º pedido (premio): envío también GRATIS (Ricardo, 17 nov)
+    const r = {extra, premio, real: o.real, cliente: c, gratis: c === 0, total, falta: premio > 0 ? 0 : faltaParaGratis(o.real, extra)};
     r.recibe = total - o.real;            // lo que le queda al negocio
     r.aporte = L - r.recibe;              // > 0: lo que puso Ricardo · < 0: lo que sobró
     if (o.pagado) r.darle = o.real;       // ya pagado: en el local se le da el envío completo al repartidor
-    else { r.pagaLocal = total - o.real; r.cobra = total; }
+    else {
+      r.pagaLocal = total - o.real; r.cobra = total;
+      if (r.pagaLocal < 0){ r.darle = -r.pagaLocal; r.pagaLocal = 0; }   // con premio grande: en el local se le completa su ganancia
+    }
     return r;
   }
 
@@ -563,7 +594,8 @@
       L.push('🤝 En el local te damos *' + pesos(c.darle) + '*');
     } else {
       L.push('');
-      L.push('💵 Pagas en el local: *' + pesos(c.pagaLocal) + '*');
+      if (c.darle) L.push('🤝 En el local te damos *' + pesos(c.darle) + '*');
+      else L.push('💵 Pagas en el local: *' + pesos(c.pagaLocal) + '*');
       L.push('💵 Cobras al cliente: *' + pesos(c.cobra) + '*');
       const paga = parseFloat(String(x.cambio || '').replace(/[^0-9.]/g, ''));
       if (paga > c.cobra) L.push('🪙 El cliente paga con ' + pesos(paga) + ': lleva *' + pesos(paga - c.cobra) + '* de cambio');
@@ -606,6 +638,7 @@
     if (x.notas) L.push('Indicaciones: ' + x.notas);
     L.push('');
     L.push('Comida: ' + pesos(x.P) + ' (local ' + pesos(x.L) + ')');
+    if (c.premio > 0) L.push('🎁 *Premio lealtad (6º pedido): −' + pesos(c.premio) + '*');
     if (rec){
       L.push('Sin envío (pasa a recoger' + (x.hora ? ': ' + x.hora : '') + ')');
       L.push('*Cliente paga: ' + pesos(c.total) + '*');
@@ -617,7 +650,7 @@
       L.push('Envío que vio el cliente: ~' + pesos(c.real) + '~ ' + (c.gratis ? 'GRATIS' : pesos(c.cliente)));
       L.push('*Cliente paga: ' + pesos(c.total) + '*');
       L.push('');
-      if (x.pagado) L.push('👉 *Darle al repartidor: ' + pesos(c.darle) + '*');
+      if (x.pagado || c.darle) L.push('👉 *Darle al repartidor: ' + pesos(c.darle) + '*');
       else L.push('👉 *Cobrarle al repartidor: ' + pesos(c.pagaLocal) + '*');
     }
     if (c.aporte != null){
@@ -652,7 +685,7 @@
   }
 
   window.CUENTAS = {TABULADOR, MARGEN_PAGINA, HORARIO_DOMICILIO, AVISO_GRATIS_MAX, COCINA, WHATSAPP_INTERNO,
-    precioPagina, kmCalle, RUTAS, kmPorRuta, INICIO_TURNO, diaTurno, folioDe, NOMBRE, envioReal, envioCliente, faltaParaGratis, cuentas,
+    precioPagina, kmCalle, RUTAS, kmPorRuta, INICIO_TURNO, diaTurno, folioDe, NOMBRE, LEALTAD, idLealtad, premioLealtad, envioReal, envioCliente, faltaParaGratis, cuentas,
     mensajeGrupo, mensajePrivado, mensajeInterno, codificar, decodificar, pesos};
 })();
 
@@ -891,8 +924,10 @@ function repintar(){
 }
 function quitarAcentos(s){ return s.normalize('NFD').replace(/[̀-ͯ]/g,''); }
 
+function nuevoPedidoSiYaSeEnvio(){ if (registrado){ registrado = false; folio = ''; token = nuevoToken(); } }   // si cambia el carrito después de enviar, es otro pedido con su propio número
 function cambiar(id, d){
   if (d > 0 && datos[id] && datos[id].a) return;
+  nuevoPedidoSiYaSeEnvio();
   carrito[id] = Math.max(0, (carrito[id]||0) + d);
   if (!carrito[id]) { delete carrito[id]; delete notas[id]; }
   const ctl = $('ctl'+id); if (ctl) ctl.innerHTML = controlHTML(id);
@@ -905,7 +940,7 @@ function resumen(){
 }
 function cuentaActual(){
   const {t, l} = resumen();
-  return CUENTAS.cuentas({L: l, P: t, real: (!recoge() && envio) ? envio.real : null, modo: modo()});
+  return CUENTAS.cuentas({L: l, P: t, real: (!recoge() && envio) ? envio.real : null, modo: modo(), premio: premioActual()});
 }
 function envioOk(){
   if (recoge() || !envio) return true;
@@ -921,7 +956,7 @@ function pintarEnvio(){
   $('cAbs').textContent = '−' + pesos(c.gratis ? c.real : c.real - c.cliente);
   $('cEnvio').innerHTML = c.gratis ? '<span class="gratis">GRATIS 🎉</span>' : pesos(c.cliente);
   $('cGratis').style.display = c.gratis ? 'block' : 'none';
-  $('cGratis').textContent = '🎉 Tu envío sale GRATIS por el tamaño de tu pedido.';
+  $('cGratis').textContent = c.premio > 0 ? '🎁 Tu envío sale GRATIS por tu premio de lealtad.' : '🎉 Tu envío sale GRATIS por el tamaño de tu pedido.';
   document.querySelector('#cotiza .cbtns').style.display = c.gratis ? 'none' : 'flex';
   if (c.gratis){ $('cMsg').style.display = 'none'; return; }
   if (envio.acepto === true && envio.monto < c.cliente){
@@ -936,7 +971,9 @@ function actualizar(){
   $('bn').textContent = n; $('bt').textContent = pesos(t);
   $('sub').textContent = pesos(t);
   const ag = $('avisoGratis'); ag.style.display = 'none';
-  if (recoge()){ $('envioTot').textContent = 'Sin costo (recoges)'; $('tot').textContent = pesos(t); }
+  const prem = premioActual();
+  $('filaPremio').style.display = prem > 0 ? 'flex' : 'none'; $('premioTot').textContent = '−' + pesos(prem);
+  if (recoge()){ $('envioTot').textContent = 'Sin costo (recoges)'; $('tot').textContent = pesos(cuentaActual().total); }
   else if (envio){
     pintarEnvio();
     const c = cuentaActual();
@@ -944,7 +981,8 @@ function actualizar(){
     $('tot').textContent = pesos(c.total);
     if (c.falta > 0 && c.falta <= CUENTAS.AVISO_GRATIS_MAX && t > 0){ ag.textContent = '🎁 Agrega ' + pesos(c.falta) + ' más y tu envío sale GRATIS'; ag.style.display = 'block'; }
   }
-  else { $('envioTot').textContent = rutaPendiente ? 'calculando…' : 'con tu ubicación 📍'; $('tot').textContent = pesos(t) + ' + envío'; }
+  else { $('envioTot').textContent = rutaPendiente ? 'calculando…' : 'con tu ubicación 📍'; $('tot').textContent = pesos(t - prem) + ' + envío'; }
+  pintarLealtad();
   if ($('hoja').classList.contains('on')) pintarLineas();
   armarEnlace();
 }
@@ -972,8 +1010,9 @@ function mensaje(){
   if ($('primero').checked) L.push('1 × Agua de Jamaica — *REGALO 1er pedido*');
   L.push('');
   L.push('Comida: ' + pesos(t));
+  if (premioActual() > 0) L.push('🎁 *Premio por lealtad (6º pedido): −' + pesos(premioActual()) + '*');
   if (recoge()){
-    L.push('*Total a pagar: ' + pesos(t) + '* (paso a recoger, sin envío)');
+    L.push('*Total a pagar: ' + pesos(cuentaActual().total) + '* (paso a recoger, sin envío)');
   } else if (envio){
     const c = cuentaActual();
     L.push('Envío: ~' + pesos(c.real) + '~ ' + (c.gratis ? '*GRATIS* 🎉' : '*' + pesos(c.cliente) + '*') + ' (estoy a ' + envio.km.toLocaleString('es-MX') + ' km de su cocina)');
@@ -1113,6 +1152,7 @@ $('detOk').onclick = () => {
   if (datos[id] && datos[id].a) return;
   if (detQ === 0){ delete carrito[id]; delete notas[id]; }
   else { carrito[id] = detQ; if (nota) notas[id] = nota; else delete notas[id]; }
+  nuevoPedidoSiYaSeEnvio();
   const ctl = $('ctl'+id); if (ctl) ctl.innerHTML = controlHTML(id);
   actualizar(); cerrarVelo('veloDet');
   aviso(detQ === 0 ? 'Quitado de tu pedido' : 'Listo: ' + datos[id].n);
@@ -1136,6 +1176,7 @@ $('lsOtro').onclick = () => {
   ids.forEach(id => { delete carrito[id]; delete notas[id]; const c = $('ctl'+id); if (c) c.innerHTML = controlHTML(id); });
   $('notas').value = ''; $('primero').checked = false;
   folio = ''; registrado = false; token = nuevoToken();
+  telLeal = ''; setTimeout(cargarLealtad, 300);
   cerrarVelo('veloListo'); $('hoja').classList.remove('on'); document.body.style.overflow = '';
   actualizar(); pintarRepetir(); scrollInicio = 0; irInicio();
 };
@@ -1173,7 +1214,7 @@ $('instalar').onclick = async () => {
   else aviso('En iPhone: toca Compartir ⬆️ y luego "Agregar a inicio"', 5000);
 };
 if (USAR_GPS && 'serviceWorker' in navigator){ try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch(e){} }
-$('verPedido').onclick = () => { revisarVersion(); if (recoge()) llenarHoras(); pintarLineas(); $('hoja').classList.add('on'); $('hoja').scrollTop = 0; document.body.style.overflow = 'hidden'; };
+$('verPedido').onclick = () => { revisarVersion(); refrescarLealtad(); if (recoge()) llenarHoras(); pintarLineas(); $('hoja').classList.add('on'); $('hoja').scrollTop = 0; document.body.style.overflow = 'hidden'; };
 $('cerrar').onclick = () => { $('hoja').classList.remove('on'); document.body.style.overflow = ''; };
 function domicilioDisponible(){
   const m = ahoraMX().min, h = CUENTAS.HORARIO_DOMICILIO;
@@ -1236,8 +1277,10 @@ $('enviar').addEventListener('click', async e => {
   const b = $('enviar'), antes = b.innerHTML;
   enviando = true; b.innerHTML = '⏳ Enviando tu pedido…'; b.style.opacity = '.75';
   guardar();
+  const usaPremio = premioActual() > 0;
   await asegurarFolio();
   armarEnlace(); guardarUltimo(); seguir(token);
+  if (usaPremio){ try { localStorage.setItem('glp_premio_usado', val('tel').replace(/\D/g, '').slice(-10)); } catch(x){} }
   b.innerHTML = antes; b.style.opacity = ''; enviando = false;
   abrirWhats(b.href);
   setTimeout(mostrarListo, 700);
@@ -1360,6 +1403,7 @@ function seguir(k){
       if ($('veloEstado').classList.contains('on')) pintarVivo();
       else if ($('veloListo').classList.contains('on') && s.estado !== 'nuevo'){ cerrarVelo('veloListo'); pintarVivo(); abrirVelo('veloEstado'); }
       else if (antes && antes !== s.estado){ aviso('Tu pedido #' + s.folio + ': ' + NOMBRE_EDO[s.estado], 5000); }
+      if (antes && antes !== s.estado && s.estado === 'entregado') setTimeout(refrescarLealtad, 600);   // ya se sumó su punto
       if (antes && antes !== s.estado && navigator.vibrate) try { navigator.vibrate([120, 80, 120]); } catch(e){}
     });
   });
@@ -1392,7 +1436,7 @@ function docPedido(){
     hora: r ? $('hora').value : '', pago: pagoElegido(),
     cambio: pagoElegido() === 'Efectivo' ? val('cambio').replace(/[^0-9.]/g, '').slice(0, 10) : '',
     notas: val('notas').slice(0, 300), promos: $('promos').checked, regalo: $('primero').checked,
-    sucursal: SUCURSAL, canal: 'web', v: 1, dia: CUENTAS.diaTurno()
+    sucursal: SUCURSAL, canal: 'web', v: 1, dia: CUENTAS.diaTurno(), premio: premioActual()
   };
 }
 function registrarPedido(){
@@ -1473,11 +1517,55 @@ function aplicarAjustes(a, guardarCopia){
 function refrescarAjustes(){ conDB(db => db.ajustes().then(a => aplicarAjustes(a, true)).catch(() => {})); }
 $('esMenu').onclick = () => cerrarVelo('veloEstado');
 
+/* ---------- Puntos de lealtad (17 nov) ----------
+   Cada pedido entregado = 1 punto. Con 5 puntos, el 6º pedido sale GRATIS hasta el promedio de los 5 anteriores. */
+let LEAL = null, telLeal = '', lealVuelta = 0, tLeal = null;
+function refrescarLealtad(){ telLeal = ''; cargarLealtad(); }   // vuelve a leer los puntos (al abrir el pedido, al regresar a la página y al entregarse)
+function premioActual(){ return (LEAL && !LEAL.usado) ? CUENTAS.premioLealtad(LEAL, resumen().t) : 0; }
+async function cargarLealtad(){
+  const t = val('tel').replace(/\D/g, '').slice(-10);
+  if (t.length !== 10){ if (telLeal){ telLeal = ''; LEAL = null; actualizar(); } else pintarLealtad(); return; }
+  if (t === telLeal) return;
+  const yo = ++lealVuelta;
+  const id = await CUENTAS.idLealtad(t);
+  const db = (window.GLP_FB && window.GLP_FB.firebase) ? await esperarDB(2500) : null;
+  let d = null;
+  if (db && db.lealtad && id){ try { d = await db.lealtad(id); } catch(e){ d = null; } }
+  if (yo !== lealVuelta) return;
+  telLeal = t; LEAL = Object.assign({pts: 0, montos: [], prom: 0}, d || {});
+  // Si ya mandó un pedido con su premio y todavía no se entrega, no se vuelve a aplicar
+  try {
+    const u = localStorage.getItem('glp_premio_usado');
+    if ((+LEAL.pts || 0) >= CUENTAS.LEALTAD.meta && u === t) LEAL.usado = true;
+    else if ((+LEAL.pts || 0) < CUENTAS.LEALTAD.meta && u === t) localStorage.removeItem('glp_premio_usado');
+  } catch(e){}
+  actualizar();
+}
+function textoLealtad(corto){
+  const meta = CUENTAS.LEALTAD.meta;
+  if (!LEAL) return corto ? '' : '⭐ <b>Junta ' + meta + ' pedidos y el 6º te sale GRATIS (con envío).</b><br>Escribe tu teléfono y te mostramos tus puntos.';
+  const pts = Math.min(meta, +LEAL.pts || 0), puntos = '<div class="pts">' + '★'.repeat(pts) + '☆'.repeat(meta - pts) + '</div>';
+  if (pts >= meta && LEAL.usado) return '🎁 <b>Tu pedido GRATIS ya va en camino.</b>' + puntos + 'Cuando lo recibas, empiezas a juntar puntos otra vez.';
+  if (pts >= meta){
+    const prem = premioActual(), hasta = Math.round(+LEAL.prom || 0);
+    return '🎉 <b>¡Tienes tu pedido GRATIS!</b>' + puntos + (corto ? 'En este pedido te regalamos hasta ' + pesos(hasta) + ' de comida y el envío.' : (prem > 0 ? 'Ya te descontamos <b>' + pesos(prem) + '</b> de la comida (hasta ' + pesos(hasta) + ', el promedio de tus 5 pedidos) y tu <b>envío va GRATIS</b>.' : 'Agrega tu comida: te regalamos hasta <b>' + pesos(hasta) + '</b> y el envío.'));
+  }
+  const faltan = meta - pts;
+  return '⭐ <b>Llevas ' + pts + ' de ' + meta + ' puntos</b>' + puntos + 'Te ' + (faltan === 1 ? 'falta 1 pedido' : 'faltan ' + faltan + ' pedidos') + ' para que uno te salga <b>GRATIS</b>' + (LEAL.prom ? ' (hasta ' + pesos(Math.round(LEAL.prom)) + ' + envío)' : ' con todo y envío') + '.';
+}
+function pintarLealtad(){
+  const h = $('lealHoja'), c = $('lealHome');
+  const lleno = LEAL && (+LEAL.pts || 0) >= CUENTAS.LEALTAD.meta;
+  h.innerHTML = textoLealtad(false); h.classList.toggle('listo', !!lleno);
+  const tc = textoLealtad(true);
+  c.innerHTML = tc; c.classList.toggle('listo', !!lleno); c.style.display = tc ? 'block' : 'none';
+}
+
 /* ---------- Actualización automática (17 nov) ----------
    Cada versión publicada trae un número. La página compara el suyo con version.txt
    al abrir, al regresar a la pantalla, al recuperar señal, cada 5 min y al abrir "Ver mi pedido".
    Si hay una nueva, se recarga sola y conserva el pedido del cliente. */
-const VERSION = '1794978640';
+const VERSION = '1794980509';
 let versionNueva = null;
 function mostrarAvisoRed(t){ const a = $('avisoRed'); a.textContent = t; a.style.display = 'block'; }
 function ocultarAvisoRed(){ $('avisoRed').style.display = 'none'; }
@@ -1537,6 +1625,8 @@ desdeHash();
 pintarEstado(); setInterval(pintarEstado, 60000);
 cargar(); aplicarModo(); revisarDomicilio(); pintarRepetir();
 restaurarTrasRecarga();
+$('tel').addEventListener('input', () => { clearTimeout(tLeal); tLeal = setTimeout(cargarLealtad, 500); });
+setTimeout(cargarLealtad, 1200);
 setTimeout(revisarVersion, 1500); setInterval(() => { if (!document.hidden) revisarVersion(); }, 5 * 60000);
 window.addEventListener('online', () => { ocultarAvisoRed(); revisarVersion(); });
 window.addEventListener('offline', () => mostrarAvisoRed('Sin conexión: los precios podrían no estar al día. Revisa tu señal.'));
@@ -1545,10 +1635,10 @@ try { const c = localStorage.getItem('glp_ajustes'); if (c) aplicarAjustes(JSON.
 verEstado();
 refrescarAjustes(); enviarPendiente();
 setInterval(refrescarAjustes, 120000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden){ refrescarAjustes(); pintarEstado(); revisarVersion(); } });
+document.addEventListener('visibilitychange', () => { if (!document.hidden){ refrescarAjustes(); pintarEstado(); revisarVersion(); refrescarLealtad(); } });
 (function(){ const u = ultimoGuardado(); if (u && u.k && u.ts && Date.now() - u.ts < 12*3600e3 && !VIVO) seguir(u.k); })();
 </script>
-<script src="fb-config.js?v=1794978640"></script>
-<script>if (window.GLP_FB && window.GLP_FB.firebase){ var s = document.createElement('script'); s.type = 'module'; s.src = 'fb-cliente.js?v=1794978640'; document.body.appendChild(s); }</script>
+<script src="fb-config.js?v=1794980509"></script>
+<script>if (window.GLP_FB && window.GLP_FB.firebase){ var s = document.createElement('script'); s.type = 'module'; s.src = 'fb-cliente.js?v=1794980509'; document.body.appendChild(s); }</script>
 </body>
 </html>

@@ -27,7 +27,8 @@ service cloud.firestore {
       allow create: if esAdmin() || (
         id.size() >= 16 && id.size() <= 40
         && request.resource.data.keys().hasOnly(['folio','ts','estado','modo','items','subtotal','local','envio','envioReal','km','total',
-             'nombre','tel','calle','colonia','refs','gps','hora','pago','cambio','notas','promos','regalo','sucursal','canal','v','dia'])
+             'nombre','tel','calle','colonia','refs','gps','hora','pago','cambio','notas','promos','regalo','sucursal','canal','v','dia','premio'])
+        && (!('premio' in request.resource.data) || (request.resource.data.premio is number && request.resource.data.premio >= 0 && request.resource.data.premio <= 5000))
         && request.resource.data.estado == 'nuevo'
         && request.resource.data.ts == request.time
         && request.resource.data.canal == 'web'
@@ -38,6 +39,12 @@ service cloud.firestore {
         && request.resource.data.tel is string && request.resource.data.tel.size() <= 20
       );
       allow read, update, delete: if esAdmin();
+    }
+
+    // Puntos de lealtad (sin datos personales; el id sale del teléfono): el cliente lee los suyos, solo el equipo los cambia
+    match /lealtad/{id} {
+      allow get: if true;
+      allow list, write: if esAdmin();
     }
 
     // Contador de pedidos del día (001, 002…): cualquiera puede tomar el siguiente número, de uno en uno

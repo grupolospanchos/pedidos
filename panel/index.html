@@ -461,9 +461,9 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="../cuentas.js?v=1794978640"></script>
-<script src="../menu-base.js?v=1794978640"></script>
-<script src="../fb-config.js?v=1794978640"></script>
+<script src="../cuentas.js?v=1794980509"></script>
+<script src="../menu-base.js?v=1794980509"></script>
+<script src="../fb-config.js?v=1794980509"></script>
 <script>
 /* =========================================================
    Panel de administrador · Grupo Los Panchos
@@ -644,11 +644,13 @@ const NOM_EDO = {nuevo:'Nuevo', confirmado:'Preparando', camino:'En camino', lis
 const minSel = {};   // minutos elegidos por pedido
 function iniciarPedidos(){
   pintarBotonesPed();
+  if (API.escucharLealtad) API.escucharLealtad(m => { if (m){ LEAL_MAP = m; repintarLealtad(); } });
   API.escucharPedidos(Date.now() - 2 * DIA, (lista, err) => {
     if (!lista){ $('listaPed').innerHTML = '<div class="vacio">No se pudieron leer los pedidos (' + esc(err && (err.code || err.message)) + ').</div>'; return; }
     const nuevos = lista.filter(p => p.estado === 'nuevo' && !vistos.has(p.id));
     lista.forEach(p => vistos.add(p.id));
     PEDIDOS = lista;
+    asegurarIdsLealtad(lista.map(p => p.tel));
     if (!primeraCarga && nuevos.length) avisarNuevo(nuevos);
     primeraCarga = false;
     pintarPedidos();
@@ -734,11 +736,12 @@ function tarjeta(p){
   if (p.local != null && !['cancelado'].includes(p.estado)) acc += '<div class="acc">' + (rec ? '' : '<button class="bt" data-msj="grupo" data-id="' + p.id + '">🛵 Grupo</button><button class="bt" data-msj="privado" data-id="' + p.id + '">🔒 Privado</button>') + '<button class="bt" data-msj="interno" data-id="' + p.id + '">📋 Interno</button></div>';
   return '<div class="ped e-' + p.estado + '">' +
     '<div class="ph"><b>#' + esc(p.folio) + '</b>' + (p.dia && p.dia !== CUENTAS.diaTurno() ? '<small style="color:#a33;font-weight:700"> · ' + esc(diaCorto(p.dia)) + '</small>' : '') + '<span class="tag ' + p.estado + '">' + NOM_EDO[p.estado] + '</span><span class="tag">' + (rec ? '🏃 Recoger' : '🛵 Domicilio') + '</span>' + (p.canal === 'whatsapp' ? '<span class="tag wa">WhatsApp</span>' : '') + '<span class="hace' + (tarde ? ' tarde' : '') + '">' + horaDe(p.ts) + ' · ' + hace(p.ts) + '</span></div>' +
-    '<div class="cli">👤 <b>' + esc(CUENTAS.NOMBRE(p.nombre) || 'SIN NOMBRE') + '</b>' + (tel ? ' · <a href="tel:' + tel + '">📞 ' + tel.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') + '</a>' : '') + (p.promos ? ' · <span class="tag" style="font-size:11px">promos ✅</span>' : '') + '</div>' +
+    '<div class="cli">👤 <b>' + esc(CUENTAS.NOMBRE(p.nombre) || 'SIN NOMBRE') + '</b>' + (tel ? ' · <a href="tel:' + tel + '">📞 ' + tel.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') + '</a>' : '') + (p.promos ? ' · <span class="tag" style="font-size:11px">promos ✅</span>' : '') + ' ' + etiquetaPuntos(p.tel) + '</div>' +
     '<ul>' + lin + (p.regalo ? '<li><b>1×</b><span>Agua de Jamaica <small>REGALO 1er pedido</small></span><i>$0</i></li>' : '') + '</ul>' +
-    '<div class="tot">Comida ' + pesos(p.subtotal) + (rec ? '' : ' · Envío ' + (p.envio != null ? (p.envioReal != null ? '<s>' + pesos(p.envioReal) + '</s> ' : '') + (p.envio === 0 ? 'GRATIS' : pesos(p.envio)) + (p.km ? ' (' + p.km + ' km)' : '') : '<b>por confirmar</b>')) + ' · <b>Total ' + pesos(p.total) + '</b></div>' +
+    '<div class="tot">Comida ' + pesos(p.subtotal) + ((+p.premio || 0) > 0 ? ' · 🎁 −' + pesos(p.premio) : '') + (rec ? '' : ' · Envío ' + (p.envio != null ? (p.envioReal != null ? '<s>' + pesos(p.envioReal) + '</s> ' : '') + (p.envio === 0 ? 'GRATIS' : pesos(p.envio)) + (p.km ? ' (' + p.km + ' km)' : '') : '<b>por confirmar</b>')) + ' · <b>Total ' + pesos(p.total) + '</b></div>' +
     '<div class="lin">' + ({Efectivo:'💵', Transferencia:'🏦'}[p.pago] || '💳') + ' ' + esc(p.pago || '') + camb + '</div>' +
     dir + (p.notas ? '<div class="lin">📝 ' + esc(p.notas) + '</div>' : '') +
+    ((vp => vp ? '<div class="lin" style="font-weight:700;color:' + (vp.ok ? '#17703d' : '#b3261e') + '">🎁 Pedido gratis por lealtad (−' + pesos(p.premio) + ') · ' + (vp.ok ? '✅ ' : '⚠️ revisar: ') + esc(vp.t) + '</div>' : '')(validarPremio(p))) +
     (p.min && p.estado !== 'nuevo' ? '<div class="lin" style="color:var(--gris)">⏱️ Le dijimos ' + p.min + ' min' + (p.t_confirmado ? ' (confirmado ' + horaDe(p.t_confirmado) + ')' : '') + '</div>' : '') +
     acc + '</div>';
 }
@@ -760,14 +763,54 @@ $('listaPed').onclick = async e => {
   const tel = String(p.tel || '').replace(/\D/g, '');
   if (pref('avisoAuto') !== false && tel && edo !== 'cancelado') window.open(ligaWa(Object.assign({}, p, extra), edo), '_blank');
   a.disabled = true;
-  try { await API.cambiarEstado(p.id, edo, extra); toast('#' + p.folio + ': ' + NOM_EDO[edo]); }
+  try {
+    if (edo === 'entregado' && API.entregarConPuntos && String(p.tel || '').replace(/\D/g, '').length >= 10){
+      const r = await API.entregarConPuntos(p.id, extra, await CUENTAS.idLealtad(p.tel), CUENTAS.LEALTAD.meta);
+      toast('#' + p.folio + ': ' + NOM_EDO[edo] + (r ? (r.pts >= CUENTAS.LEALTAD.meta ? ' · 🎁 ya tiene su pedido gratis' : (p.premio > 0 ? ' · premio canjeado' : ' · ⭐ ' + r.pts + '/' + CUENTAS.LEALTAD.meta)) : ''));
+    } else { await API.cambiarEstado(p.id, edo, extra); toast('#' + p.folio + ': ' + NOM_EDO[edo]); }
+  }
   catch(err){ toast('No se guardó: ' + (err.code || err.message)); a.disabled = false; }
 };
 function datosCuentas(p){
   return {folio: p.folio, items: p.items || [], L: p.local, P: p.subtotal, real: p.envioReal, km: p.km, modo: p.modo, pago: p.pago,
     pagado: p.pago === 'Transferencia' || p.pago === 'Mercado Pago', nombre: p.nombre, tel: p.tel, calle: p.calle, colonia: p.colonia,
-    refs: p.refs, gps: p.gps, hora: p.hora, notas: p.notas, cambio: p.cambio, regalo: p.regalo};
+    refs: p.refs, gps: p.gps, hora: p.hora, notas: p.notas, cambio: p.cambio, regalo: p.regalo, premio: +p.premio || 0};
 }
+/* ---------- Puntos de lealtad (17 nov): 5 pedidos entregados = 6º gratis hasta el promedio ---------- */
+let LEAL_MAP = {};
+const ID_LEAL = {};
+function lealDe(tel){ const t = String(tel || '').replace(/\D/g, '').slice(-10); const id = ID_LEAL[t]; return id ? (LEAL_MAP[id] || null) : null; }
+let tRepintarLeal = null;
+function asegurarIdsLealtad(tels){
+  const pend = [...new Set(tels.map(t => String(t || '').replace(/\D/g, '').slice(-10)).filter(t => t.length === 10 && !(t in ID_LEAL)))];
+  pend.forEach(t => { ID_LEAL[t] = null; CUENTAS.idLealtad(t).then(id => { ID_LEAL[t] = id; clearTimeout(tRepintarLeal); tRepintarLeal = setTimeout(repintarLealtad, 150); }); });
+}
+function repintarLealtad(){ try { pintarPedidos(); } catch(e){} try { if (PESTANA === 'Clientes') pintarClientes(); } catch(e){} }
+function etiquetaPuntos(tel){
+  const l = lealDe(tel), meta = CUENTAS.LEALTAD.meta;
+  if (!l) return '';
+  if ((+l.pts || 0) >= meta) return '<span class="tag" style="background:#eaf7ef;color:#17703d">🎁 pedido gratis listo (hasta ' + pesos(Math.round(+l.prom || 0)) + ' + envío)</span>';
+  return '<span class="tag" style="background:#fff8e6;color:#8a6500">⭐ ' + (+l.pts || 0) + '/' + meta + '</span>';
+}
+function textoPuntosCliente(p){
+  const meta = CUENTAS.LEALTAD.meta, t = String(p.tel || '').replace(/\D/g, '');
+  if (t.length < 10) return '';
+  if ((+p.premio || 0) > 0) return '\n🎁 Usaste tu pedido GRATIS. ¡Empiezas a juntar puntos de nuevo!';
+  const l = lealDe(t), pts = Math.min(meta, (l ? +l.pts || 0 : 0) + (p.puntoContado ? 0 : 1));
+  return pts >= meta ? '\n⭐ ¡Ya juntaste ' + meta + ' puntos! Tu siguiente pedido te sale *GRATIS* con todo y envío.' : '\n⭐ Llevas *' + pts + ' de ' + meta + ' puntos*. Al juntar ' + meta + ', un pedido te sale *GRATIS* con todo y envío.';
+}
+function validarPremio(p){
+  if (!((+p.premio || 0) > 0)) return null;
+  if (p.puntoContado) return {ok: true, t: 'canjeado'};
+  const l = lealDe(p.tel), meta = CUENTAS.LEALTAD.meta;
+  if (!l) return {ok: false, t: 'no encuentro sus puntos'};
+  if ((+l.pts || 0) < meta) return {ok: false, t: 'solo tiene ' + (+l.pts || 0) + ' de ' + meta + ' puntos'};
+  if (p.premio > Math.round(+l.prom || 0) + 1) return {ok: false, t: 'el premio pasa del promedio (' + pesos(Math.round(+l.prom || 0)) + ')'};
+  const otro = PEDIDOS.find(o => o.id !== p.id && String(o.tel || '').slice(-10) === String(p.tel || '').slice(-10) && (+o.premio || 0) > 0 && !['cancelado'].includes(o.estado) && (o.ts || 0) < (p.ts || 0));
+  if (otro) return {ok: false, t: 'ya usó su premio en el #' + otro.folio};
+  return {ok: true, t: 'válido'};
+}
+
 function ligaWa(p, edo){
   const tel = String(p.tel || '').replace(/\D/g, '').slice(-10);
   const link = PAGINA + '?p=' + p.folio + '&k=' + p.id;
@@ -778,7 +821,7 @@ function ligaWa(p, edo){
     confirmado: '✅ *¡Pedido #' + p.folio + ' confirmado!* Ya lo estamos preparando. ' + (rec ? 'Estará listo en aprox. ' : 'Llega en aprox. ') + (p.min || TIENDA.entrega) + ' min.' + (rec ? '\n📍 Nuestra cocina: ' + CUENTAS.COCINA.mapa : '') + (!rec && p.envio != null ? '\nTotal a pagar: *' + pesos(p.total) + '* (con envío).' : rec ? '\nTotal a pagar: *' + pesos(p.total) + '*.' : '') + ver,
     camino: '🛵 *¡Tu pedido #' + p.folio + ' va en camino!*' + (p.pago === 'Efectivo' ? '\nTotal a pagar: *' + pesos(p.total) + '*.' : '') + ver,
     listo: '🏃 *¡Tu pedido #' + p.folio + ' está listo para recoger!*\n📍 Te esperamos aquí: ' + CUENTAS.COCINA.mapa + ver,
-    entregado: '🙏 ¡Gracias por tu pedido, ' + (p.nombre || '') + '! Esperamos que lo disfrutes. Cuando quieras, pide otra vez aquí: ' + PAGINA,
+    entregado: '🙏 ¡Gracias por tu pedido, ' + (p.nombre || '') + '! Esperamos que lo disfrutes.' + textoPuntosCliente(p) + '\nCuando quieras, pide otra vez aquí: ' + PAGINA,
     cancelado: 'Hola ' + (p.nombre || '') + ', tu pedido #' + p.folio + ' se canceló. Si tienes dudas, escríbenos por aquí.'
   }[edo] || '';
   return 'https://wa.me/52' + tel + '?text=' + encodeURIComponent(txt);
@@ -789,7 +832,7 @@ function imprimir(p){
   const html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Ticket #' + esc(p.folio) + '</title><style>@page{margin:0}body{font-family:monospace;width:' + ancho + 'mm;margin:3mm;font-size:13px;color:#000}h1{font-size:17px;text-align:center;margin:0}h2{font-size:22px;text-align:center;margin:4px 0}.c{text-align:center}hr{border:0;border-top:1px dashed #000;margin:6px 0}table{width:100%;border-collapse:collapse}td{vertical-align:top;padding:1px 0}td.r{text-align:right;white-space:nowrap}b{font-weight:bold}</style></head><body>' +
     '<h1>GRUPO LOS PANCHOS</h1><div class="c">Sucursal ' + SUCURSAL + '</div><h2>#' + esc(p.folio) + '</h2><div class="c"><b>' + (p.modo === 'recoger' ? 'PARA RECOGER' : 'A DOMICILIO') + '</b><br>' + fechaDe(p.ts) + ' ' + horaDe(p.ts) + '</div><hr>' +
     '<table>' + lin + (p.regalo ? '<tr><td>1 Agua de Jamaica (REGALO)</td><td class="r">$0</td></tr>' : '') + '</table><hr>' +
-    '<table><tr><td>Comida</td><td class="r">' + pesos(p.subtotal) + '</td></tr>' + (p.modo === 'recoger' ? '' : '<tr><td>Envío</td><td class="r">' + (p.envio != null ? pesos(p.envio) : 'por confirmar') + '</td></tr>') + '<tr><td><b>TOTAL</b></td><td class="r"><b>' + pesos(p.total) + '</b></td></tr></table><hr>' +
+    '<table><tr><td>Comida</td><td class="r">' + pesos(p.subtotal) + '</td></tr>' + ((+p.premio || 0) > 0 ? '<tr><td>Premio lealtad</td><td class="r">-' + pesos(p.premio) + '</td></tr>' : '') + (p.modo === 'recoger' ? '' : '<tr><td>Envío</td><td class="r">' + (p.envio != null ? pesos(p.envio) : 'por confirmar') + '</td></tr>') + '<tr><td><b>TOTAL</b></td><td class="r"><b>' + pesos(p.total) + '</b></td></tr></table><hr>' +
     '<div>Pago: ' + esc(p.pago || '') + (p.cambio ? ' (paga con $' + esc(p.cambio) + ')' : '') + '</div>' +
     '<div>Cliente: <b style="font-size:16px">' + esc(CUENTAS.NOMBRE(p.nombre)) + '</b><br>Tel: ' + esc(p.tel || '') + '</div>' +
     (p.modo === 'recoger' ? '<div>Pasa: ' + esc(p.hora || '') + '</div>' : '<div>' + esc([p.calle, p.colonia].filter(Boolean).join(', ')) + (p.refs ? '<br>Ref: ' + esc(p.refs) : '') + '</div>') +
@@ -1172,6 +1215,7 @@ function armarClientes(h){
     c.lista.push(p);
   });
   CLIENTES = Object.values(m).sort((a, b) => b.ultimo - a.ultimo);
+  asegurarIdsLealtad(CLIENTES.map(c => c.tel));
 }
 function clientesFiltrados(){
   const q = quitarAcentos($('cBuscar').value.trim().toLowerCase()), ahora = Date.now();
@@ -1188,7 +1232,7 @@ function pintarClientes(){
   const tot = l.reduce((s, c) => s + c.total, 0);
   $('cResumen').textContent = l.length + ' clientes · ' + pesos(tot) + ' en compras · ' + l.filter(c => c.promos).length + ' aceptan promos (último año)';
   if (!l.length){ $('listaCli').innerHTML = '<div class="vacio">' + (CLIENTES.length ? 'Nadie con ese filtro.' : 'Aquí aparecerán tus clientes en cuanto confirmes pedidos.') + '</div>'; return; }
-  $('listaCli').innerHTML = l.map(c => '<div class="cliR"><div class="fila"><b>' + esc(c.nombre || 'Sin nombre') + '</b>' + (c.promos ? '<span class="tag">promos ✅</span>' : '') + (c.pedidos >= 3 ? '<span class="tag" style="background:#fbf3e3;color:var(--ambar)">⭐ frecuente</span>' : '') + '</div>' +
+  $('listaCli').innerHTML = l.map(c => '<div class="cliR"><div class="fila"><b>' + esc(c.nombre || 'Sin nombre') + '</b>' + (c.promos ? '<span class="tag">promos ✅</span>' : '') + (c.pedidos >= 3 ? '<span class="tag" style="background:#fbf3e3;color:var(--ambar)">⭐ frecuente</span>' : '') + etiquetaPuntos(c.tel) + '</div>' +
     '<p>📞 ' + c.tel.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') + (c.colonia ? ' · ' + esc(c.colonia) : '') + '</p>' +
     '<p>' + c.pedidos + (c.pedidos === 1 ? ' pedido' : ' pedidos') + ' · ' + pesos(c.total) + ' · último ' + hace(c.ultimo) + '</p>' +
     '<div class="acc"><a class="bt w" href="https://wa.me/52' + c.tel.slice(-10) + '" target="_blank" rel="noopener" style="text-decoration:none">💬 WhatsApp</a><button class="bt" data-hist="' + c.tel + '">' + (abiertoCli === c.tel ? 'Ocultar' : 'Ver pedidos') + '</button></div>' +
@@ -1233,7 +1277,7 @@ $('btCsvClientes').onclick = () => descargarCsv('clientes.csv', [['Nombre','Tel�
   $('barInstX').onclick = () => { $('barInst').style.display = 'none'; try { localStorage.setItem('glp_panel_noinst', '1'); } catch(x){} };
   if ('serviceWorker' in navigator && /\/panel\/(index\.html)?$/.test(location.pathname)){ try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch(x){} }
   /* Aviso de versión nueva (no recarga solo para no perder lo que estés editando) */
-  const VERSION_PANEL = '1794978640';
+  const VERSION_PANEL = '1794980509';
   async function revisar(){
     if (VERSION_PANEL.indexOf('__') === 0 || location.protocol === 'file:') return;
     try {
@@ -1245,6 +1289,6 @@ $('btCsvClientes').onclick = () => descargarCsv('clientes.csv', [['Nombre','Tel�
   document.addEventListener('visibilitychange', () => { if (!document.hidden) revisar(); });
 })();
 </script>
-<script type="module" src="../fb-admin.js?v=1794978640"></script>
+<script type="module" src="../fb-admin.js?v=1794980509"></script>
 </body>
 </html>
